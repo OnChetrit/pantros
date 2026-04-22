@@ -1,56 +1,146 @@
-# Welcome to your Expo app 👋
+# Pantry
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Clean Expo SDK 55 scaffold for a full rewrite of the pantry app.
 
-## Get started
+## Goals
 
-1. Install dependencies
+- keep the same product category as `new-pantry`
+- do not reuse implementation code from `new-pantry`
+- rebuild around one main app context
+- use Expo Router, Supabase, and Expo UI SwiftUI-native surfaces
 
-   ```bash
-   npm install
-   ```
+## Planning
 
-2. Start the app
+The rewrite plan is documented in `docs/PLAN.md`.
 
-   ```bash
-   npx expo start
-   ```
+## Environment
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+Bun is the package manager and script runner for this project.
 
 ```bash
-npm run reset-project
+brew tap oven-sh/bun
+brew install oven-sh/bun/bun
+bun install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Create `.env` or `.env.local` with:
 
-### Other setup steps
+```bash
+EXPO_PUBLIC_SUPABASE_URL=
+EXPO_PUBLIC_SUPABASE_ANON_KEY=
+EXPO_PUBLIC_OPENAI_API_KEY=
+```
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+`Pantry/.gitignore` now ignores `.env`, so keep real values there and commit only `.env.example`.
 
-## Learn more
+`EXPO_PUBLIC_OPENAI_API_KEY` is only needed if you want the expiration-image scanner to call OpenAI directly from the app.
 
-To learn more about developing your project with Expo, look at the following resources:
+## Run
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+bun run ios
+bun run android
+bun run web
+```
 
-## Join the community
+## Native UI Note
 
-Join our community of developers creating universal apps.
+`@expo/ui/swift-ui` requires iOS development builds for real native validation and is not available in Expo Go.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Development Builds
+
+`expo-dev-client` is installed and configured.
+
+Create and run a local development build with:
+
+```bash
+bun run run:ios
+```
+
+or
+
+```bash
+bun run run:android
+```
+
+If you make changes that affect native configuration, rebuild the app:
+
+```bash
+bun run prebuild
+```
+
+## EAS Migration From `new-pantry`
+
+`Pantry` now includes:
+
+- `eas.json`
+- the linked EAS project id from `new-pantry`
+- build scripts for iOS and Android production or preview builds
+
+Recommended migration steps:
+
+1. Log in to Expo:
+
+   ```bash
+   bunx eas-cli login
+   ```
+
+2. Make sure the Expo project slug matches this app config.
+
+   `Pantry` now uses:
+   - app name: `Pantry`
+   - app slug: `pantry-ai`
+
+   If the linked Expo project is still named `new-pantry` or `pantry`, rename that existing Expo project in the Expo dashboard to `pantry-ai` first, then verify the link:
+
+   ```bash
+   bunx eas-cli project:info
+   ```
+
+   The linked project should resolve to the existing EAS project id:
+   `b400235c-f7ce-40cb-8056-74170351dbcf`
+
+3. Add the public Supabase env vars to EAS so cloud builds have the same config as local:
+
+   ```bash
+   bunx eas-cli env:create --name EXPO_PUBLIC_SUPABASE_URL --value <your-url> --environment production
+   bunx eas-cli env:create --name EXPO_PUBLIC_SUPABASE_ANON_KEY --value <your-anon-key> --environment production
+   ```
+
+   Repeat for `preview` and `development` if you use those profiles.
+
+4. Decide whether you are replacing the existing published `new-pantry` app or shipping a new app identity.
+
+   If you want to replace the existing App Store / Play Store app, `Pantry` must use the same native identifiers as `new-pantry` before the first production build:
+
+   - iOS bundle id: `com.on.chetrit.new-pantry`
+   - Android package: `com.on.chetrit.newpantry`
+   - URL scheme: `newpantry`
+
+   Right now `Pantry` is still configured as:
+
+   - iOS bundle id: `com.onchetrit.pantry`
+   - Android package: `com.onchetrit.pantry`
+   - URL scheme: `pantry`
+
+   With the current identifiers, `Pantry` will build as a different app and will not replace `new-pantry`.
+
+5. If you change identifiers or other native config, regenerate native code before building:
+
+   ```bash
+   bun run prebuild --clean
+   ```
+
+6. Build:
+
+   ```bash
+   bun run eas:build:ios
+   bun run eas:build:android
+   ```
+
+7. Submit when the production builds are ready:
+
+   ```bash
+   bunx eas-cli submit --platform ios --profile production
+   bunx eas-cli submit --platform android --profile production
+   ```
