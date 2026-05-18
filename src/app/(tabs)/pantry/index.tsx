@@ -10,16 +10,7 @@ import { appColors } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
 
 export default function PantryScreen() {
-  const {
-    deleteItem,
-    moveItemToCart,
-    pantryCarts,
-    pantryItems,
-    pantries,
-    selectPantry,
-    selectedPantry,
-    selectedPantryId,
-  } = useAppContext();
+  const { deleteItem, moveItemToCart, pantryCarts, pantryItems, selectedPantry } = useAppContext();
   const router = useRouter();
   const openSwipeableRef = useRef<SwipeableMethods | null>(null);
   const [sortOption, setSortOption] = useState<PantryListSortOption>('expiration');
@@ -95,18 +86,7 @@ export default function PantryScreen() {
     <>
       <Stack.Screen
         options={{
-          headerLeft: () => (
-            <PantryFilterMenu
-              variant="icon"
-              pantries={pantries}
-              selectedPantryId={selectedPantryId}
-              selectedPantryName={selectedPantry.name}
-              itemCount={sortedItems.length}
-              sortOption={sortOption}
-              onSelectPantry={selectPantry}
-              onSelectSort={setSortOption}
-            />
-          ),
+          headerLeft: () => <PantryFilterMenu sortOption={sortOption} onSelectSort={setSortOption} />,
         }}
       />
       <FlatList
@@ -135,7 +115,6 @@ export default function PantryScreen() {
               onPress={() => router.push(`/items/${item.id}`)}
               leftActionLabel={item.isInCart ? undefined : 'Add to Cart'}
               leftActionIcon="cart-outline"
-              leftActionIconArmed="cart"
               onLeftAction={item.isInCart ? undefined : () => void handleAddToCart(item.id)}
               onDelete={() => void deleteItem(item.id)}
               onWillOpen={handleWillOpen}

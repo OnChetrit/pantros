@@ -1,12 +1,10 @@
-import { Stack, useRouter } from 'expo-router';
+import { Stack } from 'expo-router';
 import { Platform, StyleSheet, View } from 'react-native';
 
 import { AvatarSidebarButton } from '@/components/navigation/avatar-sidebar';
-import { HeaderAddButton } from '@/components/navigation/header-add-button';
 import { useAppTheme } from '@/lib/theme';
 
 export function TabStackLayout({title}: {title: string}) {
-  const router = useRouter();
   const {colors} = useAppTheme();
 
   return (
@@ -25,7 +23,6 @@ export function TabStackLayout({title}: {title: string}) {
         },
         headerRight: () => (
           <View style={styles.headerActions}>
-            <HeaderAddButton onPress={() => router.push('/items/new')} />
             <AvatarSidebarButton />
           </View>
         ),
@@ -45,7 +42,6 @@ const styles = StyleSheet.create({
   headerActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
     backgroundColor: 'transparent',
   },
   transparentHeaderBackground: {

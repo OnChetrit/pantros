@@ -1,20 +1,11 @@
 import { usePathname, useRouter } from 'expo-router';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  Animated,
-  Modal,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { useCallback, useMemo, useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { AvatarBadge } from '@/components/ui/primitives';
+import { BottomSheetModal } from '@/components/ui/bottom-sheet-modal';
 import { appColors } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
-
-const SHEET_HIDDEN_OFFSET = 420;
 
 type RouteItem = {
   href: '/profile' | '/notifications' | '/settings';
@@ -31,65 +22,44 @@ const routeItems: RouteItem[] = [
 export function AvatarSidebarButton() {
   const router = useRouter();
   const pathname = usePathname();
-  const insets = useSafeAreaInsets();
   const { profile, signOut } = useAppContext();
-  const [isMounted, setIsMounted] = useState(false);
-  const sheetProgress = useRef(new Animated.Value(0)).current;
+  const [isMenuVisible, setIsMenuVisible] = useState(false);
+  const [pendingHref, setPendingHref] = useState<RouteItem['href'] | null>(null);
+  const [pendingSignOut, setPendingSignOut] = useState(false);
 
   const expanderName = useMemo(() => profile?.fullName ?? profile?.email ?? 'Pantry User', [profile?.email, profile?.fullName]);
 
   const openSidebar = () => {
-    setIsMounted(true);
+    setIsMenuVisible(true);
   };
 
   const closeSidebar = () => {
-    Animated.timing(sheetProgress, {
-      toValue: 0,
-      duration: 220,
-      useNativeDriver: true,
-    }).start(({ finished }) => {
-      if (finished) {
-        setIsMounted(false);
-      }
-    });
+    setIsMenuVisible(false);
   };
 
-  useEffect(() => {
-    if (!isMounted) {
-      sheetProgress.setValue(0);
-      return;
-    }
-
-    Animated.spring(sheetProgress, {
-      toValue: 1,
-      damping: 24,
-      stiffness: 240,
-      mass: 0.9,
-      useNativeDriver: true,
-    }).start();
-  }, [isMounted, sheetProgress]);
-
   const handleNavigate = (href: RouteItem['href']) => {
+    setPendingSignOut(false);
+    setPendingHref(pathname !== href ? href : null);
     closeSidebar();
-
-    if (pathname !== href) {
-      router.push(href);
-    }
   };
 
   const handleSignOut = () => {
+    setPendingHref(null);
+    setPendingSignOut(true);
     closeSidebar();
-    void signOut();
   };
 
-  const scrimOpacity = sheetProgress.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, 1],
-  });
-  const translateY = sheetProgress.interpolate({
-    inputRange: [0, 1],
-    outputRange: [SHEET_HIDDEN_OFFSET, 0],
-  });
+  const handleDismiss = useCallback(() => {
+    if (pendingHref) {
+      router.push(pendingHref);
+      setPendingHref(null);
+    }
+
+    if (pendingSignOut) {
+      setPendingSignOut(false);
+      void signOut();
+    }
+  }, [pendingHref, pendingSignOut, router, signOut]);
 
   return (
     <>
@@ -101,74 +71,51 @@ export function AvatarSidebarButton() {
         <AvatarBadge name={expanderName} size={34} />
       </Pressable>
 
-      <Modal
-        animationType="fade"
-        transparent
-        statusBarTranslucent
-        visible={isMounted}
-        onRequestClose={closeSidebar}
-      >
-        <View style={styles.modalRoot}>
-          <Animated.View style={[styles.backdrop, { opacity: scrimOpacity }]}>
-            <Pressable style={styles.scrim} onPress={closeSidebar} />
-          </Animated.View>
-          <Animated.View
-            style={[
-              styles.sheet,
-              {
-                paddingBottom: Math.max(insets.bottom, 12) + 10,
-                transform: [{ translateY }],
-              },
-            ]}
-          >
-            <View style={styles.sheetGrabber} />
-
-            <View style={styles.sheetHeader}>
-              <View style={styles.profileRow}>
-                <AvatarBadge name={expanderName} size={56} />
-                <View style={styles.panelHeaderCopy}>
-                  <Text style={styles.panelTitle}>{profile?.fullName ?? 'Pantry User'}</Text>
-                  <Text style={styles.panelSubtitle}>{profile?.email ?? 'No email available'}</Text>
-                </View>
-              </View>
+      <BottomSheetModal visible={isMenuVisible} onClose={closeSidebar} onDismiss={handleDismiss}>
+        <View style={styles.sheetHeader}>
+          <View style={styles.profileRow}>
+            <AvatarBadge name={expanderName} size={56} />
+            <View style={styles.panelHeaderCopy}>
+              <Text style={styles.panelTitle}>{profile?.fullName ?? 'Pantry User'}</Text>
+              <Text style={styles.panelSubtitle}>{profile?.email ?? 'No email available'}</Text>
             </View>
-
-            <View style={styles.content}>
-              <View style={styles.sectionGroup}>
-                <Text style={styles.sectionLabel}>Navigate</Text>
-                <View style={styles.routeList}>
-                  {routeItems.map((item) => {
-                    const isActive = pathname === item.href;
-
-                    return (
-                      <Pressable
-                        key={item.href}
-                        onPress={() => handleNavigate(item.href)}
-                        style={({ pressed }) => [
-                          styles.routeRow,
-                          isActive ? styles.routeRowActive : null,
-                          pressed ? styles.routeRowPressed : null,
-                        ]}
-                      >
-                        <View style={[styles.routeMarker, isActive ? styles.routeMarkerActive : null]}>
-                          <Text style={[styles.routeMarkerText, isActive ? styles.routeMarkerTextActive : null]}>
-                            {item.marker}
-                          </Text>
-                        </View>
-                        <Text style={styles.routeLabel}>{item.label}</Text>
-                      </Pressable>
-                    );
-                  })}
-                </View>
-              </View>
-
-              <Pressable onPress={handleSignOut} style={({ pressed }) => [styles.signOutRow, pressed ? styles.routeRowPressed : null]}>
-                <Text style={styles.signOutLabel}>Sign Out</Text>
-              </Pressable>
-            </View>
-          </Animated.View>
+          </View>
         </View>
-      </Modal>
+
+        <View style={styles.content}>
+          <View style={styles.sectionGroup}>
+            <Text style={styles.sectionLabel}>Navigate</Text>
+            <View style={styles.routeList}>
+              {routeItems.map((item) => {
+                const isActive = pathname === item.href;
+
+                return (
+                  <Pressable
+                    key={item.href}
+                    onPress={() => handleNavigate(item.href)}
+                    style={({ pressed }) => [
+                      styles.routeRow,
+                      isActive ? styles.routeRowActive : null,
+                      pressed ? styles.routeRowPressed : null,
+                    ]}
+                  >
+                    <View style={[styles.routeMarker, isActive ? styles.routeMarkerActive : null]}>
+                      <Text style={[styles.routeMarkerText, isActive ? styles.routeMarkerTextActive : null]}>
+                        {item.marker}
+                      </Text>
+                    </View>
+                    <Text style={styles.routeLabel}>{item.label}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
+
+          <Pressable onPress={handleSignOut} style={({ pressed }) => [styles.signOutRow, pressed ? styles.routeRowPressed : null]}>
+            <Text style={styles.signOutLabel}>Sign Out</Text>
+          </Pressable>
+        </View>
+      </BottomSheetModal>
     </>
   );
 }
@@ -180,41 +127,6 @@ const styles = StyleSheet.create({
   },
   avatarButtonPressed: {
     opacity: 0.82,
-  },
-  modalRoot: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: appColors.overlay,
-  },
-  scrim: {
-    flex: 1,
-  },
-  sheet: {
-    backgroundColor: appColors.background,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    borderWidth: 1,
-    borderColor: appColors.border,
-    borderBottomWidth: 0,
-    paddingHorizontal: 16,
-    paddingTop: 10,
-    gap: 16,
-    shadowColor: appColors.shadow,
-    shadowOpacity: 0.14,
-    shadowRadius: 22,
-    shadowOffset: { width: 0, height: -6 },
-    elevation: 14,
-  },
-  sheetGrabber: {
-    alignSelf: 'center',
-    width: 38,
-    height: 5,
-    borderRadius: 999,
-    backgroundColor: appColors.grabber,
-    marginBottom: 4,
   },
   sheetHeader: {
     gap: 12,

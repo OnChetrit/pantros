@@ -11,16 +11,7 @@ import { getCartItems } from '@/lib/pantry-insights';
 import { useAppContext } from '@/state/app-context';
 
 export default function CartScreen() {
-  const {
-    deleteItem,
-    moveItemToPantry,
-    pantryCarts,
-    pantryItems,
-    pantries,
-    selectPantry,
-    selectedPantry,
-    selectedPantryId,
-  } = useAppContext();
+  const { deleteItem, moveItemToPantry, pantryCarts, pantryItems, selectedPantry } = useAppContext();
   const router = useRouter();
   const openSwipeableRef = useRef<SwipeableMethods | null>(null);
   const [sortOption, setSortOption] = useState<PantryListSortOption>('expiration');
@@ -52,8 +43,6 @@ export default function CartScreen() {
       return new Date(left.expirationDate).getTime() - new Date(right.expirationDate).getTime();
     });
   }, [pantryItems, sortOption]);
-  const primaryCart = pantryCarts.find((cart) => cart.isPrimary) ?? pantryCarts[0] ?? null;
-
   const handleWillOpen = (row: SwipeableMethods | null) => {
     if (openSwipeableRef.current && openSwipeableRef.current !== row) {
       openSwipeableRef.current.close();
@@ -77,18 +66,7 @@ export default function CartScreen() {
     <>
       <Stack.Screen
         options={{
-          headerLeft: () => (
-            <PantryFilterMenu
-              variant="icon"
-              pantries={pantries}
-              selectedPantryId={selectedPantryId}
-              selectedPantryName={primaryCart?.name ?? selectedPantry.name}
-              itemCount={itemsInCart.length}
-              sortOption={sortOption}
-              onSelectPantry={selectPantry}
-              onSelectSort={setSortOption}
-            />
-          ),
+          headerLeft: () => <PantryFilterMenu sortOption={sortOption} onSelectSort={setSortOption} />,
         }}
       />
       <FlatList
@@ -117,7 +95,6 @@ export default function CartScreen() {
               onPress={() => router.push(`/items/${item.id}`)}
               leftActionLabel="Move to Pantry"
               leftActionIcon="return-up-back-outline"
-              leftActionIconArmed="return-up-back"
               onLeftAction={() => void moveItemToPantry(item.id)}
               onDelete={() => void deleteItem(item.id)}
               onWillOpen={handleWillOpen}

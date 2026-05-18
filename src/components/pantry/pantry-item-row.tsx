@@ -1,34 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
 import type { PantryItem } from '@/domain/models';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
-import type { ColorValue } from 'react-native';
 import ReanimatedSwipeable, {
-  SwipeDirection,
   type SwipeableMethods,
 } from 'react-native-gesture-handler/ReanimatedSwipeable';
-import Animated, {
-  Extrapolation,
-  interpolate,
-  runOnJS,
-  useAnimatedReaction,
-  useAnimatedStyle,
-  type SharedValue,
-} from 'react-native-reanimated';
 
+import {
+  PANTRY_SWIPE_OPEN_DISTANCE,
+  PantrySwipeAction,
+} from '@/components/pantry/pantry-item-row-swipe';
 import { appColors } from '@/lib/theme';
 import { formatExpirationLabel } from '@/lib/pantry-insights';
+import { triggerMediumImpact } from '@/lib/haptics';
 
-const IOS_ACTION_WIDTH = 80;
-const IOS_ACTION_EXPANDED_WIDTH = 168;
-const ACTION_OPEN_THRESHOLD = 40;
-const ACTION_TRIGGER_THRESHOLD = 132;
-const ACTION_EXPANDED_VISUAL_DISTANCE = 156;
-const ACTION_EXPANDED_GROWTH_MULTIPLIER = 2.4;
-const IOS_SUCCESS_COLOR = '#34C759';
-const IOS_SUCCESS_ARMED_COLOR = '#30B357';
-const IOS_DESTRUCTIVE_COLOR = '#FF3B30';
-const IOS_DESTRUCTIVE_ARMED_COLOR = '#E02F26';
+const SUCCESS_COLOR = '#34C759';
+const DESTRUCTIVE_COLOR = '#FF3B30';
 
 type PantryItemRowProps = {
   item: PantryItem;
@@ -38,175 +25,28 @@ type PantryItemRowProps = {
   onPress: () => void;
   leftActionLabel?: string;
   leftActionIcon?: keyof typeof Ionicons.glyphMap;
-  leftActionIconArmed?: keyof typeof Ionicons.glyphMap;
   onLeftAction?: () => void;
   onDelete: () => void;
   onWillOpen: (row: SwipeableMethods | null) => void;
 };
 
-type SwipeActionVisualProps = {
-  backgroundColor: ColorValue;
-  armedBackgroundColor: ColorValue;
-  icon: keyof typeof Ionicons.glyphMap;
-  armedIcon: keyof typeof Ionicons.glyphMap;
-  translation: SharedValue<number>;
-  side: 'left' | 'right';
-  onTranslationChange: (value: number) => void;
-};
-
-function SwipeActionVisual({
-  backgroundColor,
-  armedBackgroundColor,
-  icon,
-  armedIcon,
-  translation,
-  side,
-  onTranslationChange,
-}: SwipeActionVisualProps) {
-  const getExpandedDistance = (swipeDistance: number) => {
-    'worklet';
-
-    if (swipeDistance <= ACTION_TRIGGER_THRESHOLD) {
-      return swipeDistance;
-    }
-
-    return ACTION_TRIGGER_THRESHOLD + (swipeDistance - ACTION_TRIGGER_THRESHOLD) * ACTION_EXPANDED_GROWTH_MULTIPLIER;
-  };
-
-  const getVisualWidth = (swipeDistance: number) => {
-    'worklet';
-
-    return interpolate(
-      getExpandedDistance(swipeDistance),
-      [0, IOS_ACTION_WIDTH, ACTION_TRIGGER_THRESHOLD, ACTION_EXPANDED_VISUAL_DISTANCE],
-      [0, IOS_ACTION_WIDTH, IOS_ACTION_WIDTH, IOS_ACTION_EXPANDED_WIDTH],
-      Extrapolation.CLAMP,
-    );
-  };
-
-  useAnimatedReaction(
-    () => translation.value,
-    (value, previousValue) => {
-      if (value !== previousValue) {
-        runOnJS(onTranslationChange)(value);
-      }
-    },
-    [onTranslationChange],
-  );
-
-  const actionSurfaceStyle = useAnimatedStyle(() => {
-    const swipeDistance = Math.abs(translation.value);
-    const visualWidth = getVisualWidth(swipeDistance);
-    const baseWidth = Math.min(visualWidth, IOS_ACTION_WIDTH);
-    const extensionScale = visualWidth > IOS_ACTION_WIDTH ? visualWidth / IOS_ACTION_WIDTH : 1;
-    const extraWidth = Math.max(visualWidth - IOS_ACTION_WIDTH, 0);
-    const anchoredTranslateX = visualWidth > IOS_ACTION_WIDTH ? (side === 'left' ? extraWidth / 2 : -extraWidth / 2) : 0;
-
-    return {
-      width: baseWidth,
-      opacity: swipeDistance > 0 ? 1 : 0,
-      transform: [{ translateX: anchoredTranslateX }, { scaleX: extensionScale }],
-    };
-  });
-
-  const baseFillStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(
-      getExpandedDistance(Math.abs(translation.value)),
-      [0, IOS_ACTION_WIDTH, ACTION_TRIGGER_THRESHOLD, ACTION_EXPANDED_VISUAL_DISTANCE],
-      [1, 1, 1, 0],
-      Extrapolation.CLAMP,
-    ),
-  }));
-  const armedFillStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(
-      getExpandedDistance(Math.abs(translation.value)),
-      [0, IOS_ACTION_WIDTH, ACTION_TRIGGER_THRESHOLD, ACTION_EXPANDED_VISUAL_DISTANCE],
-      [0, 0, 0, 1],
-      Extrapolation.CLAMP,
-    ),
-  }));
-  const outlineIconStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(
-      getExpandedDistance(Math.abs(translation.value)),
-      [0, 16, IOS_ACTION_WIDTH],
-      [0, 0.78, 1],
-      Extrapolation.CLAMP,
-    ),
-  }));
-  const filledIconStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(
-      getExpandedDistance(Math.abs(translation.value)),
-      [0, ACTION_TRIGGER_THRESHOLD, ACTION_EXPANDED_VISUAL_DISTANCE],
-      [0, 0, 1],
-      Extrapolation.CLAMP,
-    ),
-  }));
-  const iconWrapStyle = useAnimatedStyle(() => ({
-    transform: (() => {
-      const swipeDistance = Math.abs(translation.value);
-      const visualWidth = getVisualWidth(swipeDistance);
-      const extraWidth = Math.max(visualWidth - IOS_ACTION_WIDTH, 0);
-      const anchoredTranslateX = visualWidth > IOS_ACTION_WIDTH ? (side === 'left' ? extraWidth / 2 : -extraWidth / 2) : 0;
-
-      return [
-        { translateX: anchoredTranslateX },
-        {
-          scale: interpolate(
-            getExpandedDistance(swipeDistance),
-            [0, 16, IOS_ACTION_WIDTH, ACTION_EXPANDED_VISUAL_DISTANCE],
-            [0.72, 0.86, 1, 1.05],
-            Extrapolation.CLAMP,
-          ),
-        },
-      ];
-    })(),
-  }));
-
-  return (
-    <Animated.View
-      style={[
-        styles.actionSurface,
-        side === 'left' ? styles.actionSurfaceLeft : styles.actionSurfaceRight,
-        actionSurfaceStyle,
-      ]}
-    >
-      <Animated.View style={[styles.actionFill, { backgroundColor }, baseFillStyle]} />
-      <Animated.View style={[styles.actionFill, { backgroundColor: armedBackgroundColor }, armedFillStyle]} />
-      <Animated.View
-        style={[
-          styles.actionIconWrap,
-          iconWrapStyle,
-        ]}
-      >
-        <Animated.View style={[styles.actionIconLayer, outlineIconStyle]}>
-          <Ionicons name={icon} size={24} color={appColors.textInverse} />
-        </Animated.View>
-        <Animated.View style={[styles.actionIconLayer, filledIconStyle]}>
-          <Ionicons name={armedIcon} size={24} color={appColors.textInverse} />
-        </Animated.View>
-      </Animated.View>
-    </Animated.View>
-  );
-}
-
 export function PantryItemRow({
   item,
   cartName,
-  isFirst,
   isLast,
   onPress,
   leftActionLabel,
   leftActionIcon = 'cart-outline',
-  leftActionIconArmed = 'cart',
   onLeftAction,
   onDelete,
   onWillOpen,
 }: PantryItemRowProps) {
   const swipeableRef = useRef<SwipeableMethods | null>(null);
   const actionLockRef = useRef(false);
-  const lastTranslationRef = useRef(0);
+  const [isSwiping, setIsSwiping] = useState(false);
   const quantityLabel = String(item.quantity);
   const meta = item.isInCart ? cartName : null;
+  const openDistance = PANTRY_SWIPE_OPEN_DISTANCE;
 
   const withActionLock = (action: () => void) => {
     if (actionLockRef.current) {
@@ -221,21 +61,24 @@ export function PantryItemRow({
     }, 350);
   };
 
+  const closeRow = () => {
+    swipeableRef.current?.close();
+  };
+
   const handleDelete = () => {
     withActionLock(() => {
+      void triggerMediumImpact();
       Alert.alert('Delete Item', `Delete "${item.name}"?`, [
         {
           text: 'Cancel',
           style: 'cancel',
-          onPress: () => {
-            swipeableRef.current?.close();
-          },
+          onPress: closeRow,
         },
         {
           text: 'Delete',
           style: 'destructive',
           onPress: () => {
-            swipeableRef.current?.close();
+            closeRow();
             onDelete();
           },
         },
@@ -245,117 +88,65 @@ export function PantryItemRow({
 
   const handleLeftAction = () => {
     withActionLock(() => {
-      swipeableRef.current?.close();
+      void triggerMediumImpact();
+      closeRow();
       onLeftAction?.();
     });
-  };
-
-  const handleActionRelease = (direction: SwipeDirection) => {
-    const releaseTranslation = lastTranslationRef.current;
-
-    if (direction === SwipeDirection.RIGHT && onLeftAction && releaseTranslation >= ACTION_TRIGGER_THRESHOLD) {
-      handleLeftAction();
-    }
-
-    if (direction === SwipeDirection.LEFT && releaseTranslation <= -ACTION_TRIGGER_THRESHOLD) {
-      handleDelete();
-    }
-  };
-
-  const renderSwipeAction = ({
-    accessibilityLabel,
-    backgroundColor,
-    armedBackgroundColor,
-    icon,
-    armedIcon,
-    translation,
-    side,
-    onPress,
-  }: {
-    accessibilityLabel: string;
-    backgroundColor: ColorValue;
-    armedBackgroundColor: ColorValue;
-    icon: keyof typeof Ionicons.glyphMap;
-    armedIcon: keyof typeof Ionicons.glyphMap;
-    translation: SharedValue<number>;
-    side: 'left' | 'right';
-    onPress: () => void;
-  }) => {
-    return (
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={accessibilityLabel}
-        onPress={onPress}
-        style={styles.action}
-      >
-        <SwipeActionVisual
-          backgroundColor={backgroundColor}
-          armedBackgroundColor={armedBackgroundColor}
-          icon={icon}
-          armedIcon={armedIcon}
-          translation={translation}
-          side={side}
-          onTranslationChange={(value) => {
-            lastTranslationRef.current = value;
-          }}
-        />
-      </Pressable>
-    );
   };
 
   return (
     <ReanimatedSwipeable
       ref={swipeableRef}
-      friction={1}
-      overshootLeft={Boolean(onLeftAction)}
-      overshootRight
-      overshootFriction={10}
+      friction={1.05}
+      overshootLeft={false}
+      overshootRight={false}
       dragOffsetFromLeftEdge={12}
       dragOffsetFromRightEdge={12}
-      leftThreshold={ACTION_OPEN_THRESHOLD}
-      rightThreshold={ACTION_OPEN_THRESHOLD}
-      onSwipeableWillOpen={(direction) => {
+      leftThreshold={openDistance / 2}
+      rightThreshold={openDistance / 2}
+      onSwipeableWillOpen={() => {
         onWillOpen(swipeableRef.current);
-        handleActionRelease(direction);
       }}
       onSwipeableClose={() => {
-        lastTranslationRef.current = 0;
+        setIsSwiping(false);
       }}
       renderLeftActions={
         !onLeftAction || !leftActionLabel
           ? undefined
-          : (_progress, translation) =>
-              renderSwipeAction({
-                accessibilityLabel: leftActionLabel,
-                backgroundColor: IOS_SUCCESS_COLOR,
-                armedBackgroundColor: IOS_SUCCESS_ARMED_COLOR,
-                icon: leftActionIcon,
-                armedIcon: leftActionIconArmed,
-                translation,
-                side: 'left',
-                onPress: handleLeftAction,
-              })
+          : (_progress, translation) => (
+              <PantrySwipeAction
+                accessibilityLabel={leftActionLabel}
+                backgroundColor={SUCCESS_COLOR}
+                icon={leftActionIcon}
+                translation={translation}
+                side="left"
+                onPress={handleLeftAction}
+                onSwipeStateChange={setIsSwiping}
+              />
+            )
       }
-      renderRightActions={(_progress, translation) =>
-        renderSwipeAction({
-          accessibilityLabel: 'Delete',
-          backgroundColor: IOS_DESTRUCTIVE_COLOR,
-          armedBackgroundColor: IOS_DESTRUCTIVE_ARMED_COLOR,
-          icon: 'trash-outline',
-          armedIcon: 'trash',
-          translation,
-          side: 'right',
-          onPress: handleDelete,
-        })
-      }
-      containerStyle={[
-        styles.swipeContainer,
-        isFirst ? styles.firstRow : null,
-        isLast ? styles.lastRow : styles.middleRow,
-      ]}
+      renderRightActions={(_progress, translation) => (
+        <PantrySwipeAction
+          accessibilityLabel="Delete"
+          backgroundColor={DESTRUCTIVE_COLOR}
+          icon="trash-outline"
+          translation={translation}
+          side="right"
+          onPress={handleDelete}
+          onSwipeStateChange={setIsSwiping}
+        />
+      )}
+      containerStyle={styles.swipeContainer}
       childrenContainerStyle={styles.childrenContainer}
     >
-      <Pressable onPress={onPress} style={({ pressed }) => [styles.row, pressed ? styles.rowPressed : null]}>
+      <Pressable
+        onPress={onPress}
+        style={({ pressed }) => [
+          styles.row,
+          isSwiping ? styles.rowSwiping : null,
+          pressed ? styles.rowPressed : null,
+        ]}
+      >
         <View style={styles.leadingBadge}>
           <Text style={styles.leadingBadgeText}>{item.name.charAt(0).toUpperCase()}</Text>
         </View>
@@ -367,6 +158,7 @@ export function PantryItemRow({
           {item.expirationDate ? <Text style={styles.expiration}>{formatExpirationLabel(item.expirationDate)}</Text> : null}
           {item.isInCart ? <Text style={styles.cartBadge}>{quantityLabel}</Text> : null}
         </View>
+        {!isLast ? <View pointerEvents="none" style={styles.divider} /> : null}
       </Pressable>
     </ReanimatedSwipeable>
   );
@@ -374,43 +166,36 @@ export function PantryItemRow({
 
 const styles = StyleSheet.create({
   swipeContainer: {
-    backgroundColor: appColors.card,
-    marginHorizontal: 16,
-    borderLeftWidth: 1,
-    borderRightWidth: 1,
-    borderLeftColor: appColors.border,
-    borderRightColor: appColors.border,
-  },
-  firstRow: {
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    borderTopWidth: 1,
-    borderTopColor: appColors.border,
+    backgroundColor: 'transparent',
   },
   childrenContainer: {
-    backgroundColor: appColors.card,
-  },
-  middleRow: {
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: appColors.border,
-  },
-  lastRow: {
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: appColors.border,
+    backgroundColor: 'transparent',
   },
   row: {
+    position: 'relative',
     minHeight: 72,
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     paddingVertical: 12,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    backgroundColor: appColors.card,
+    backgroundColor: 'transparent',
+    borderRadius: 18,
+    overflow: 'hidden',
   },
   rowPressed: {
     backgroundColor: appColors.rowPressed,
+  },
+  rowSwiping: {
+    backgroundColor: appColors.listRowEmphasized,
+  },
+  divider: {
+    position: 'absolute',
+    left: 70,
+    right: 0,
+    bottom: 0,
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: appColors.border,
   },
   leadingBadge: {
     width: 42,
@@ -459,39 +244,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 999,
-  },
-  action: {
-    width: IOS_ACTION_WIDTH,
-    height: '100%',
-    overflow: 'visible',
-    justifyContent: 'center',
-    position: 'relative',
-  },
-  actionSurface: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    width: IOS_ACTION_WIDTH,
-    overflow: 'hidden',
-    justifyContent: 'center',
-  },
-  actionSurfaceLeft: {
-    left: 0,
-  },
-  actionSurfaceRight: {
-    right: 0,
-  },
-  actionFill: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  actionIconWrap: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  actionIconLayer: {
-    position: 'absolute',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });

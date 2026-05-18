@@ -116,7 +116,6 @@ export default function SearchScreen() {
             onPress={() => router.push(`/items/${item.id}`)}
             leftActionLabel={item.isInCart ? 'Move to Pantry' : 'Add to Cart'}
             leftActionIcon={item.isInCart ? 'return-up-back-outline' : 'cart-outline'}
-            leftActionIconArmed={item.isInCart ? 'return-up-back' : 'cart'}
             onLeftAction={item.isInCart ? () => void moveItemToPantry(item.id) : () => void handleAddToCart(item.id)}
             onDelete={() => void deleteItem(item.id)}
             onWillOpen={handleWillOpen}

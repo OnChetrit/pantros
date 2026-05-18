@@ -1,8 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Button, Host, Menu, Section } from '@expo/ui/swift-ui';
-import type { Pantry } from '@/domain/models';
-import { Alert, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { BottomSheetModal } from '@/components/ui/bottom-sheet-modal';
 import { appColors } from '@/lib/theme';
 
 export type PantryListSortOption = 'expiration' | 'name' | 'recent';
@@ -19,160 +19,89 @@ const SORT_OPTIONS: SortOption[] = [
 ];
 
 type PantryFilterMenuProps = {
-  eyebrowLabel?: string;
-  pantries: Pantry[];
-  selectedPantryId: string | null;
-  selectedPantryName: string;
-  itemCount: number;
   sortOption?: PantryListSortOption;
-  onSelectPantry: (pantryId: string) => void;
   onSelectSort?: (option: PantryListSortOption) => void;
-  variant?: 'card' | 'icon';
 };
 
 export function PantryFilterMenu({
-  eyebrowLabel = 'Viewing Pantry',
-  pantries,
-  selectedPantryId,
-  selectedPantryName,
-  itemCount,
   sortOption,
-  onSelectPantry,
   onSelectSort,
-  variant = 'card',
 }: PantryFilterMenuProps) {
-  const itemLabel = itemCount === 1 ? '1 item' : `${itemCount} items`;
-  const selectedSortLabel = SORT_OPTIONS.find((option) => option.key === sortOption)?.label;
-  const subtitle = selectedSortLabel ? `${itemLabel} · ${selectedSortLabel}` : itemLabel;
-  const renderTrigger = () =>
-    variant === 'icon' ? (
-      <View style={styles.iconTrigger}>
-        <Ionicons name="funnel-outline" size={20} color={appColors.tint} />
-      </View>
-    ) : (
-      <View style={styles.trigger}>
-        <View style={styles.triggerCopy}>
-          <Text style={styles.triggerTitle}>{selectedPantryName}</Text>
-          <Text style={styles.triggerSubtitle}>{subtitle}</Text>
-        </View>
-        <Text style={styles.chevron}>􀆈</Text>
-      </View>
-    );
+  const [isMenuVisible, setIsMenuVisible] = useState(false);
+  const [pendingSortOption, setPendingSortOption] = useState<PantryListSortOption | null>(null);
 
-  const openFallbackMenu = () => {
-    Alert.alert(
-      'Sort & Filter',
-      undefined,
-      [
-        ...(onSelectSort
-          ? SORT_OPTIONS.map((option) => ({
-              text: option.key === sortOption ? `✓ ${option.label}` : option.label,
-              onPress: () => onSelectSort(option.key),
-            }))
-          : []),
-        ...pantries.map((pantry) => ({
-          text: pantry.id === selectedPantryId ? `✓ ${pantry.name}` : pantry.name,
-          onPress: () => onSelectPantry(pantry.id),
-        })),
-        { text: 'Cancel', style: 'cancel' as const },
-      ],
-      { cancelable: true }
-    );
+  const closeMenu = () => {
+    setIsMenuVisible(false);
   };
 
-  if (Platform.OS === 'ios' && variant !== 'icon') {
-    return (
-      <View style={styles.wrapper}>
-        <Text style={styles.eyebrow}>{eyebrowLabel}</Text>
-        <Host matchContents useViewportSizeMeasurement style={styles.host}>
-          <Menu label={renderTrigger()}>
-            {onSelectSort ? (
-              <Section title="Sort">
-                {SORT_OPTIONS.map((option) => (
-                  <Button
-                    key={option.key}
-                    label={option.key === sortOption ? `✓ ${option.label}` : option.label}
-                    onPress={() => onSelectSort(option.key)}
-                  />
-                ))}
-              </Section>
-            ) : null}
-            <Section title="Pantries">
-              {pantries.map((pantry) => (
-                <Button
-                  key={pantry.id}
-                  label={pantry.id === selectedPantryId ? `✓ ${pantry.name}` : pantry.name}
-                  onPress={() => onSelectPantry(pantry.id)}
-                />
-              ))}
-            </Section>
-          </Menu>
-        </Host>
-      </View>
-    );
-  }
+  const handleSelectSort = (option: PantryListSortOption) => {
+    setPendingSortOption(option);
+    closeMenu();
+  };
+
+  const handleDismiss = useCallback(() => {
+    if (!pendingSortOption) {
+      return;
+    }
+
+    onSelectSort?.(pendingSortOption);
+    setPendingSortOption(null);
+  }, [onSelectSort, pendingSortOption]);
 
   return (
-    <View style={variant === 'icon' ? styles.iconWrapper : styles.wrapper}>
-      {variant === 'card' ? <Text style={styles.eyebrow}>{eyebrowLabel}</Text> : null}
+    <View style={styles.iconWrapper}>
       <Pressable
-        onPress={openFallbackMenu}
-        style={({ pressed }) => [
-          variant === 'icon' ? styles.iconTrigger : styles.trigger,
-          pressed ? styles.triggerPressed : null,
-        ]}
+        accessibilityRole="button"
+        accessibilityLabel="Open sort menu"
+        disabled={!onSelectSort}
+        onPress={() => setIsMenuVisible(true)}
+        style={({ pressed }) => [styles.iconTrigger, pressed ? styles.triggerPressed : null, !onSelectSort ? styles.triggerDisabled : null]}
       >
-        {variant === 'icon' ? (
-          <Ionicons name="funnel-outline" size={20} color={appColors.tint} />
-        ) : (
-          <>
-            <View style={styles.triggerCopy}>
-              <Text style={styles.triggerTitle}>{selectedPantryName}</Text>
-              <Text style={styles.triggerSubtitle}>{subtitle}</Text>
-            </View>
-            <Text style={styles.chevron}>›</Text>
-          </>
-        )}
+        <Ionicons name="swap-vertical-outline" size={20} color={appColors.tint} />
       </Pressable>
+
+      <BottomSheetModal visible={isMenuVisible} onClose={closeMenu} onDismiss={handleDismiss} sheetStyle={styles.sheet}>
+        <View style={styles.sheetHeader}>
+          <Text style={styles.sheetTitle}>Sort</Text>
+        </View>
+
+        <View style={styles.optionList}>
+          {SORT_OPTIONS.map((option) => {
+            const isSelected = option.key === sortOption;
+
+            return (
+              <Pressable
+                key={option.key}
+                onPress={() => handleSelectSort(option.key)}
+                style={({ pressed }) => [
+                  styles.optionRow,
+                  isSelected ? styles.optionRowSelected : null,
+                  pressed ? styles.optionRowPressed : null,
+                ]}
+              >
+                <View style={[styles.optionMarker, isSelected ? styles.optionMarkerSelected : null]}>
+                  {isSelected ? <Ionicons name="checkmark" size={16} color={appColors.textInverse} /> : null}
+                </View>
+                <Text style={styles.optionLabel}>{option.label}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </BottomSheetModal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 10,
-    gap: 8,
-  },
   iconWrapper: {
     alignSelf: 'center',
     backgroundColor: 'transparent',
   },
-  eyebrow: {
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 0.4,
-    textTransform: 'uppercase',
-    color: appColors.muted,
-  },
-  host: {
-    alignSelf: 'stretch',
-  },
-  trigger: {
-    minHeight: 56,
-    paddingHorizontal: 14,
-    borderRadius: 16,
-    backgroundColor: appColors.card,
-    borderWidth: 1,
-    borderColor: appColors.border,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
   triggerPressed: {
     opacity: 0.8,
+  },
+  triggerDisabled: {
+    opacity: 0.45,
   },
   iconTrigger: {
     width: 36,
@@ -184,21 +113,57 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: appColors.border,
   },
-  triggerCopy: {
-    flex: 1,
-    gap: 2,
+  sheet: {
+    gap: 14,
   },
-  triggerTitle: {
-    fontSize: 17,
-    fontWeight: '700',
+  sheetHeader: {
+    paddingHorizontal: 2,
+  },
+  sheetTitle: {
     color: appColors.text,
+    fontSize: 20,
+    fontWeight: '800',
   },
-  triggerSubtitle: {
-    fontSize: 13,
-    color: appColors.muted,
+  optionList: {
+    gap: 10,
   },
-  chevron: {
+  optionRow: {
+    minHeight: 52,
+    borderRadius: 18,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    backgroundColor: appColors.card,
+    borderWidth: 1,
+    borderColor: appColors.border,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  optionRowSelected: {
+    backgroundColor: appColors.tintSoft,
+    borderColor: appColors.borderStrong,
+  },
+  optionRowPressed: {
+    opacity: 0.78,
+  },
+  optionMarker: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: appColors.borderStrong,
+    backgroundColor: appColors.listRowEmphasized,
+  },
+  optionMarkerSelected: {
+    backgroundColor: appColors.tint,
+    borderColor: appColors.tint,
+  },
+  optionLabel: {
+    flex: 1,
+    color: appColors.text,
     fontSize: 16,
-    color: appColors.muted,
+    fontWeight: '700',
   },
 });
