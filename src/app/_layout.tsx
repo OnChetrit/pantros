@@ -51,6 +51,14 @@ export default function RootLayout() {
             <Stack.Screen name="(auth)" options={{headerShown: false}} />
             <Stack.Screen name="(tabs)" options={{headerShown: false}} />
             <Stack.Screen
+              name="items/scan"
+              options={{
+                headerShown: false,
+                presentation: 'fullScreenModal',
+                animation: 'fade',
+              }}
+            />
+            <Stack.Screen
               name="items/new"
               options={{
                 presentation: 'modal',
