@@ -1,5 +1,3 @@
-import { Host, Picker as SwiftUIPicker, Text as SwiftUIText } from '@expo/ui/swift-ui';
-import { pickerStyle, tag } from '@expo/ui/swift-ui/modifiers';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker as NativePicker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
@@ -11,6 +9,7 @@ import { env } from '@/lib/env';
 import { useAppTheme } from '@/lib/theme';
 
 import { extractExpirationDate } from './expiration-ai';
+import { ItemExpirationModePicker } from './item-expiration-mode-picker';
 
 type ExpirationMode = 'manual' | 'relative' | 'scan';
 
@@ -74,40 +73,6 @@ function initialRelativeState(value: string): {days: number; weeks: number; mont
   const days = Math.min(30, daysAfterMonths - weeks * 7);
 
   return {days, weeks, months};
-}
-
-function ModeChip({active, label, onPress}: {active: boolean; label: string; onPress: () => void}) {
-  return (
-    <Pressable onPress={onPress} style={[styles.modeChip, active ? styles.modeChipActive : null]}>
-      <Text style={[styles.modeChipText, active ? styles.modeChipTextActive : null]}>{label}</Text>
-    </Pressable>
-  );
-}
-
-function ModePicker({mode, onChange}: {mode: ExpirationMode; onChange: (mode: ExpirationMode) => void}) {
-  if (Platform.OS === 'ios') {
-    return (
-      <Host matchContents useViewportSizeMeasurement style={styles.nativeModeHost}>
-        <SwiftUIPicker
-          selection={mode}
-          onSelectionChange={selection => onChange(selection as ExpirationMode)}
-          modifiers={[pickerStyle('segmented')]}
-        >
-          <SwiftUIText modifiers={[tag('manual')]}>Manual</SwiftUIText>
-          <SwiftUIText modifiers={[tag('relative')]}>Relative</SwiftUIText>
-          <SwiftUIText modifiers={[tag('scan')]}>Scan</SwiftUIText>
-        </SwiftUIPicker>
-      </Host>
-    );
-  }
-
-  return (
-    <View style={styles.modeRow}>
-      <ModeChip active={mode === 'manual'} label="Manual" onPress={() => onChange('manual')} />
-      <ModeChip active={mode === 'relative'} label="Relative" onPress={() => onChange('relative')} />
-      <ModeChip active={mode === 'scan'} label="Scan" onPress={() => onChange('scan')} />
-    </View>
-  );
 }
 
 export function ItemExpirationField({value, onChange}: {value: string; onChange: (value: string) => void}) {
@@ -276,7 +241,7 @@ export function ItemExpirationField({value, onChange}: {value: string; onChange:
         </View>
       ) : null}
 
-      {isEnabled ? <ModePicker mode={mode} onChange={enableMode} /> : null}
+      {isEnabled ? <ItemExpirationModePicker mode={mode} onChange={enableMode} /> : null}
 
       {isEnabled && mode === 'manual' ? (
         <View style={[styles.controlBlock, styles.datePickerCard]}>
@@ -428,35 +393,6 @@ const styles = StyleSheet.create({
     color: appColors.text,
     fontSize: 16,
     fontWeight: '800',
-  },
-  modeRow: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  nativeModeHost: {
-    alignSelf: 'stretch',
-  },
-  modeChip: {
-    flex: 1,
-    minHeight: 40,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: appColors.listRow,
-    borderWidth: 1,
-    borderColor: appColors.border,
-  },
-  modeChipActive: {
-    backgroundColor: appColors.tintSoft,
-    borderColor: appColors.borderStrong,
-  },
-  modeChipText: {
-    color: appColors.muted,
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  modeChipTextActive: {
-    color: appColors.text,
   },
   controlBlock: {
     gap: 12,

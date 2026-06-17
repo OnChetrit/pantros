@@ -6,6 +6,8 @@ import Animated, {
   runOnJS,
   useAnimatedReaction,
   useAnimatedStyle,
+  useDerivedValue,
+  withSpring,
   type SharedValue,
 } from 'react-native-reanimated';
 
@@ -14,73 +16,123 @@ import { appColors } from '@/lib/theme';
 const ACTION_CIRCLE_SIZE = 56;
 const ACTION_GAP = 10;
 const ACTION_OPEN_DISTANCE = ACTION_CIRCLE_SIZE + ACTION_GAP;
+const FULL_SWIPE_MIN_DISTANCE = ACTION_OPEN_DISTANCE * 2.35;
+const FULL_SWIPE_ROW_RATIO = 0.62;
+const ACTION_MIN_VISIBLE_WIDTH = 8;
+const ACTION_SCALE_DISTANCE = 60;
 
 type PantrySwipeActionProps = {
   accessibilityLabel: string;
+  armed: SharedValue<boolean>;
   backgroundColor: ColorValue;
+  fullSwipeDistance: number;
   icon: keyof typeof Ionicons.glyphMap;
   translation: SharedValue<number>;
   side: 'left' | 'right';
+  onArmedChange: (isArmed: boolean) => void;
   onPress: () => void;
-  onSwipeStateChange: (value: boolean) => void;
 };
 
 export function PantrySwipeAction({
   accessibilityLabel,
+  armed,
   backgroundColor,
+  fullSwipeDistance,
   icon,
   translation,
   side,
+  onArmedChange,
   onPress,
-  onSwipeStateChange,
 }: PantrySwipeActionProps) {
-  useAnimatedReaction(
-    () => translation.value,
-    (value, previousValue) => {
-      const absValue = Math.abs(value);
-      const absPreviousValue = Math.abs(previousValue ?? 0);
+  const isArmed = useDerivedValue(() =>
+    side === 'left'
+      ? translation.value >= fullSwipeDistance
+      : translation.value <= -fullSwipeDistance
+  );
 
-      const wasSwiping = absPreviousValue > 0;
-      const isSwiping = absValue > 0;
-      if (wasSwiping !== isSwiping) {
-        runOnJS(onSwipeStateChange)(isSwiping);
+  const armedProgress = useDerivedValue(() =>
+    withSpring(isArmed.value ? 1 : 0, {
+      damping: 18,
+      stiffness: 280,
+      mass: 0.65,
+      overshootClamping: true,
+    })
+  );
+
+  useAnimatedReaction(
+    () => isArmed.value,
+    (isArmed, wasArmed) => {
+      armed.value = isArmed;
+
+      if (isArmed !== wasArmed) {
+        runOnJS(onArmedChange)(isArmed);
       }
     },
-    [onSwipeStateChange]
+    [armed, isArmed, onArmedChange]
   );
 
   const slotStyle = useAnimatedStyle(() => {
-    const absValue = Math.abs(translation.value);
+    const directionalValue =
+      side === 'left' ? Math.max(translation.value, 0) : Math.max(-translation.value, 0);
 
     return {
-      opacity: interpolate(absValue, [0, 16, ACTION_OPEN_DISTANCE], [0, 0.85, 1], Extrapolation.CLAMP),
+      opacity: interpolate(
+        directionalValue,
+        [0, 18, ACTION_SCALE_DISTANCE],
+        [0, 0.6, 1],
+        Extrapolation.CLAMP
+      ),
     };
   });
 
   const surfaceStyle = useAnimatedStyle(() => {
-    const absValue = Math.abs(translation.value);
+    const directionalValue =
+      side === 'left' ? Math.max(translation.value, 0) : Math.max(-translation.value, 0);
+    const width = Math.max(
+      ACTION_MIN_VISIBLE_WIDTH,
+      directionalValue > ACTION_OPEN_DISTANCE ? directionalValue - ACTION_GAP : ACTION_CIRCLE_SIZE
+    );
 
     return {
+      width,
+      borderRadius: interpolate(
+        width,
+        [ACTION_CIRCLE_SIZE, fullSwipeDistance],
+        [ACTION_CIRCLE_SIZE / 2, 18],
+        Extrapolation.CLAMP
+      ),
       transform: [
         {
-          scale: interpolate(absValue, [0, 16, ACTION_OPEN_DISTANCE], [0.88, 0.95, 1], Extrapolation.CLAMP),
+          scale: interpolate(
+            directionalValue,
+            [0, 18, ACTION_SCALE_DISTANCE],
+            [0, 0.72, 1],
+            Extrapolation.CLAMP
+          ),
         },
       ],
     };
   });
 
-  const iconScaleStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        scale: interpolate(
-          Math.abs(translation.value),
-          [0, 16, ACTION_OPEN_DISTANCE],
-          [0.8, 0.9, 1],
-          Extrapolation.CLAMP
-        ),
-      },
-    ],
-  }));
+  const iconScaleStyle = useAnimatedStyle(() => {
+    const direction = side === 'left' ? 1 : -1;
+    const directionalValue =
+      side === 'left' ? Math.max(translation.value, 0) : Math.max(-translation.value, 0);
+    const stretchedWidth =
+      directionalValue > ACTION_OPEN_DISTANCE ? directionalValue - ACTION_GAP : ACTION_CIRCLE_SIZE;
+    const endOffset = (stretchedWidth - ACTION_CIRCLE_SIZE) / 2;
+
+    return {
+      transform: [
+        {
+          translateX: direction * endOffset * armedProgress.value,
+        },
+        {
+          scale: 1 + 0.14 * armedProgress.value,
+        },
+      ],
+    };
+  });
 
   return (
     <Animated.View style={[styles.slot, side === 'left' ? styles.slotLeft : styles.slotRight, slotStyle]}>
@@ -90,7 +142,14 @@ export function PantrySwipeAction({
         onPress={onPress}
         style={styles.pressable}
       >
-        <Animated.View style={[styles.surface, {backgroundColor}, surfaceStyle]}>
+        <Animated.View
+          style={[
+            styles.surface,
+            side === 'left' ? styles.surfaceLeft : styles.surfaceRight,
+            { backgroundColor },
+            surfaceStyle,
+          ]}
+        >
           <Animated.View style={[styles.iconWrap, iconScaleStyle]}>
             <Animated.View style={styles.iconLayer}>
               <Ionicons name={icon} size={24} color={appColors.textInverse} />
@@ -103,10 +162,13 @@ export function PantrySwipeAction({
 }
 
 export { ACTION_OPEN_DISTANCE as PANTRY_SWIPE_OPEN_DISTANCE };
+export function getPantryFullSwipeDistance(rowWidth: number) {
+  return Math.max(FULL_SWIPE_MIN_DISTANCE, rowWidth * FULL_SWIPE_ROW_RATIO);
+}
 
 const styles = StyleSheet.create({
   slot: {
-    width: ACTION_OPEN_DISTANCE,
+    width: '100%',
     height: '100%',
     justifyContent: 'center',
     overflow: 'visible',
@@ -128,6 +190,12 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     justifyContent: 'center',
     position: 'relative',
+  },
+  surfaceLeft: {
+    alignSelf: 'flex-start',
+  },
+  surfaceRight: {
+    alignSelf: 'flex-end',
   },
   iconWrap: {
     ...StyleSheet.absoluteFill,
