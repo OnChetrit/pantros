@@ -11,10 +11,11 @@ import { appColors } from '@/components/ui/primitives';
 import { triggerMediumImpact } from '@/lib/haptics';
 import { useAppTheme } from '@/lib/theme';
 
-const MENU_MAX_WIDTH = 300;
-const MENU_ROW_HEIGHT = 58;
-const MENU_VERTICAL_PADDING = 8;
-const MENU_MIN_HEIGHT = MENU_ROW_HEIGHT * 2 + MENU_VERTICAL_PADDING * 2;
+const MENU_MAX_WIDTH = 340;
+const MENU_ROW_HEIGHT = 64;
+const MENU_PILL_HEIGHT = 66;
+const MENU_ROW_GAP = 8;
+const MENU_VERTICAL_PADDING = 14;
 
 const ADD_ITEM_ACTIONS = [
   {
@@ -32,6 +33,14 @@ const ADD_ITEM_ACTIONS = [
 ] as const;
 
 type AddItemAction = (typeof ADD_ITEM_ACTIONS)[number]['id'];
+
+const SECONDARY_ADD_ITEM_ACTIONS = ADD_ITEM_ACTIONS.slice(0, -1);
+const PRIMARY_ADD_ITEM_ACTION = ADD_ITEM_ACTIONS[ADD_ITEM_ACTIONS.length - 1];
+const MENU_MIN_HEIGHT =
+  SECONDARY_ADD_ITEM_ACTIONS.length * MENU_ROW_HEIGHT +
+  MENU_ROW_GAP +
+  MENU_PILL_HEIGHT +
+  MENU_VERTICAL_PADDING * 2;
 
 export function AddItemMenu() {
   const router = useRouter();
@@ -137,14 +146,21 @@ export function AddItemMenu() {
       return null;
     }
 
-    const rowOffset = pageY - bounds.y - MENU_VERTICAL_PADDING;
-    const rowIndex = Math.floor(rowOffset / MENU_ROW_HEIGHT);
+    const menuOffset = pageY - bounds.y - MENU_VERTICAL_PADDING;
+    const rowAreaHeight = SECONDARY_ADD_ITEM_ACTIONS.length * MENU_ROW_HEIGHT;
 
-    if (rowOffset < 0 || rowIndex < 0 || rowIndex >= ADD_ITEM_ACTIONS.length) {
-      return null;
+    if (menuOffset >= 0 && menuOffset < rowAreaHeight) {
+      const rowIndex = Math.floor(menuOffset / MENU_ROW_HEIGHT);
+
+      return SECONDARY_ADD_ITEM_ACTIONS[rowIndex]?.id ?? null;
     }
 
-    return ADD_ITEM_ACTIONS[rowIndex].id;
+    const primaryActionTop = rowAreaHeight + MENU_ROW_GAP;
+    if (menuOffset >= primaryActionTop && menuOffset <= primaryActionTop + MENU_PILL_HEIGHT) {
+      return PRIMARY_ADD_ITEM_ACTION.id;
+    }
+
+    return null;
   }, []);
 
   const updateDragSelection = useCallback((pageY: number) => {
@@ -234,23 +250,33 @@ export function AddItemMenu() {
   ]);
 
   const menuOpacity = menuProgress.interpolate({
-    inputRange: [0, 0.5, 1],
-    outputRange: [0, 0.85, 1],
+    inputRange: [0, 0.35, 1],
+    outputRange: [0, 0.82, 1],
     extrapolate: 'clamp',
   });
   const menuTranslateX = menuProgress.interpolate({
     inputRange: [0, 1],
-    outputRange: [28, 0],
+    outputRange: [36, 0],
     extrapolate: 'clamp',
   });
   const menuTranslateY = menuProgress.interpolate({
     inputRange: [0, 1],
-    outputRange: [34, 0],
+    outputRange: [48, 0],
     extrapolate: 'clamp',
   });
   const menuScale = menuProgress.interpolate({
     inputRange: [0, 1],
-    outputRange: [0.82, 1],
+    outputRange: [0.64, 1],
+    extrapolate: 'clamp',
+  });
+  const menuItemTranslateY = menuProgress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [12, 0],
+    extrapolate: 'clamp',
+  });
+  const primaryActionScale = menuProgress.interpolate({
+    inputRange: [0, 0.45, 1],
+    outputRange: [0.86, 0.94, 1],
     extrapolate: 'clamp',
   });
   const plusRotation = menuProgress.interpolate({
@@ -293,7 +319,7 @@ export function AddItemMenu() {
               style={[
                 styles.actionMenu,
                 {
-                  backgroundColor: colors.card,
+                  backgroundColor: Platform.OS === 'ios' ? 'transparent' : colors.card,
                   borderColor: colors.border,
                   opacity: menuOpacity,
                   transform: [
@@ -304,44 +330,83 @@ export function AddItemMenu() {
                 },
               ]}
             >
-              {ADD_ITEM_ACTIONS.map((action) => {
-                const isHighlighted = highlightedAction === action.id;
+              {Platform.OS === 'ios' ? (
+                <GlassView
+                  pointerEvents="none"
+                  style={styles.menuGlass}
+                  glassEffectStyle="regular"
+                  tintColor={colors.card}
+                  colorScheme={isDark ? 'dark' : 'light'}
+                  isInteractive
+                />
+              ) : null}
+              <Animated.View
+                style={[
+                  styles.menuContent,
+                  {
+                    transform: [{translateY: menuItemTranslateY}],
+                  },
+                ]}
+              >
+                {SECONDARY_ADD_ITEM_ACTIONS.map((action) => {
+                  const isHighlighted = highlightedAction === action.id;
 
-                return (
-                  <Pressable
-                    key={action.id}
-                    accessibilityRole="button"
-                    accessibilityLabel={action.label}
-                    accessibilityHint={action.description}
-                    onPress={() => navigateToAction(action.id)}
-                    style={[
-                      styles.actionRow,
-                      isHighlighted ? {backgroundColor: colors.tintSoft} : null,
-                    ]}
-                  >
-                    <View
+                  return (
+                    <Pressable
+                      key={action.id}
+                      accessibilityRole="button"
+                      accessibilityLabel={action.label}
+                      accessibilityHint={action.description}
+                      onPress={() => navigateToAction(action.id)}
                       style={[
-                        styles.actionIcon,
-                        {
-                          backgroundColor: isHighlighted ? colors.tint : colors.tintSoft,
-                          borderColor: colors.border,
-                        },
+                        styles.actionRow,
+                        isHighlighted ? {backgroundColor: colors.tintSoft} : null,
                       ]}
                     >
-                      <Ionicons
-                        name={action.icon}
-                        size={21}
-                        color={isHighlighted ? colors.textInverse : colors.tint}
-                      />
-                    </View>
-                    <View style={styles.actionCopy}>
-                      <Text style={[styles.actionLabel, {color: colors.text}]}>{action.label}</Text>
-                      <Text style={[styles.actionDescription, {color: colors.muted}]}>{action.description}</Text>
-                    </View>
-                    <Ionicons name="chevron-forward" size={18} color={colors.muted} />
+                      <View
+                        style={[
+                          styles.actionIcon,
+                          {
+                            backgroundColor: isHighlighted ? colors.tint : colors.tintSoft,
+                            borderColor: colors.border,
+                          },
+                        ]}
+                      >
+                        <Ionicons
+                          name={action.icon}
+                          size={21}
+                          color={isHighlighted ? colors.textInverse : colors.tint}
+                        />
+                      </View>
+                      <View style={styles.actionCopy}>
+                        <Text style={[styles.actionLabel, {color: colors.text}]}>{action.label}</Text>
+                        <Text style={[styles.actionDescription, {color: colors.muted}]}>{action.description}</Text>
+                      </View>
+                      <Ionicons name="chevron-forward" size={18} color={colors.muted} />
+                    </Pressable>
+                  );
+                })}
+                <Animated.View style={{transform: [{scale: primaryActionScale}]}}>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={PRIMARY_ADD_ITEM_ACTION.label}
+                    accessibilityHint={PRIMARY_ADD_ITEM_ACTION.description}
+                    onPress={() => navigateToAction(PRIMARY_ADD_ITEM_ACTION.id)}
+                    style={[
+                      styles.primaryAction,
+                      {
+                        backgroundColor: colors.tint,
+                      },
+                      highlightedAction === PRIMARY_ADD_ITEM_ACTION.id ? styles.primaryActionHighlighted : null,
+                    ]}
+                  >
+                    <Ionicons name={PRIMARY_ADD_ITEM_ACTION.icon} size={24} color={colors.textInverse} />
+                    <Text style={[styles.primaryActionLabel, {color: colors.textInverse}]}>
+                      {PRIMARY_ADD_ITEM_ACTION.label}
+                    </Text>
                   </Pressable>
-                );
-              })}
+                </Animated.View>
+              </Animated.View>
             </Animated.View>
           </View>
         ) : null}
@@ -408,27 +473,36 @@ const styles = StyleSheet.create({
   actionMenu: {
     width: '100%',
     minHeight: MENU_MIN_HEIGHT,
-    borderRadius: 22,
-    paddingVertical: MENU_VERTICAL_PADDING,
+    borderRadius: 30,
     overflow: 'hidden',
     borderWidth: 1,
     shadowColor: appColors.shadow,
-    shadowOpacity: 0.2,
-    shadowRadius: 22,
-    shadowOffset: {width: 0, height: 10},
-    elevation: 14,
+    shadowOpacity: 0.26,
+    shadowRadius: 28,
+    shadowOffset: {width: 0, height: 14},
+    elevation: 16,
+  },
+  menuGlass: {
+    ...StyleSheet.absoluteFill,
+    borderRadius: 30,
+    overflow: 'hidden',
+  },
+  menuContent: {
+    padding: MENU_VERTICAL_PADDING,
+    gap: MENU_ROW_GAP,
   },
   actionRow: {
     height: MENU_ROW_HEIGHT,
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 11,
+    borderRadius: 20,
   },
   actionIcon: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
+    width: 42,
+    height: 42,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
@@ -444,6 +518,25 @@ const styles = StyleSheet.create({
   actionDescription: {
     fontSize: 12,
     fontWeight: '600',
+  },
+  primaryAction: {
+    height: MENU_PILL_HEIGHT,
+    borderRadius: MENU_PILL_HEIGHT / 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    shadowColor: appColors.shadow,
+    shadowOpacity: 0.16,
+    shadowRadius: 12,
+    shadowOffset: {width: 0, height: 6},
+  },
+  primaryActionHighlighted: {
+    transform: [{scale: 0.98}],
+  },
+  primaryActionLabel: {
+    fontSize: 18,
+    fontWeight: '800',
   },
   fabShell: {
     width: 60,
