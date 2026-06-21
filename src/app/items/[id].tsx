@@ -4,7 +4,7 @@ import { EmptyNotice } from '@/components/ui/primitives';
 import { ItemFormScreen } from '@/features/items/item-form-screen';
 import { useAppContext } from '@/state/app-context';
 
-export default function EditItemModal() {
+export default function EditItemScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { isAuthenticated, items, status } = useAppContext();
 

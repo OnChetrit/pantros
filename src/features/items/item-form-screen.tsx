@@ -280,7 +280,8 @@ export function ItemFormScreen({ item }: { item?: PantryItem }) {
         options={{
           title,
           headerTitleAlign: 'center',
-          headerBackVisible: Platform.OS !== 'ios',
+          headerBackVisible: Boolean(item) || Platform.OS !== 'ios',
+          headerBackButtonDisplayMode: item && Platform.OS === 'ios' ? 'minimal' : undefined,
           headerRight: () => (
             <Pressable
               onPress={selectedPantry ? () => void handleSave() : handleMissingPantry}
@@ -300,7 +301,7 @@ export function ItemFormScreen({ item }: { item?: PantryItem }) {
             </Pressable>
           ),
           unstable_headerLeftItems:
-            Platform.OS === 'ios'
+            Platform.OS === 'ios' && !item
               ? () => [
                   {
                     type: 'button',

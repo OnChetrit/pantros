@@ -75,15 +75,9 @@ export default function RootLayout() {
             <Stack.Screen
               name="items/[id]"
               options={{
-                presentation: 'modal',
+                presentation: 'card',
                 headerShown: true,
                 title: '',
-                sheetGrabberVisible: true,
-                sheetCornerRadius: 24,
-                sheetExpandsWhenScrolledToEdge: true,
-                sheetElevation: 24,
-                animation: 'slide_from_bottom',
-                gestureDirection: 'vertical',
               }}
             />
           </Stack>
