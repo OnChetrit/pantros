@@ -1,9 +1,10 @@
 import 'expo-dev-client';
 
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
+import * as Notifications from 'expo-notifications';
+import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { useAppTheme } from '@/lib/theme';
@@ -15,6 +16,7 @@ export const unstable_settings = {
 
 export default function RootLayout() {
   const { colors, isDark } = useAppTheme();
+  const router = useRouter();
   const navigationTheme = useMemo(() => {
     const baseTheme = isDark ? DarkTheme : DefaultTheme;
 
@@ -31,6 +33,34 @@ export default function RootLayout() {
       },
     };
   }, [colors, isDark]);
+
+  useEffect(() => {
+    const handleNotificationResponse = (
+      response: Notifications.NotificationResponse
+    ) => {
+      const route = response.notification.request.content.data?.route;
+
+      if (route === '/(tabs)/cart') {
+        router.push('/(tabs)/cart');
+      }
+    };
+
+    const subscription =
+      Notifications.addNotificationResponseReceivedListener(
+        handleNotificationResponse
+      );
+
+    void Notifications.getLastNotificationResponseAsync().then((response) => {
+      if (response) {
+        handleNotificationResponse(response);
+        void Notifications.clearLastNotificationResponseAsync();
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [router]);
 
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.background }}>

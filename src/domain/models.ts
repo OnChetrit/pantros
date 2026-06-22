@@ -9,6 +9,13 @@ export type ReminderSettings = {
   defaultExpirationDays: number | null;
 };
 
+export type NotificationPreferences = {
+  userId: string;
+  cartRemindersEnabled: boolean;
+  cartReminderTime: string;
+  timeZone: string;
+};
+
 export type PantryMember = {
   userId: string;
   name: string;

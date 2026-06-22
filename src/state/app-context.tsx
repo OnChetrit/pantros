@@ -2,7 +2,15 @@ import type { Session } from '@supabase/supabase-js';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { PropsWithChildren } from 'react';
 
-import type { BootstrapStatus, Cart, Pantry, PantryItem, PantryItemInput, UserProfile } from '@/domain/models';
+import type {
+  BootstrapStatus,
+  Cart,
+  NotificationPreferences,
+  Pantry,
+  PantryItem,
+  PantryItemInput,
+  UserProfile,
+} from '@/domain/models';
 import { hasSupabaseEnv } from '@/lib/env';
 import {
   getStoredSession,
@@ -14,6 +22,12 @@ import {
   subscribeToAuthChanges,
 } from '@/services/supabase/auth-service';
 import { createPantryItem, deletePantryItem, movePantryItemToCart, movePantryItemToPantry, updatePantryItem } from '@/services/supabase/item-service';
+import {
+  fetchNotificationPreferences,
+  syncPushTokenIfPermitted,
+  unregisterCurrentPushToken,
+  updateNotificationPreferences,
+} from '@/services/supabase/notification-service';
 import { fetchWorkspaceBundle } from '@/services/supabase/workspace-service';
 
 type AppContextValue = {
@@ -21,6 +35,7 @@ type AppContextValue = {
   isEnvReady: boolean;
   session: Session | null;
   profile: UserProfile | null;
+  notificationPreferences: NotificationPreferences | null;
   pantries: Pantry[];
   selectedPantryId: string | null;
   selectedPantry: Pantry | null;
@@ -32,6 +47,7 @@ type AppContextValue = {
   errorMessage: string | null;
   authBusy: boolean;
   itemBusy: boolean;
+  notificationBusy: boolean;
   refreshAppState: () => Promise<void>;
   selectPantry: (pantryId: string) => void;
   addItem: (input: PantryItemInput) => Promise<PantryItem>;
@@ -39,6 +55,9 @@ type AppContextValue = {
   moveItemToCart: (itemId: string, cartId: string | null) => Promise<PantryItem>;
   moveItemToPantry: (itemId: string) => Promise<PantryItem>;
   deleteItem: (itemId: string) => Promise<void>;
+  saveNotificationPreferences: (
+    preferences: NotificationPreferences
+  ) => Promise<NotificationPreferences>;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, fullName?: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
@@ -52,6 +71,8 @@ export function AppProvider({ children }: PropsWithChildren) {
   const [status, setStatus] = useState<BootstrapStatus>('idle');
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [notificationPreferences, setNotificationPreferences] =
+    useState<NotificationPreferences | null>(null);
   const [pantries, setPantries] = useState<Pantry[]>([]);
   const [items, setItems] = useState<PantryItem[]>([]);
   const [carts, setCarts] = useState<Cart[]>([]);
@@ -59,6 +80,7 @@ export function AppProvider({ children }: PropsWithChildren) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [authBusy, setAuthBusy] = useState(false);
   const [itemBusy, setItemBusy] = useState(false);
+  const [notificationBusy, setNotificationBusy] = useState(false);
 
   const isEnvReady = hasSupabaseEnv();
 
@@ -69,6 +91,7 @@ export function AppProvider({ children }: PropsWithChildren) {
       setStatus('error');
       setErrorMessage('Supabase environment variables are missing.');
       setProfile(null);
+      setNotificationPreferences(null);
       setPantries([]);
       setItems([]);
       setCarts([]);
@@ -80,6 +103,7 @@ export function AppProvider({ children }: PropsWithChildren) {
       setStatus('ready');
       setErrorMessage(null);
       setProfile(null);
+      setNotificationPreferences(null);
       setPantries([]);
       setItems([]);
       setCarts([]);
@@ -91,9 +115,13 @@ export function AppProvider({ children }: PropsWithChildren) {
     setErrorMessage(null);
 
     try {
-      const bundle = await fetchWorkspaceBundle(nextSession.user);
+      const [bundle, nextNotificationPreferences] = await Promise.all([
+        fetchWorkspaceBundle(nextSession.user),
+        fetchNotificationPreferences(nextSession.user.id),
+      ]);
 
       setProfile(bundle.profile);
+      setNotificationPreferences(nextNotificationPreferences);
       setPantries(bundle.pantries);
       setItems(bundle.items);
       setCarts(bundle.carts);
@@ -105,6 +133,10 @@ export function AppProvider({ children }: PropsWithChildren) {
         return bundle.pantries[0]?.id ?? null;
       });
       setStatus('ready');
+
+      if (nextNotificationPreferences.cartRemindersEnabled) {
+        void syncPushTokenIfPermitted();
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to load app state.';
       setStatus('error');
@@ -148,8 +180,37 @@ export function AppProvider({ children }: PropsWithChildren) {
   }, [hydrateWorkspace, session]);
 
   const signOut = useCallback(async () => {
-    await signOutUser();
+    try {
+      await unregisterCurrentPushToken();
+    } catch (error) {
+      console.warn('Unable to unregister this device before signing out.', error);
+    } finally {
+      await signOutUser();
+    }
   }, []);
+
+  const saveNotificationPreferences = useCallback(
+    async (preferences: NotificationPreferences) => {
+      setNotificationBusy(true);
+      setErrorMessage(null);
+
+      try {
+        const savedPreferences = await updateNotificationPreferences(preferences);
+        setNotificationPreferences(savedPreferences);
+        return savedPreferences;
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : 'Unable to save notification preferences.';
+        setErrorMessage(message);
+        throw error;
+      } finally {
+        setNotificationBusy(false);
+      }
+    },
+    []
+  );
 
   const addItem = useCallback(async (input: PantryItemInput) => {
     setItemBusy(true);
@@ -334,6 +395,7 @@ export function AppProvider({ children }: PropsWithChildren) {
     isEnvReady,
     session,
     profile,
+    notificationPreferences,
     pantries,
     selectedPantryId,
     selectedPantry,
@@ -345,6 +407,7 @@ export function AppProvider({ children }: PropsWithChildren) {
     errorMessage,
     authBusy,
     itemBusy,
+    notificationBusy,
     refreshAppState,
     selectPantry: setSelectedPantryId,
     addItem,
@@ -352,6 +415,7 @@ export function AppProvider({ children }: PropsWithChildren) {
     moveItemToCart,
     moveItemToPantry,
     deleteItem,
+    saveNotificationPreferences,
     signIn,
     signUp,
     signInWithGoogle: googleSignIn,
@@ -367,6 +431,8 @@ export function AppProvider({ children }: PropsWithChildren) {
     isEnvReady,
     itemBusy,
     items,
+    notificationBusy,
+    notificationPreferences,
     deleteItem,
     moveItemToCart,
     moveItemToPantry,
@@ -375,6 +441,7 @@ export function AppProvider({ children }: PropsWithChildren) {
     pantryItems,
     profile,
     refreshAppState,
+    saveNotificationPreferences,
     selectedPantry,
     selectedPantryId,
     session,

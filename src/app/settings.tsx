@@ -1,6 +1,16 @@
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import { Redirect } from 'expo-router';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import {
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  View,
+} from 'react-native';
 
 import { AppStackHeader } from '@/components/navigation/app-stack-header';
 import {
@@ -10,21 +20,53 @@ import {
   SectionCard,
   appColors,
 } from '@/components/ui/primitives';
+import {
+  getDeviceTimeZone,
+  registerForPushNotifications,
+} from '@/services/supabase/notification-service';
 import { useAppContext } from '@/state/app-context';
+
+function parseReminderTime(value: string) {
+  const [hours, minutes] = value.split(':').map(Number);
+  const date = new Date();
+  date.setHours(hours || 0, minutes || 0, 0, 0);
+  return date;
+}
+
+function formatReminderTime(value: Date) {
+  return `${String(value.getHours()).padStart(2, '0')}:${String(
+    value.getMinutes()
+  ).padStart(2, '0')}`;
+}
 
 export default function SettingsScreen() {
   const {
     errorMessage,
     isAuthenticated,
+    notificationBusy,
+    notificationPreferences,
     pantries,
     profile,
     refreshAppState,
+    saveNotificationPreferences,
     selectedPantry,
     selectedPantryId,
     selectPantry,
     signOut,
     status,
   } = useAppContext();
+  const [reminderTime, setReminderTime] = useState(() =>
+    parseReminderTime(notificationPreferences?.cartReminderTime ?? '18:00')
+  );
+  const [notificationActionBusy, setNotificationActionBusy] = useState(false);
+  const [notificationError, setNotificationError] = useState<string | null>(null);
+  const [showAndroidTimePicker, setShowAndroidTimePicker] = useState(false);
+
+  useEffect(() => {
+    if (notificationPreferences) {
+      setReminderTime(parseReminderTime(notificationPreferences.cartReminderTime));
+    }
+  }, [notificationPreferences]);
 
   if (status === 'idle' || status === 'loading') {
     return null;
@@ -34,6 +76,69 @@ export default function SettingsScreen() {
     return <Redirect href="/(auth)/login" />;
   }
 
+  const notificationsBusy = notificationBusy || notificationActionBusy;
+
+  const saveCartReminderSettings = async (enabled: boolean) => {
+    if (!notificationPreferences) {
+      return;
+    }
+
+    setNotificationActionBusy(true);
+    setNotificationError(null);
+
+    try {
+      if (enabled) {
+        const token = await registerForPushNotifications(true);
+
+        if (!token) {
+          throw new Error(
+            'Notification permission is required to enable cart reminders.'
+          );
+        }
+      }
+
+      await saveNotificationPreferences({
+        ...notificationPreferences,
+        cartRemindersEnabled: enabled,
+        cartReminderTime: formatReminderTime(reminderTime),
+        timeZone: getDeviceTimeZone(),
+      });
+    } catch (error) {
+      setNotificationError(
+        error instanceof Error
+          ? error.message
+          : 'Unable to save notification settings.'
+      );
+    } finally {
+      setNotificationActionBusy(false);
+    }
+  };
+
+  const saveReminderTime = async () => {
+    if (!notificationPreferences) {
+      return;
+    }
+
+    setNotificationActionBusy(true);
+    setNotificationError(null);
+
+    try {
+      await saveNotificationPreferences({
+        ...notificationPreferences,
+        cartReminderTime: formatReminderTime(reminderTime),
+        timeZone: getDeviceTimeZone(),
+      });
+    } catch (error) {
+      setNotificationError(
+        error instanceof Error
+          ? error.message
+          : 'Unable to save the reminder time.'
+      );
+    } finally {
+      setNotificationActionBusy(false);
+    }
+  };
+
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: appColors.background }}
@@ -42,6 +147,89 @@ export default function SettingsScreen() {
     >
       <AppStackHeader title="Settings" showAccountMenu={false} minimalBackButton />
       <AppScreen>
+        <SectionCard
+          title="Cart Reminders"
+          subtitle="Receive one reminder each day when any pantry you belong to has items waiting in a cart."
+        >
+          <View style={styles.notificationToggleRow}>
+            <View style={styles.notificationToggleCopy}>
+              <Text style={styles.notificationToggleTitle}>Push notifications</Text>
+              <Text style={styles.notificationToggleSubtitle}>
+                {notificationPreferences?.cartRemindersEnabled
+                  ? `Enabled for ${notificationPreferences.timeZone}`
+                  : 'Disabled'}
+              </Text>
+            </View>
+            <Switch
+              value={notificationPreferences?.cartRemindersEnabled ?? false}
+              disabled={!notificationPreferences || notificationsBusy}
+              onValueChange={(enabled) => {
+                void saveCartReminderSettings(enabled);
+              }}
+            />
+          </View>
+
+          <View style={styles.timeRow}>
+            <View style={styles.notificationToggleCopy}>
+              <Text style={styles.notificationToggleTitle}>Reminder time</Text>
+              <Text style={styles.notificationToggleSubtitle}>
+                Uses the current device time zone.
+              </Text>
+            </View>
+            {Platform.OS === 'android' ? (
+              <Pressable
+                disabled={!notificationPreferences || notificationsBusy}
+                onPress={() => setShowAndroidTimePicker(true)}
+                style={({ pressed }) => [
+                  styles.timeButton,
+                  pressed ? styles.timeButtonPressed : null,
+                ]}
+              >
+                <Text style={styles.timeButtonText}>
+                  {formatReminderTime(reminderTime)}
+                </Text>
+              </Pressable>
+            ) : (
+              <DateTimePicker
+                value={reminderTime}
+                mode="time"
+                display="default"
+                disabled={!notificationPreferences || notificationsBusy}
+                onChange={(_event, date) => {
+                  if (date) {
+                    setReminderTime(date);
+                  }
+                }}
+              />
+            )}
+          </View>
+
+          {Platform.OS === 'android' && showAndroidTimePicker ? (
+            <DateTimePicker
+              value={reminderTime}
+              mode="time"
+              display="default"
+              onChange={(_event, date) => {
+                setShowAndroidTimePicker(false);
+                if (date) {
+                  setReminderTime(date);
+                }
+              }}
+            />
+          ) : null}
+
+          {notificationError ? (
+            <Text style={styles.notificationError}>{notificationError}</Text>
+          ) : null}
+
+          <AppButton
+            label={notificationsBusy ? 'Saving…' : 'Save Reminder Time'}
+            onPress={() => void saveReminderTime()}
+            variant="secondary"
+            disabled={!notificationPreferences || notificationsBusy}
+          />
+        </SectionCard>
+
         <SectionCard
           title="Workspace Scope"
           subtitle="Pantry selection belongs to the shared app state, so switching workspaces here updates every feature surface."
@@ -59,7 +247,9 @@ export default function SettingsScreen() {
               itemStyle={styles.pickerItem}
               dropdownIconColor={String(appColors.tint)}
             >
-              {pantries.length === 0 ? <Picker.Item label="No pantry loaded" value="" /> : null}
+              {pantries.length === 0 ? (
+                <Picker.Item label="No pantry loaded" value="" />
+              ) : null}
               {pantries.map((pantry) => (
                 <Picker.Item key={pantry.id} label={pantry.name} value={pantry.id} />
               ))}
@@ -67,9 +257,18 @@ export default function SettingsScreen() {
           </View>
 
           <View style={{ gap: 10 }}>
-            <ListRow title="Selected pantry" subtitle={selectedPantry?.name ?? 'None selected'} />
-            <ListRow title="Reminder time" subtitle={selectedPantry?.settings.reminderTime ?? 'Not configured'} />
-            <ListRow title="Share code" subtitle={selectedPantry?.shareCode ?? 'Not generated'} />
+            <ListRow
+              title="Selected pantry"
+              subtitle={selectedPantry?.name ?? 'None selected'}
+            />
+            <ListRow
+              title="Expiration reminder time"
+              subtitle={selectedPantry?.settings.reminderTime ?? 'Not configured'}
+            />
+            <ListRow
+              title="Share code"
+              subtitle={selectedPantry?.shareCode ?? 'Not generated'}
+            />
           </View>
         </SectionCard>
 
@@ -79,10 +278,17 @@ export default function SettingsScreen() {
         >
           <View style={{ gap: 10 }}>
             <ListRow title="Profile" subtitle={profile?.email ?? 'Not authenticated'} />
-            <ListRow title="Last app message" subtitle={errorMessage ?? 'No errors'} />
+            <ListRow
+              title="Last app message"
+              subtitle={errorMessage ?? 'No errors'}
+            />
           </View>
 
-          <AppButton label="Refresh App State" onPress={() => void refreshAppState()} variant="secondary" />
+          <AppButton
+            label="Refresh App State"
+            onPress={() => void refreshAppState()}
+            variant="secondary"
+          />
           <AppButton label="Sign Out" onPress={() => void signOut()} />
         </SectionCard>
       </AppScreen>
@@ -91,6 +297,57 @@ export default function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
+  notificationToggleRow: {
+    minHeight: 52,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 16,
+  },
+  notificationToggleCopy: {
+    flex: 1,
+    gap: 3,
+  },
+  notificationToggleTitle: {
+    color: appColors.text,
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  notificationToggleSubtitle: {
+    color: appColors.muted,
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  timeRow: {
+    minHeight: 52,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  notificationError: {
+    color: appColors.danger,
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  timeButton: {
+    minWidth: 76,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    alignItems: 'center',
+    backgroundColor: appColors.input,
+    borderWidth: 1,
+    borderColor: appColors.border,
+  },
+  timeButtonPressed: {
+    opacity: 0.72,
+  },
+  timeButtonText: {
+    color: appColors.tint,
+    fontSize: 15,
+    fontWeight: '700',
+  },
   pickerField: {
     minHeight: 52,
     borderRadius: 16,

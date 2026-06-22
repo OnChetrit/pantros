@@ -24,7 +24,8 @@
       },
       "predictiveBackGestureEnabled": false,
       "permissions": [
-        "android.permission.RECORD_AUDIO"
+        "android.permission.RECORD_AUDIO",
+        "android.permission.POST_NOTIFICATIONS"
       ]
     },
     "web": {
@@ -63,6 +64,7 @@
           "cameraPermission": "Allow $(PRODUCT_NAME) to use your camera to scan expiration label images."
         }
       ],
+      "expo-notifications",
       "@react-native-community/datetimepicker",
       "expo-web-browser"
     ],

@@ -69,6 +69,15 @@ If you make changes that affect native configuration, rebuild the app:
 bun run prebuild
 ```
 
+## Push Notifications
+
+Cart reminders use Expo Push Notifications with a Supabase Cron job and Edge
+Function. Users can enable reminders and choose their local reminder time from
+the Settings screen.
+
+Deployment and credential setup are documented in
+[`docs/PUSH_NOTIFICATIONS.md`](docs/PUSH_NOTIFICATIONS.md).
+
 ## EAS Migration From `new-pantry`
 
 `Pantry` now includes:

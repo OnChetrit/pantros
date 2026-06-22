@@ -15,7 +15,13 @@ import { countItemsExpiringWithinDays, formatExpirationLabel, getSoonestExpiring
 import { useAppContext } from '@/state/app-context';
 
 export default function NotificationsScreen() {
-  const { isAuthenticated, pantryItems, selectedPantry, status } = useAppContext();
+  const {
+    isAuthenticated,
+    notificationPreferences,
+    pantryItems,
+    selectedPantry,
+    status,
+  } = useAppContext();
 
   if (status === 'idle' || status === 'loading') {
     return null;
@@ -39,17 +45,25 @@ export default function NotificationsScreen() {
       <AppScreen>
         <SectionCard
           title="Reminder Center"
-          subtitle={`This screen previews the kinds of alerts ${selectedPantry?.name ?? 'your pantry'} will generate once reminder delivery is implemented.`}
+          subtitle={`Expiration alerts for ${selectedPantry?.name ?? 'your pantry'}, plus your account-wide cart reminder status.`}
         >
           <MetricGrid>
             <MetricPill value={String(expiringToday)} label="today" tone="warning" />
             <MetricPill value={String(expiringThisWeek)} label="this week" tone="accent" />
+            <MetricPill
+              value={
+                notificationPreferences?.cartRemindersEnabled
+                  ? notificationPreferences.cartReminderTime
+                  : 'Off'
+              }
+              label="cart reminder"
+            />
           </MetricGrid>
         </SectionCard>
 
         <SectionCard
           title="Upcoming Alerts"
-          subtitle="Derived from current inventory dates. Push delivery and notification preferences can build on this without changing the route structure."
+          subtitle="Expiration entries are derived from current inventory dates. Cart push reminders are managed from Settings."
         >
           {expiringSoon.length === 0 ? (
             <EmptyNotice
