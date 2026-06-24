@@ -110,6 +110,14 @@ export default function RootLayout() {
                 title: '',
               }}
             />
+            <Stack.Screen
+              name="account/delete"
+              options={{
+                presentation: 'card',
+                headerShown: true,
+                title: '',
+              }}
+            />
           </Stack>
         </ThemeProvider>
       </AppProvider>

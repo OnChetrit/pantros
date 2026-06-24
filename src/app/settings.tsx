@@ -1,6 +1,6 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
-import { Redirect } from 'expo-router';
+import { Redirect, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
   Platform,
@@ -40,6 +40,7 @@ function formatReminderTime(value: Date) {
 }
 
 export default function SettingsScreen() {
+  const router = useRouter();
   const {
     errorMessage,
     isAuthenticated,
@@ -290,6 +291,17 @@ export default function SettingsScreen() {
             variant="secondary"
           />
           <AppButton label="Sign Out" onPress={() => void signOut()} />
+        </SectionCard>
+
+        <SectionCard
+          title="Delete Account"
+          subtitle="Permanently delete your account, leave shared pantries, and choose what happens to pantries you own."
+        >
+          <AppButton
+            label="Review Account Deletion"
+            onPress={() => router.push('/account/delete')}
+            variant="secondary"
+          />
         </SectionCard>
       </AppScreen>
     </ScrollView>

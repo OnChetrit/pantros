@@ -200,3 +200,7 @@ export async function unregisterCurrentPushToken() {
 
   await AsyncStorage.removeItem(STORED_EXPO_PUSH_TOKEN_KEY);
 }
+
+export async function clearStoredPushToken() {
+  await AsyncStorage.removeItem(STORED_EXPO_PUSH_TOKEN_KEY);
+}

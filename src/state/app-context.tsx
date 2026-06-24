@@ -4,6 +4,7 @@ import type { PropsWithChildren } from 'react';
 
 import type {
   BootstrapStatus,
+  AccountDeletionDecision,
   Cart,
   NotificationPreferences,
   Pantry,
@@ -12,6 +13,7 @@ import type {
   UserProfile,
 } from '@/domain/models';
 import { hasSupabaseEnv } from '@/lib/env';
+import { deleteCurrentAccount } from '@/services/supabase/account-service';
 import {
   getStoredSession,
   signInWithApple,
@@ -24,6 +26,7 @@ import {
 import { createPantryItem, deletePantryItem, movePantryItemToCart, movePantryItemToPantry, updatePantryItem } from '@/services/supabase/item-service';
 import {
   fetchNotificationPreferences,
+  clearStoredPushToken,
   syncPushTokenIfPermitted,
   unregisterCurrentPushToken,
   updateNotificationPreferences,
@@ -48,6 +51,7 @@ type AppContextValue = {
   authBusy: boolean;
   itemBusy: boolean;
   notificationBusy: boolean;
+  accountDeletionBusy: boolean;
   refreshAppState: () => Promise<void>;
   selectPantry: (pantryId: string) => void;
   addItem: (input: PantryItemInput) => Promise<PantryItem>;
@@ -63,6 +67,7 @@ type AppContextValue = {
   signInWithGoogle: () => Promise<void>;
   signInWithApple: () => Promise<void>;
   signOut: () => Promise<void>;
+  deleteAccount: (decisions: AccountDeletionDecision[]) => Promise<void>;
 };
 
 const AppContext = createContext<AppContextValue | undefined>(undefined);
@@ -81,6 +86,7 @@ export function AppProvider({ children }: PropsWithChildren) {
   const [authBusy, setAuthBusy] = useState(false);
   const [itemBusy, setItemBusy] = useState(false);
   const [notificationBusy, setNotificationBusy] = useState(false);
+  const [accountDeletionBusy, setAccountDeletionBusy] = useState(false);
 
   const isEnvReady = hasSupabaseEnv();
 
@@ -186,6 +192,24 @@ export function AppProvider({ children }: PropsWithChildren) {
       console.warn('Unable to unregister this device before signing out.', error);
     } finally {
       await signOutUser();
+    }
+  }, []);
+
+  const deleteAccount = useCallback(async (decisions: AccountDeletionDecision[]) => {
+    setAccountDeletionBusy(true);
+    setErrorMessage(null);
+
+    try {
+      await deleteCurrentAccount(decisions);
+      await clearStoredPushToken();
+      await signOutUser();
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Unable to delete your account.';
+      setErrorMessage(message);
+      throw error;
+    } finally {
+      setAccountDeletionBusy(false);
     }
   }, []);
 
@@ -408,6 +432,7 @@ export function AppProvider({ children }: PropsWithChildren) {
     authBusy,
     itemBusy,
     notificationBusy,
+    accountDeletionBusy,
     refreshAppState,
     selectPantry: setSelectedPantryId,
     addItem,
@@ -421,8 +446,10 @@ export function AppProvider({ children }: PropsWithChildren) {
     signInWithGoogle: googleSignIn,
     signInWithApple: appleSignIn,
     signOut,
+    deleteAccount,
   }), [
     appleSignIn,
+    accountDeletionBusy,
     authBusy,
     addItem,
     carts,
@@ -434,6 +461,7 @@ export function AppProvider({ children }: PropsWithChildren) {
     notificationBusy,
     notificationPreferences,
     deleteItem,
+    deleteAccount,
     moveItemToCart,
     moveItemToPantry,
     pantries,

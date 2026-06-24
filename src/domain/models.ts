@@ -74,6 +74,38 @@ export type UserProfile = {
   createdAt: string;
 };
 
+export type AccountDeletionMember = {
+  userId: string;
+  name: string;
+  email: string;
+  role: PantryRole;
+  joinedAt: string;
+};
+
+export type AccountDeletionPantry = {
+  id: string;
+  name: string;
+  members: AccountDeletionMember[];
+};
+
+export type AccountDeletionPreview = {
+  pantries: AccountDeletionPantry[];
+  joinedPantryCount: number;
+  providers: string[];
+};
+
+export type AccountDeletionDecision =
+  | {
+      pantryId: string;
+      action: 'transfer';
+      transferToUserId: string;
+    }
+  | {
+      pantryId: string;
+      action: 'delete';
+      transferToUserId?: null;
+    };
+
 export type WorkspaceBundle = {
   profile: UserProfile | null;
   pantries: Pantry[];

@@ -1,7 +1,5 @@
 {
-  "deno.enablePaths": [
-    "supabase/functions"
-  ],
+  "deno.enablePaths": ["supabase/functions"],
   "deno.lint": true,
   "editor.codeActionsOnSave": {
     "source.fixAll": "explicit",
@@ -27,5 +25,16 @@
     "titleBar.inactiveBackground": "#7a5b3299",
     "titleBar.inactiveForeground": "#e7e7e799"
   },
-  "peacock.color": "#7a5b32"
+  "peacock.color": "#7a5b32",
+  "github.copilot.chat.commitMessageGeneration.instructions": [
+    {
+      "text": "Use conventional commit format: type(scope): description."
+    },
+    {
+      "text": "Always write in the imperative mood (e.g., 'Add feature' instead of 'Added feature')."
+    },
+    {
+      "text": "Keep the first line under 50 characters and capitalize the first letter."
+    }
+  ]
 }

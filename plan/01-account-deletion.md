@@ -1,6 +1,6 @@
 # 01 — In-App Account Deletion
 
-Status: Next
+Status: In progress
 
 ## Goal
 
@@ -28,36 +28,50 @@ the app, as required by App Review Guideline 5.1.1.
 
 ## Owner decision flow
 
-- [ ] List every pantry owned by the deleting user.
-- [ ] Show the remaining member count for each pantry.
-- [ ] Preselect **Transfer ownership and exit** when another member exists.
-- [ ] Identify the member who will become the new owner.
-- [ ] Allow the owner to choose another eligible member if desired.
-- [ ] Show a stronger warning when **Delete pantry** is selected because all
+- [x] List every pantry owned by the deleting user.
+- [x] Show the remaining member count for each pantry.
+- [x] Preselect **Transfer ownership and exit** when another member exists.
+- [x] Identify the member who will become the new owner.
+- [x] Allow the owner to choose another eligible member if desired.
+- [x] Show a stronger warning when **Delete pantry** is selected because all
       members will lose the pantry and its data.
-- [ ] Require the user to resolve every owned pantry before enabling the final
+- [x] Require the user to resolve every owned pantry before enabling the final
       Delete Account action.
 
 ## Implementation
 
-- [ ] Audit all tables that reference `auth.users`.
-- [ ] Define deletion behavior for profiles, memberships, pantries, items,
+- [x] Audit all tables that reference `auth.users`.
+- [x] Define deletion behavior for profiles, memberships, pantries, items,
       carts, notification preferences, deliveries, push tokens, and uploaded
       images.
-- [ ] Create a protected Supabase Edge Function using the service-role key only
+- [x] Create a protected Supabase Edge Function using the service-role key only
       on the server.
-- [ ] Validate the caller from their JWT; never accept a user ID from the
+- [x] Validate the caller from their JWT; never accept a user ID from the
       client as authority.
-- [ ] Validate that every selected ownership recipient is still an active
+- [x] Validate that every selected ownership recipient is still an active
       member when the deletion transaction runs.
 - [ ] Revoke or remove external provider authorization where supported.
-- [ ] Transfer or delete each owned pantry according to the user's recorded
+- [x] Transfer or delete each owned pantry according to the user's recorded
       decision in a transaction-safe operation.
-- [ ] Remove the deleting user from pantries owned by other users.
-- [ ] Delete the Supabase Auth user last.
-- [ ] Add a confirmation and progress/error UI.
-- [ ] Clear local session and cached app state after success.
+- [x] Remove the deleting user from pantries owned by other users.
+- [x] Delete the Supabase Auth user last.
+- [x] Add a confirmation and progress/error UI.
+- [x] Clear local session and cached app state after success.
 - [ ] Add the deletion behavior and retention rules to the privacy policy.
+
+Current deployment state:
+
+- The `delete-account` Edge Function is deployed and rejects unauthenticated
+  requests.
+- The database migration is ready locally but still needs to be pushed to the
+  linked project.
+- Supabase Storage is not currently used for item images, so there are no
+  stored image objects to delete in this version.
+- Third-party provider authorization revocation is still pending. Supabase Auth
+  account deletion removes the Pantry account, but separate Apple or Google app
+  authorization revocation is not yet implemented in-product.
+- The public privacy-policy update for deletion and retention behavior is still
+  pending under step 04.
 
 ## Security requirements
 
