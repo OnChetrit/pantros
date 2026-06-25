@@ -119,24 +119,25 @@ export async function signUpWithEmail(email: string, password: string, fullName?
 }
 
 function getRedirectUrl() {
-  return Platform.select({
-    ios: 'pantry://auth/callback',
-    android: 'pantry://auth/callback',
-    default: AuthSession.makeRedirectUri({
-      scheme: 'pantry',
-      path: 'auth/callback',
-    }),
-  })!;
+  if (Platform.OS === 'web') {
+    return globalThis.location?.origin ?? AuthSession.makeRedirectUri();
+  }
+
+  return AuthSession.makeRedirectUri({
+    scheme: 'pantry',
+    path: 'auth/callback',
+  });
 }
 
-export async function signInWithGoogle() {
+async function signInWithOAuthProvider(provider: 'google' | 'apple') {
   const redirectTo = getRedirectUrl();
+  const isWeb = Platform.OS === 'web';
 
   const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
+    provider,
     options: {
       redirectTo,
-      skipBrowserRedirect: true,
+      ...(isWeb ? {} : { skipBrowserRedirect: true }),
     },
   });
 
@@ -144,8 +145,12 @@ export async function signInWithGoogle() {
     throw error;
   }
 
+  if (isWeb) {
+    return;
+  }
+
   if (!data?.url) {
-    throw new Error('No Google auth URL was returned.');
+    throw new Error(`No ${provider} auth URL was returned.`);
   }
 
   const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo, {
@@ -163,7 +168,7 @@ export async function signInWithGoogle() {
   const refreshToken = hash.get('refresh_token');
 
   if (!accessToken || !refreshToken) {
-    throw new Error('Google auth did not return an access token and refresh token.');
+    throw new Error(`${provider} auth did not return an access token and refresh token.`);
   }
 
   const { error: sessionError } = await supabase.auth.setSession({
@@ -176,7 +181,16 @@ export async function signInWithGoogle() {
   }
 }
 
+export async function signInWithGoogle() {
+  await signInWithOAuthProvider('google');
+}
+
 export async function signInWithApple() {
+  if (Platform.OS === 'web') {
+    await signInWithOAuthProvider('apple');
+    return;
+  }
+
   const isAvailable = await AppleAuthentication.isAvailableAsync();
 
   if (!isAvailable) {

@@ -36,6 +36,6 @@ export const supabase = createClient(env.supabaseUrl || 'https://placeholder.sup
     storage: authStorage,
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: false,
+    detectSessionInUrl: Platform.OS === 'web',
   },
 });
