@@ -303,6 +303,29 @@ export default function SettingsScreen() {
             variant="secondary"
           />
         </SectionCard>
+
+        <SectionCard
+          title="Legal"
+          subtitle="Review the current privacy policy, terms, and support contact details."
+        >
+          <View style={{ gap: 10 }}>
+            <ListRow
+              title="Privacy Policy"
+              subtitle="How Pantry collects, uses, shares, and deletes data."
+              onPress={() => router.push('/legal/privacy')}
+            />
+            <ListRow
+              title="Terms of Service"
+              subtitle="Basic service terms for shared pantry use."
+              onPress={() => router.push('/legal/terms')}
+            />
+            <ListRow
+              title="Contact Support"
+              subtitle="Get help with account, reminder, or deletion issues."
+              onPress={() => router.push('/legal/support')}
+            />
+          </View>
+        </SectionCard>
       </AppScreen>
     </ScrollView>
   );

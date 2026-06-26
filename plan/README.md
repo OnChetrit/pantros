@@ -24,7 +24,7 @@ implementation, verification, and documentation checkboxes are finished.
 | 01 | In-app account deletion | In progress |
 | 02 | Move AI requests and key to Supabase | Pending |
 | 03 | AI disclosure and user consent | Pending |
-| 04 | Privacy policy, support, and legal links | Pending |
+| 04 | Privacy policy, support, and legal links | In progress |
 | 05 | App icon and brand assets | Pending |
 | 06 | Remove development content | Pending |
 | 07 | Permissions and native configuration | Pending |

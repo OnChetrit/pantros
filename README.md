@@ -78,6 +78,18 @@ the Settings screen.
 Deployment and credential setup are documented in
 [`docs/PUSH_NOTIFICATIONS.md`](docs/PUSH_NOTIFICATIONS.md).
 
+## Legal Pages
+
+The app now includes legal/support routes that can be published through the web
+build and linked inside the native app:
+
+- `/legal/privacy`
+- `/legal/terms`
+- `/legal/support`
+
+Update `src/lib/legal.ts` before release so the support email and any final
+branding or contact details match the production app.
+
 ## EAS Migration From `new-pantry`
 
 `Pantry` now includes:

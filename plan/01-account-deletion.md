@@ -57,7 +57,7 @@ the app, as required by App Review Guideline 5.1.1.
 - [x] Delete the Supabase Auth user last.
 - [x] Add a confirmation and progress/error UI.
 - [x] Clear local session and cached app state after success.
-- [ ] Add the deletion behavior and retention rules to the privacy policy.
+- [x] Add the deletion behavior and retention rules to the privacy policy.
 
 Current deployment state:
 

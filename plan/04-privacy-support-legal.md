@@ -1,6 +1,6 @@
 # 04 — Privacy Policy, Support, and Legal Links
 
-Status: Pending
+Status: In progress
 
 ## Goal
 
@@ -51,3 +51,11 @@ should still make its service terms clear.
 
 All URLs are public, accurate, available during review, and linked from inside
 the application.
+
+## Current implementation notes
+
+- Privacy, Terms, and Support screens now exist in the app and web route tree
+  under `/legal/privacy`, `/legal/terms`, and `/legal/support`.
+- Settings and Profile now link directly to those screens.
+- A real support email and deployed public URLs are still required before App
+  Store submission.

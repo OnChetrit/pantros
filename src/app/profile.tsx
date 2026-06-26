@@ -1,4 +1,4 @@
-import { Redirect } from 'expo-router';
+import { Redirect, useRouter } from 'expo-router';
 import { ScrollView, Text, View } from 'react-native';
 
 import { AppStackHeader } from '@/components/navigation/app-stack-header';
@@ -13,6 +13,7 @@ import {
 import { useAppContext } from '@/state/app-context';
 
 export default function ProfileScreen() {
+  const router = useRouter();
   const { isAuthenticated, pantries, profile, selectedPantry, status } = useAppContext();
 
   if (status === 'idle' || status === 'loading') {
@@ -58,6 +59,29 @@ export default function ProfileScreen() {
             <ListRow title="Selected pantry" subtitle={selectedPantry?.name ?? 'None selected'} />
             <ListRow title="Account created" subtitle={profile?.createdAt ?? 'Unknown'} />
             <ListRow title="Profile image" subtitle={profile?.avatarUrl ?? 'No uploaded avatar'} />
+          </View>
+        </SectionCard>
+
+        <SectionCard
+          title="Privacy and Support"
+          subtitle="These links should also be reachable from the public web build for App Store review."
+        >
+          <View style={{ gap: 10 }}>
+            <ListRow
+              title="Privacy Policy"
+              subtitle="Data collection, sharing, retention, and deletion."
+              onPress={() => router.push('/legal/privacy')}
+            />
+            <ListRow
+              title="Terms of Service"
+              subtitle="Shared pantry service terms."
+              onPress={() => router.push('/legal/terms')}
+            />
+            <ListRow
+              title="Support"
+              subtitle="Contact details for app and deletion issues."
+              onPress={() => router.push('/legal/support')}
+            />
           </View>
         </SectionCard>
       </AppScreen>
