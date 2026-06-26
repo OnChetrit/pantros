@@ -1,6 +1,7 @@
 import { Alert, Linking } from 'react-native';
 
 import { LegalBullet, LegalParagraph, LegalScreen } from '@/components/legal/legal-screen';
+import { getLegalDocument } from '@/content/legal-content';
 import { buildMailtoUrl, legalConfig } from '@/lib/legal';
 
 async function contactSupport() {
@@ -19,10 +20,16 @@ async function contactSupport() {
 }
 
 export default function SupportScreen() {
+  const document = getLegalDocument('support');
+
+  if (!document) {
+    return null;
+  }
+
   return (
     <LegalScreen
-      title="Support"
-      subtitle={`Need help with ${legalConfig.appName}? Use the contact details below.`}
+      title={document.title}
+      subtitle={document.subtitle}
       actions={[
         {
           label: 'Email Support',
@@ -32,33 +39,17 @@ export default function SupportScreen() {
         },
       ]}
     >
-      <LegalScreen.Section title="Contact">
-        <LegalParagraph>
-          Support email: {legalConfig.supportEmail}
-        </LegalParagraph>
-        <LegalParagraph>
-          Target response time: {legalConfig.supportResponseWindow}
-        </LegalParagraph>
-      </LegalScreen.Section>
-
-      <LegalScreen.Section title="What to include">
-        <LegalBullet>
-          The account email you use in the app.
-        </LegalBullet>
-        <LegalBullet>
-          The device platform and app version.
-        </LegalBullet>
-        <LegalBullet>
-          A short description of the issue and what you expected to happen.
-        </LegalBullet>
-      </LegalScreen.Section>
-
-      <LegalScreen.Section title="Account deletion help">
-        <LegalParagraph>
-          If the in-app deletion flow fails, contact support and include the
-          email address tied to your account so the request can be reviewed.
-        </LegalParagraph>
-      </LegalScreen.Section>
+      {document.sections.map((section) => (
+        <LegalScreen.Section key={section.title} title={section.title}>
+          {section.content.map((item, index) =>
+            item.type === 'bullet' ? (
+              <LegalBullet key={`${section.title}-${index}`}>{item.text}</LegalBullet>
+            ) : (
+              <LegalParagraph key={`${section.title}-${index}`}>{item.text}</LegalParagraph>
+            )
+          )}
+        </LegalScreen.Section>
+      ))}
     </LegalScreen>
   );
 }

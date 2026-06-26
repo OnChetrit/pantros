@@ -3,6 +3,7 @@ export const legalConfig = {
   supportEmail: 'onchetrit@gmail.com',
   supportResponseWindow: '5 business days',
   lastUpdated: '2026-06-26',
+  publicLegalBaseUrl: 'https://legal.pantryapp.co',
 } as const;
 
 export function buildMailtoUrl(subject: string) {

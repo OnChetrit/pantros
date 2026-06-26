@@ -80,15 +80,26 @@ Deployment and credential setup are documented in
 
 ## Legal Pages
 
-The app now includes legal/support routes that can be published through the web
-build and linked inside the native app:
+The app now includes legal/support routes in the app, plus a separate static
+legal-site build target in the same repo.
+
+In-app routes:
 
 - `/legal/privacy`
 - `/legal/terms`
 - `/legal/support`
 
-Update `src/lib/legal.ts` before release so the support email and any final
-branding or contact details match the production app.
+Public static site:
+
+```bash
+bun run legal:build
+```
+
+This generates deployable HTML files in `legal-site/dist/` from the shared
+source in `src/content/legal-content.ts`.
+
+Update `src/lib/legal.ts` before release so the support email, canonical legal
+site base URL, and any final branding or contact details match production.
 
 ## EAS Migration From `new-pantry`
 
