@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, Platform, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 
 import { appColors } from '@/components/ui/primitives';
+import { useAiConsent } from '@/hooks/use-ai-consent';
 import { useAppTheme } from '@/lib/theme';
 
 import { extractExpirationDate } from './expiration-ai';
@@ -75,6 +76,7 @@ function initialRelativeState(value: string): {days: number; weeks: number; mont
 }
 
 export function ItemExpirationField({value, onChange}: {value: string; onChange: (value: string) => void}) {
+  const { ensureAiConsent } = useAiConsent();
   const initialDate = parseIsoDate(value) ?? startOfDay(new Date());
   const initialRelative = initialRelativeState(value);
   const [isEnabled, setIsEnabled] = useState(Boolean(value));
@@ -166,6 +168,14 @@ export function ItemExpirationField({value, onChange}: {value: string; onChange:
     const imageUri = result.assets[0].uri;
     setIsEnabled(true);
     setMode('scan');
+
+    const allowed = await ensureAiConsent();
+
+    if (!allowed) {
+      setScanError('AI scanning is off until you accept the disclosure. You can still set the date manually.');
+      setMode('manual');
+      return;
+    }
 
     setScanBusy(true);
     const scanned = await extractExpirationDate(imageUri);

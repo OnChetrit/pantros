@@ -57,6 +57,9 @@ export async function fetchUserProfile(userId: string): Promise<UserProfile | nu
     fullName: data.full_name,
     avatarUrl: data.avatar_url,
     createdAt: data.created_at,
+    aiConsentVersion: data.ai_consent_version ?? null,
+    aiConsentGrantedAt: data.ai_consent_granted_at ?? null,
+    aiConsentWithdrawnAt: data.ai_consent_withdrawn_at ?? null,
   };
 }
 
@@ -88,6 +91,51 @@ export async function ensureUserProfile(user: User): Promise<UserProfile | null>
     fullName: data.full_name,
     avatarUrl: data.avatar_url,
     createdAt: data.created_at,
+    aiConsentVersion: data.ai_consent_version ?? null,
+    aiConsentGrantedAt: data.ai_consent_granted_at ?? null,
+    aiConsentWithdrawnAt: data.ai_consent_withdrawn_at ?? null,
+  };
+}
+
+export async function updateAiConsent(
+  userId: string,
+  input:
+    | {
+        status: 'granted';
+        version: string;
+      }
+    | {
+        status: 'withdrawn';
+      }
+): Promise<UserProfile> {
+  const patch =
+    input.status === 'granted'
+      ? {
+          id: userId,
+          ai_consent_version: input.version,
+          ai_consent_granted_at: new Date().toISOString(),
+          ai_consent_withdrawn_at: null,
+        }
+      : {
+          id: userId,
+          ai_consent_withdrawn_at: new Date().toISOString(),
+        };
+
+  const { data, error } = await supabase.from('profiles').upsert(patch).select('*').single();
+
+  if (error) {
+    throw error;
+  }
+
+  return {
+    id: data.id,
+    email: data.email,
+    fullName: data.full_name,
+    avatarUrl: data.avatar_url,
+    createdAt: data.created_at,
+    aiConsentVersion: data.ai_consent_version ?? null,
+    aiConsentGrantedAt: data.ai_consent_granted_at ?? null,
+    aiConsentWithdrawnAt: data.ai_consent_withdrawn_at ?? null,
   };
 }
 

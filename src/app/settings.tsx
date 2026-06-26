@@ -20,6 +20,7 @@ import {
   SectionCard,
   appColors,
 } from '@/components/ui/primitives';
+import { AI_CONSENT_VERSION, formatAiConsentDate, hasActiveAiConsent } from '@/lib/ai-consent';
 import {
   getDeviceTimeZone,
   registerForPushNotifications,
@@ -55,6 +56,7 @@ export default function SettingsScreen() {
     selectPantry,
     signOut,
     status,
+    withdrawAiConsent,
   } = useAppContext();
   const [reminderTime, setReminderTime] = useState(() =>
     parseReminderTime(notificationPreferences?.cartReminderTime ?? '18:00')
@@ -62,6 +64,7 @@ export default function SettingsScreen() {
   const [notificationActionBusy, setNotificationActionBusy] = useState(false);
   const [notificationError, setNotificationError] = useState<string | null>(null);
   const [showAndroidTimePicker, setShowAndroidTimePicker] = useState(false);
+  const aiConsentEnabled = hasActiveAiConsent(profile);
 
   useEffect(() => {
     if (notificationPreferences) {
@@ -271,6 +274,38 @@ export default function SettingsScreen() {
               subtitle={selectedPantry?.shareCode ?? 'Not generated'}
             />
           </View>
+        </SectionCard>
+
+        <SectionCard
+          title="AI Scanning"
+          subtitle="Barcode and expiration image scans are optional and require consent before Pantry sends a selected image to OpenAI."
+        >
+          <View style={{ gap: 10 }}>
+            <ListRow
+              title="Consent status"
+              subtitle={
+                aiConsentEnabled
+                  ? `Accepted on ${formatAiConsentDate(profile?.aiConsentGrantedAt ?? null)}`
+                  : 'Not accepted or withdrawn'
+              }
+              rightValue={profile?.aiConsentVersion ?? AI_CONSENT_VERSION}
+            />
+            <ListRow
+              title="Processor"
+              subtitle="OpenAI receives the selected scan image only to extract barcode digits or expiration dates."
+            />
+            <ListRow
+              title="Withdrawal"
+              subtitle="Turning this off blocks future AI uploads. Manual barcode and date entry still work."
+            />
+          </View>
+
+          <AppButton
+            label={aiConsentEnabled ? 'Withdraw AI Consent' : 'AI Consent Not Accepted'}
+            onPress={() => void withdrawAiConsent()}
+            variant="secondary"
+            disabled={!aiConsentEnabled}
+          />
         </SectionCard>
 
         <SectionCard

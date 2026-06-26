@@ -18,6 +18,7 @@ import {
 
 import { AppTextInput, EmptyNotice, appColors } from '@/components/ui/primitives';
 import type { PantryItem, PantryItemInput } from '@/domain/models';
+import { useAiConsent } from '@/hooks/use-ai-consent';
 import { useAppContext } from '@/state/app-context';
 
 import { extractBarcodeValue } from './barcode-ai';
@@ -48,6 +49,7 @@ function FieldLabel({ children }: { children: string }) {
 export function ItemFormScreen({ item }: { item?: PantryItem }) {
   const router = useRouter();
   const { addItem, itemBusy, pantryCarts, pantryItems, selectedPantry, selectedPantryId, updateItem } = useAppContext();
+  const { ensureAiConsent } = useAiConsent();
 
   const primaryCartId = pantryCarts.find((cart) => cart.isPrimary)?.id ?? pantryCarts[0]?.id ?? null;
 
@@ -208,6 +210,13 @@ export function ItemFormScreen({ item }: { item?: PantryItem }) {
 
     if (mode === 'image') {
       setImage(imageUri);
+      return;
+    }
+
+    const allowed = await ensureAiConsent();
+
+    if (!allowed) {
+      setBarcodeError('AI scanning is off until you accept the disclosure. You can enter the barcode manually.');
       return;
     }
 

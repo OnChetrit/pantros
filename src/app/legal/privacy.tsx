@@ -70,9 +70,13 @@ export default function PrivacyPolicyScreen() {
         </LegalParagraph>
         <LegalParagraph>
           In the current app version, these AI requests are made only when you
-          intentionally start a scan. The project release plan also tracks a
-          dedicated consent prompt that should be completed before App Store
-          submission.
+          intentionally start a scan and first accept the in-app disclosure for
+          the current consent version.
+        </LegalParagraph>
+        <LegalParagraph>
+          The disclosure identifies OpenAI as the processor, explains that the
+          selected image is uploaded solely to extract barcode digits or
+          expiration dates, and can be withdrawn later from Settings.
         </LegalParagraph>
       </LegalScreen.Section>
 
@@ -104,6 +108,10 @@ export default function PrivacyPolicyScreen() {
           image uploads in production, but the account-deletion flow is prepared
           to remove matching storage objects if they are added later.
         </LegalBullet>
+        <LegalBullet>
+          AI scan consent records are stored on your profile with the accepted
+          disclosure version and grant or withdrawal timestamps.
+        </LegalBullet>
       </LegalScreen.Section>
 
       <LegalScreen.Section title="Your choices">
@@ -117,8 +125,8 @@ export default function PrivacyPolicyScreen() {
           You can delete your account from the in-app Delete Account screen.
         </LegalBullet>
         <LegalBullet>
-          If you do not want image data sent to OpenAI, do not use the AI scan
-          flows and enter barcode or expiration details manually instead.
+          You can withdraw AI scan consent from Settings at any time. After
+          withdrawal, enter barcode or expiration details manually instead.
         </LegalBullet>
       </LegalScreen.Section>
 

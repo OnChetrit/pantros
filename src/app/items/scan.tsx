@@ -20,6 +20,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BottomSheetModal } from '@/components/ui/bottom-sheet-modal';
 import { EmptyNotice, appColors } from '@/components/ui/primitives';
 import type { PantryItem, PantryItemInput } from '@/domain/models';
+import { useAiConsent } from '@/hooks/use-ai-consent';
 import { triggerMediumImpact } from '@/lib/haptics';
 import { formatExpirationLabel } from '@/lib/pantry-insights';
 import { useAppContext } from '@/state/app-context';
@@ -214,6 +215,7 @@ export default function ScanItemScreen() {
     status,
     updateItem,
   } = useAppContext();
+  const { ensureAiConsent } = useAiConsent();
 
   const [mode, setMode] = useState<ScanMode>('barcode');
   const [isCameraReady, setIsCameraReady] = useState(false);
@@ -370,6 +372,13 @@ export default function ScanItemScreen() {
         return;
       }
 
+      const allowed = await ensureAiConsent();
+
+      if (!allowed) {
+        setExpirationError('AI scanning is off until you accept the disclosure. You can keep using barcode-only flow.');
+        return;
+      }
+
       const scanResult = await extractExpirationDate(imageUri);
 
       if (scanResult.success && scanResult.date) {
@@ -384,7 +393,7 @@ export default function ScanItemScreen() {
     } finally {
       setIsCapturingExpiration(false);
     }
-  }, [captureStillImage, isCapturingExpiration]);
+  }, [captureStillImage, ensureAiConsent, isCapturingExpiration]);
 
   const handleMoveCartItem = useCallback(async (expirationDate: string | null) => {
     if (!pendingItem || pendingItem.kind !== 'cart') {

@@ -12,6 +12,7 @@ import type {
   PantryItemInput,
   UserProfile,
 } from '@/domain/models';
+import { hasActiveAiConsent } from '@/lib/ai-consent';
 import { hasSupabaseEnv } from '@/lib/env';
 import { deleteCurrentAccount } from '@/services/supabase/account-service';
 import {
@@ -22,6 +23,7 @@ import {
   signOutUser,
   signUpWithEmail,
   subscribeToAuthChanges,
+  updateAiConsent,
 } from '@/services/supabase/auth-service';
 import { createPantryItem, deletePantryItem, movePantryItemToCart, movePantryItemToPantry, updatePantryItem } from '@/services/supabase/item-service';
 import {
@@ -62,6 +64,9 @@ type AppContextValue = {
   saveNotificationPreferences: (
     preferences: NotificationPreferences
   ) => Promise<NotificationPreferences>;
+  hasAiConsent: boolean;
+  grantAiConsent: (version: string) => Promise<UserProfile>;
+  withdrawAiConsent: () => Promise<UserProfile>;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, fullName?: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
@@ -89,6 +94,7 @@ export function AppProvider({ children }: PropsWithChildren) {
   const [accountDeletionBusy, setAccountDeletionBusy] = useState(false);
 
   const isEnvReady = hasSupabaseEnv();
+  const hasAiConsent = hasActiveAiConsent(profile);
 
   const hydrateWorkspace = useCallback(async (nextSession: Session | null) => {
     setSession(nextSession);
@@ -252,6 +258,33 @@ export function AppProvider({ children }: PropsWithChildren) {
       setItemBusy(false);
     }
   }, []);
+
+  const grantAiConsent = useCallback(async (version: string) => {
+    if (!session?.user) {
+      throw new Error('Sign in to enable AI scanning.');
+    }
+
+    setErrorMessage(null);
+    const nextProfile = await updateAiConsent(session.user.id, {
+      status: 'granted',
+      version,
+    });
+    setProfile(nextProfile);
+    return nextProfile;
+  }, [session]);
+
+  const withdrawAiConsent = useCallback(async () => {
+    if (!session?.user) {
+      throw new Error('Sign in to manage AI scanning.');
+    }
+
+    setErrorMessage(null);
+    const nextProfile = await updateAiConsent(session.user.id, {
+      status: 'withdrawn',
+    });
+    setProfile(nextProfile);
+    return nextProfile;
+  }, [session]);
 
   const updateItem = useCallback(async (itemId: string, input: PantryItemInput) => {
     setItemBusy(true);
@@ -420,6 +453,7 @@ export function AppProvider({ children }: PropsWithChildren) {
     session,
     profile,
     notificationPreferences,
+    hasAiConsent,
     pantries,
     selectedPantryId,
     selectedPantry,
@@ -441,6 +475,8 @@ export function AppProvider({ children }: PropsWithChildren) {
     moveItemToPantry,
     deleteItem,
     saveNotificationPreferences,
+    grantAiConsent,
+    withdrawAiConsent,
     signIn,
     signUp,
     signInWithGoogle: googleSignIn,
@@ -455,11 +491,13 @@ export function AppProvider({ children }: PropsWithChildren) {
     carts,
     errorMessage,
     googleSignIn,
+    grantAiConsent,
     isEnvReady,
     itemBusy,
     items,
     notificationBusy,
     notificationPreferences,
+    hasAiConsent,
     deleteItem,
     deleteAccount,
     moveItemToCart,
@@ -478,6 +516,7 @@ export function AppProvider({ children }: PropsWithChildren) {
     signUp,
     status,
     updateItem,
+    withdrawAiConsent,
   ]);
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
