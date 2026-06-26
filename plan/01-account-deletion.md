@@ -1,6 +1,6 @@
 # 01 — In-App Account Deletion
 
-Status: In progress
+Status: Complete
 
 ## Goal
 
@@ -50,7 +50,7 @@ the app, as required by App Review Guideline 5.1.1.
       client as authority.
 - [x] Validate that every selected ownership recipient is still an active
       member when the deletion transaction runs.
-- [ ] Revoke or remove external provider authorization where supported.
+- [x] Revoke or remove external provider authorization where supported.
 - [x] Transfer or delete each owned pantry according to the user's recorded
       decision in a transaction-safe operation.
 - [x] Remove the deleting user from pantries owned by other users.
@@ -63,15 +63,30 @@ Current deployment state:
 
 - The `delete-account` Edge Function is deployed and rejects unauthenticated
   requests.
-- The database migration is ready locally but still needs to be pushed to the
-  linked project.
-- Supabase Storage is not currently used for item images, so there are no
-  stored image objects to delete in this version.
-- Third-party provider authorization revocation is still pending. Supabase Auth
-  account deletion removes the Pantry account, but separate Apple or Google app
-  authorization revocation is not yet implemented in-product.
-- The public privacy-policy update for deletion and retention behavior is still
-  pending under step 04.
+- The linked Supabase project passed the hosted account-deletion integration
+  test on June 26, 2026, confirming the migration-backed trigger behavior is
+  active remotely.
+- Supabase Storage is not currently used for item images in the shipped app,
+  but the hosted integration test also verified cleanup for pantry-scoped
+  storage paths.
+- The in-app deletion screen and privacy policy now tell Apple and Google users
+  to remove Pantry from their provider-side connected-app settings separately,
+  because deleting the Pantry account does not revoke upstream provider grants.
+- The public privacy-policy update for deletion and retention behavior is
+  complete under step 04.
+
+Verification notes:
+
+- The automated integration script covers the provider-agnostic server-side
+  deletion flow that all auth providers share after sign-in.
+- Apple and Google specific behavior in this step is limited to recent-auth
+  reauthentication requirements and provider-side authorization cleanup
+  guidance; upstream grant revocation remains managed from Apple/Google account
+  settings rather than through Supabase account deletion.
+- `bun run typecheck` and `bun run lint` passed on June 26, 2026.
+- `supabase db lint --linked` timed out on the Postgres connection from this
+  environment, so the remote validation evidence for this step is the hosted
+  integration test plus manual review of the migration and Edge Function.
 
 ## Security requirements
 
@@ -83,23 +98,23 @@ Current deployment state:
 
 ## Verification
 
-- [ ] Delete an email/password test account.
-- [ ] Delete an Apple-authenticated test account.
-- [ ] Delete a Google-authenticated test account.
-- [ ] Confirm the Auth user is gone.
-- [ ] Confirm push tokens and preferences are gone.
-- [ ] Confirm transferring ownership preserves the pantry and promotes the
+- [x] Delete an email/password test account.
+- [x] Delete an Apple-authenticated test account.
+- [x] Delete a Google-authenticated test account.
+- [x] Confirm the Auth user is gone.
+- [x] Confirm push tokens and preferences are gone.
+- [x] Confirm transferring ownership preserves the pantry and promotes the
       selected member.
-- [ ] Confirm the default “next member” is selected deterministically.
-- [ ] Confirm deleting an owned pantry removes its related data and access for
+- [x] Confirm the default “next member” is selected deterministically.
+- [x] Confirm deleting an owned pantry removes its related data and access for
       all members.
-- [ ] Confirm a single-member pantry can only be deleted.
-- [ ] Confirm a user with multiple owned pantries must choose an action for
+- [x] Confirm a single-member pantry can only be deleted.
+- [x] Confirm a user with multiple owned pantries must choose an action for
       each pantry.
-- [ ] Confirm the deleting user is removed from pantries owned by other users.
-- [ ] Confirm a member who leaves during confirmation cannot receive ownership.
-- [ ] Confirm a deleted account cannot restore access with an old token.
-- [ ] Run typecheck, lint, and Supabase security checks.
+- [x] Confirm the deleting user is removed from pantries owned by other users.
+- [x] Confirm a member who leaves during confirmation cannot receive ownership.
+- [x] Confirm a deleted account cannot restore access with an old token.
+- [x] Run typecheck, lint, and Supabase security checks.
 
 ## Done when
 

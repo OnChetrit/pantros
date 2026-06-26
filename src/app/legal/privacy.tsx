@@ -88,6 +88,13 @@ export default function PrivacyPolicyScreen() {
           account data are deleted.
         </LegalBullet>
         <LegalBullet>
+          Deleting your Pantry account does not automatically revoke any Apple
+          or Google authorization you previously granted at the identity
+          provider level. If you signed in with one of those providers, remove
+          Pantry from that provider&apos;s connected-app settings separately if you
+          no longer want the authorization to remain there.
+        </LegalBullet>
+        <LegalBullet>
           If you own a pantry at deletion time, you must choose whether to
           transfer ownership to another active member or permanently delete that
           pantry and its related data.

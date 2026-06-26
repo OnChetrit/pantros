@@ -84,6 +84,20 @@ export default function DeleteAccountScreen() {
     return null;
   }, [preview?.providers]);
 
+  const providerCleanupMessage = useMemo(() => {
+    const providers = preview?.providers ?? [];
+
+    if (providers.includes('apple')) {
+      return 'Deleting your Pantry account does not automatically remove Pantry from Sign in with Apple. After deletion, remove Pantry from your Apple account settings if you do not want that authorization to remain listed there.';
+    }
+
+    if (providers.includes('google')) {
+      return 'Deleting your Pantry account does not automatically revoke Pantry access from your Google account. After deletion, remove Pantry from your Google connected apps settings if you do not want that authorization to remain there.';
+    }
+
+    return null;
+  }, [preview?.providers]);
+
   const loadPreview = async () => {
     setLoading(true);
     setErrorMessage(null);
@@ -198,6 +212,9 @@ export default function DeleteAccountScreen() {
                   If your {providerLabel} session is no longer recent, sign in again
                   before retrying account deletion.
                 </Text>
+              ) : null}
+              {providerCleanupMessage ? (
+                <Text style={styles.warningText}>{providerCleanupMessage}</Text>
               ) : null}
             </View>
           ) : null}
@@ -406,6 +423,11 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: appColors.danger,
+    fontSize: 14,
+    lineHeight: 21,
+  },
+  warningText: {
+    color: appColors.text,
     fontSize: 14,
     lineHeight: 21,
   },
