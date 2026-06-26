@@ -22,7 +22,7 @@ implementation, verification, and documentation checkboxes are finished.
 | Step | Area | Status |
 | --- | --- | --- |
 | 01 | In-app account deletion | Complete |
-| 02 | Move AI requests and key to Supabase | Pending |
+| 02 | Move AI requests and key to Supabase | Complete |
 | 03 | AI disclosure and user consent | Pending |
 | 04 | Privacy policy, support, and legal links | In progress |
 | 05 | App icon and brand assets | Pending |

@@ -20,7 +20,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BottomSheetModal } from '@/components/ui/bottom-sheet-modal';
 import { EmptyNotice, appColors } from '@/components/ui/primitives';
 import type { PantryItem, PantryItemInput } from '@/domain/models';
-import { env } from '@/lib/env';
 import { triggerMediumImpact } from '@/lib/haptics';
 import { formatExpirationLabel } from '@/lib/pantry-insights';
 import { useAppContext } from '@/state/app-context';
@@ -359,11 +358,6 @@ export default function ScanItemScreen() {
       return;
     }
 
-    if (!env.openAiApiKey) {
-      setExpirationError('EXPO_PUBLIC_OPENAI_API_KEY is required for expiration scanning.');
-      return;
-    }
-
     setExpirationError(null);
     setSheetError(null);
     setIsCapturingExpiration(true);
@@ -376,7 +370,7 @@ export default function ScanItemScreen() {
         return;
       }
 
-      const scanResult = await extractExpirationDate(imageUri, env.openAiApiKey);
+      const scanResult = await extractExpirationDate(imageUri);
 
       if (scanResult.success && scanResult.date) {
         setDetectedExpirationDate(scanResult.date);

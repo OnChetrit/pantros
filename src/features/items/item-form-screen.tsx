@@ -18,7 +18,6 @@ import {
 
 import { AppTextInput, EmptyNotice, appColors } from '@/components/ui/primitives';
 import type { PantryItem, PantryItemInput } from '@/domain/models';
-import { env } from '@/lib/env';
 import { useAppContext } from '@/state/app-context';
 
 import { extractBarcodeValue } from './barcode-ai';
@@ -219,13 +218,7 @@ export function ItemFormScreen({ item }: { item?: PantryItem }) {
       setImage(imageUri);
     }
 
-    if (!env.openAiApiKey) {
-      setBarcodeBusy(false);
-      setBarcodeError('EXPO_PUBLIC_OPENAI_API_KEY is required for barcode image scanning.');
-      return;
-    }
-
-    const scanned = await extractBarcodeValue(imageUri, env.openAiApiKey);
+    const scanned = await extractBarcodeValue(imageUri);
     setBarcodeBusy(false);
 
     if (scanned.success && scanned.barcode) {

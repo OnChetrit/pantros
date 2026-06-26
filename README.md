@@ -28,12 +28,12 @@ Create `.env` or `.env.local` with:
 ```bash
 EXPO_PUBLIC_SUPABASE_URL=
 EXPO_PUBLIC_SUPABASE_ANON_KEY=
-EXPO_PUBLIC_OPENAI_API_KEY=
 ```
 
 `Pantry/.gitignore` now ignores `.env`, so keep real values there and commit only `.env.example`.
 
-`EXPO_PUBLIC_OPENAI_API_KEY` is only needed if you want the expiration-image scanner to call OpenAI directly from the app.
+For AI barcode and expiration scanning, set `OPENAI_API_KEY` as a Supabase Edge
+Function secret instead of exposing it in Expo public env.
 
 ## Run
 

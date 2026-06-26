@@ -5,7 +5,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, Platform, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 
 import { appColors } from '@/components/ui/primitives';
-import { env } from '@/lib/env';
 import { useAppTheme } from '@/lib/theme';
 
 import { extractExpirationDate } from './expiration-ai';
@@ -90,8 +89,6 @@ export function ItemExpirationField({value, onChange}: {value: string; onChange:
   const [scanError, setScanError] = useState<string | null>(null);
   const {colors, isDark} = useAppTheme();
 
-  const hasOpenAiKey = Boolean(env.openAiApiKey);
-
   const resolvedDate = useMemo(() => {
     if (!isEnabled) {
       return '';
@@ -119,7 +116,7 @@ export function ItemExpirationField({value, onChange}: {value: string; onChange:
     setMode(nextMode);
 
     if (nextMode === 'scan' && !scanDetectedDate) {
-      setScanError(hasOpenAiKey ? null : 'Add EXPO_PUBLIC_OPENAI_API_KEY to enable AI date extraction.');
+      setScanError(null);
     }
   };
 
@@ -170,13 +167,8 @@ export function ItemExpirationField({value, onChange}: {value: string; onChange:
     setIsEnabled(true);
     setMode('scan');
 
-    if (!hasOpenAiKey) {
-      setScanError('AI scanning is ready for a key, but EXPO_PUBLIC_OPENAI_API_KEY is not configured yet.');
-      return;
-    }
-
     setScanBusy(true);
-    const scanned = await extractExpirationDate(imageUri, env.openAiApiKey);
+    const scanned = await extractExpirationDate(imageUri);
     setScanBusy(false);
 
     if (scanned.success && scanned.date) {
