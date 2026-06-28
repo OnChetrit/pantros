@@ -64,6 +64,9 @@ the application.
   policy update date.
 - The repo now includes a separate static legal-site build target generated
   from the same shared legal content used by the in-app screens.
+- GitHub Pages deployment is now wired through a repository workflow and the
+  default Pages base URL.
 - What still remains for this step is operational rather than in-app:
-  set the final `publicLegalBaseUrl`, publish the generated HTTPS pages, and
-  enter those URLs into App Store Connect before submission.
+  enable GitHub Pages with `GitHub Actions` in repository settings, wait for a
+  successful deploy, verify the public URLs, and enter those URLs into App
+  Store Connect before submission.

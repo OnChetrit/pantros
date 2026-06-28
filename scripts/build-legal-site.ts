@@ -47,6 +47,7 @@ function renderPage(options: {
   subtitle: string;
   body: string;
   canonicalPath: string;
+  sitePathPrefix: string;
 }) {
   const siteTitle = `${options.title} | ${legalConfig.appName}`;
   const canonicalBase = legalConfig.publicLegalBaseUrl.replace(/\/$/, '');
@@ -59,7 +60,7 @@ function renderPage(options: {
     <title>${escapeHtml(siteTitle)}</title>
     <meta name="description" content="${escapeHtml(options.subtitle)}" />
     <link rel="canonical" href="${canonicalBase}${options.canonicalPath}" />
-    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="${options.sitePathPrefix}/styles.css" />
   </head>
   <body>
     <main class="shell">
@@ -68,10 +69,10 @@ function renderPage(options: {
         <h1>${escapeHtml(options.title)}</h1>
         <p class="subtitle">${escapeHtml(options.subtitle)}</p>
         <nav class="nav">
-          <a href="/index.html">Legal Home</a>
-          <a href="/privacy/">Privacy</a>
-          <a href="/terms/">Terms</a>
-          <a href="/support/">Support</a>
+          <a href="${options.sitePathPrefix}/">Legal Home</a>
+          <a href="${options.sitePathPrefix}/privacy/">Privacy</a>
+          <a href="${options.sitePathPrefix}/terms/">Terms</a>
+          <a href="${options.sitePathPrefix}/support/">Support</a>
         </nav>
       </header>
       <div class="card">
@@ -94,6 +95,8 @@ async function build() {
   await mkdir(outputDir, { recursive: true });
 
   const documents = getLegalDocuments();
+  const siteUrl = new URL(legalConfig.publicLegalBaseUrl);
+  const sitePathPrefix = siteUrl.pathname.replace(/\/$/, '');
 
   const styles = `:root {
   color-scheme: light;
@@ -256,6 +259,7 @@ li + li {
 }`;
 
   await writePage('styles.css', styles);
+  await writePage('.nojekyll', '');
 
   for (const document of documents) {
     const body = document.sections.map(renderSection).join('\n');
@@ -266,6 +270,7 @@ li + li {
         subtitle: document.subtitle,
         body,
         canonicalPath: `/${document.slug}/`,
+        sitePathPrefix,
       })
     );
   }
@@ -302,6 +307,7 @@ li + li {
       subtitle: 'Public privacy, terms, and support pages for App Store review and customer access.',
       body: homeBody,
       canonicalPath: '/index.html',
+      sitePathPrefix,
     })
   );
 }

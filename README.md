@@ -98,6 +98,10 @@ bun run legal:build
 This generates deployable HTML files in `legal-site/dist/` from the shared
 source in `src/content/legal-content.ts`.
 
+GitHub Pages deployment is configured through
+`.github/workflows/deploy-legal-site.yml` and currently targets the repository
+Pages URL base `https://onchetrit.github.io/pantry`.
+
 Update `src/lib/legal.ts` before release so the support email, canonical legal
 site base URL, and any final branding or contact details match production.
 

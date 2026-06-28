@@ -23,17 +23,25 @@ That command generates static files in `legal-site/dist/`:
 
 ## Deployment model
 
-Deploy `legal-site/dist/` as a small static site on any host that can serve
-plain HTML files.
+This repo is configured to deploy `legal-site/dist/` to GitHub Pages from the
+`main` branch through `.github/workflows/deploy-legal-site.yml`.
 
-Recommended stable URLs:
+Default public URLs for this repository:
 
-- `/privacy/`
-- `/terms/`
-- `/support/`
+- `https://onchetrit.github.io/pantry/privacy/`
+- `https://onchetrit.github.io/pantry/terms/`
+- `https://onchetrit.github.io/pantry/support/`
 
-If you want the pages under `/legal/...`, add your host-level routing or deploy
-the contents of `dist` beneath a `/legal` base path.
+## GitHub Pages setup
+
+In the GitHub repository settings:
+
+1. Open `Settings` -> `Pages`
+2. Set `Source` to `GitHub Actions`
+3. Push to `main` or run the workflow manually
+
+If you later move to a custom domain, update
+`legalConfig.publicLegalBaseUrl` in `src/lib/legal.ts` and redeploy.
 
 ## Updating content
 
