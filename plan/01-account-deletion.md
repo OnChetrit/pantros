@@ -70,8 +70,8 @@ Current deployment state:
   but the hosted integration test also verified cleanup for pantry-scoped
   storage paths.
 - The in-app deletion screen and privacy policy now tell Apple and Google users
-  to remove Pantry from their provider-side connected-app settings separately,
-  because deleting the Pantry account does not revoke upstream provider grants.
+  to remove Pantros from their provider-side connected-app settings separately,
+  because deleting the Pantros account does not revoke upstream provider grants.
 - The public privacy-policy update for deletion and retention behavior is
   complete under step 04.
 

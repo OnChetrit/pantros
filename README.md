@@ -1,4 +1,4 @@
-# Pantry
+# Pantros
 
 Clean Expo SDK 55 scaffold for a full rewrite of the pantry app.
 
@@ -30,7 +30,7 @@ EXPO_PUBLIC_SUPABASE_URL=
 EXPO_PUBLIC_SUPABASE_ANON_KEY=
 ```
 
-`Pantry/.gitignore` now ignores `.env`, so keep real values there and commit only `.env.example`.
+This repo's `.gitignore` ignores `.env`, so keep real values there and commit only `.env.example`.
 
 For AI barcode and expiration scanning, set `OPENAI_API_KEY` as a Supabase Edge
 Function secret instead of exposing it in Expo public env.
@@ -100,14 +100,14 @@ source in `src/content/legal-content.ts`.
 
 GitHub Pages deployment is configured through
 `.github/workflows/deploy-legal-site.yml` and currently targets the repository
-Pages URL base `https://onchetrit.github.io/pantry`.
+Pages URL base `https://onchetrit.github.io/pantros`.
 
 Update `src/lib/legal.ts` before release so the support email, canonical legal
 site base URL, and any final branding or contact details match production.
 
 ## EAS Migration From `new-pantry`
 
-`Pantry` now includes:
+`Pantros` now includes:
 
 - `eas.json`
 - the linked EAS project id from `new-pantry`
@@ -123,18 +123,18 @@ Recommended migration steps:
 
 2. Make sure the Expo project slug matches this app config.
 
-   `Pantry` now uses:
-   - app name: `Pantry`
-   - app slug: `pantry-ai`
+   `Pantros` now uses:
+   - app name: `Pantros`
+   - app slug: `pantros`
 
-   If the linked Expo project is still named `new-pantry` or `pantry`, rename that existing Expo project in the Expo dashboard to `pantry-ai` first, then verify the link:
+   If the linked Expo project is still named `new-pantry` or `pantry`, rename that existing Expo project in the Expo dashboard to `pantros` first, then verify the link:
 
    ```bash
    bunx eas-cli project:info
    ```
 
    The linked project should resolve to the existing EAS project id:
-   `b400235c-f7ce-40cb-8056-74170351dbcf`
+   `e905b4f0-8b99-4763-a6f4-e402de0e72c4`
 
 3. Add the public Supabase env vars to EAS so cloud builds have the same config as local:
 
@@ -147,19 +147,19 @@ Recommended migration steps:
 
 4. Decide whether you are replacing the existing published `new-pantry` app or shipping a new app identity.
 
-   If you want to replace the existing App Store / Play Store app, `Pantry` must use the same native identifiers as `new-pantry` before the first production build:
+   If you want to replace the existing App Store / Play Store app, `Pantros` must use the same native identifiers as `new-pantry` before the first production build:
 
    - iOS bundle id: `com.on.chetrit.new-pantry`
    - Android package: `com.on.chetrit.newpantry`
    - URL scheme: `newpantry`
 
-   Right now `Pantry` is still configured as:
+   Right now `Pantros` is configured as a new app identity:
 
-   - iOS bundle id: `com.onchetrit.pantry`
-   - Android package: `com.onchetrit.pantry`
-   - URL scheme: `pantry`
+   - iOS bundle id: `com.onchetrit.pantros`
+   - Android package: `com.onchetrit.pantros`
+   - URL scheme: `pantros`
 
-   With the current identifiers, `Pantry` will build as a different app and will not replace `new-pantry`.
+   With the current identifiers, `Pantros` will build as a different app and will not replace `new-pantry`.
 
 5. If you change identifiers or other native config, regenerate native code before building:
 

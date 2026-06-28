@@ -1,13 +1,13 @@
-# Pantry App Store Release Plan
+# Pantros App Store Release Plan
 
-This folder is the release tracker for publishing Pantry to the iOS App Store.
+This folder is the release tracker for publishing Pantros to the iOS App Store.
 Work through the numbered files in order. A step is complete only after its
 implementation, verification, and documentation checkboxes are finished.
 
 ## Current baseline
 
-- App: Pantry
-- Bundle ID: `com.onchetrit.pantry-ai`
+- App: Pantros
+- Bundle ID: `com.onchetrit.pantros`
 - App version: `1.0.0`
 - Stack: Expo SDK 55, React Native, Supabase, EAS
 - TypeScript: passing

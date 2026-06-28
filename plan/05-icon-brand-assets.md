@@ -4,7 +4,7 @@ Status: Pending
 
 ## Goal
 
-Replace Expo placeholder branding with final Pantry artwork suitable for the
+Replace Expo placeholder branding with final Pantros artwork suitable for the
 App Store.
 
 ## Current issues
@@ -14,7 +14,7 @@ App Store.
 
 ## Implementation
 
-- [ ] Design an original Pantry app icon.
+- [ ] Design an original Pantros app icon.
 - [ ] Provide a 1024×1024 source.
 - [ ] Ensure there are no transparent regions.
 - [ ] Do not pre-round the icon corners.
@@ -33,4 +33,4 @@ App Store.
 ## Done when
 
 The installed production build and App Store product page use final,
-rights-cleared Pantry branding.
+rights-cleared Pantros branding.

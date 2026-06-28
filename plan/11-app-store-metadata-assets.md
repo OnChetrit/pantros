@@ -8,16 +8,16 @@ Prepare all customer-facing App Store Connect content.
 
 ## App information
 
-- [ ] Confirm the final app name.
-- [ ] Write subtitle.
-- [ ] Write full description.
-- [ ] Choose accurate keywords.
-- [ ] Choose primary and optional secondary categories.
-- [ ] Add copyright.
-- [ ] Add Support URL.
-- [ ] Add Privacy Policy URL.
+- [x] Confirm the final app name.
+- [x] Write subtitle.
+- [x] Write full description.
+- [x] Choose accurate keywords.
+- [x] Choose primary and optional secondary categories.
+- [x] Add copyright.
+- [x] Add Support URL.
+- [x] Add Privacy Policy URL.
 - [ ] Add Marketing URL if desired.
-- [ ] Prepare version release notes.
+- [x] Prepare version release notes.
 
 ## Screenshots
 

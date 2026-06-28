@@ -27,7 +27,7 @@ export function AvatarSidebarButton() {
   const [pendingHref, setPendingHref] = useState<RouteItem['href'] | null>(null);
   const [pendingSignOut, setPendingSignOut] = useState(false);
 
-  const expanderName = useMemo(() => profile?.fullName ?? profile?.email ?? 'Pantry User', [profile?.email, profile?.fullName]);
+  const expanderName = useMemo(() => profile?.fullName ?? profile?.email ?? 'Pantros User', [profile?.email, profile?.fullName]);
 
   const openSidebar = () => {
     setIsMenuVisible(true);
@@ -76,7 +76,7 @@ export function AvatarSidebarButton() {
           <View style={styles.profileRow}>
             <AvatarBadge name={expanderName} size={56} />
             <View style={styles.panelHeaderCopy}>
-              <Text style={styles.panelTitle}>{profile?.fullName ?? 'Pantry User'}</Text>
+              <Text style={styles.panelTitle}>{profile?.fullName ?? 'Pantros User'}</Text>
               <Text style={styles.panelSubtitle}>{profile?.email ?? 'No email available'}</Text>
             </View>
           </View>

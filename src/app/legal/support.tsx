@@ -5,7 +5,7 @@ import { getLegalDocument } from '@/content/legal-content';
 import { buildMailtoUrl, legalConfig } from '@/lib/legal';
 
 async function contactSupport() {
-  const url = buildMailtoUrl('Pantry support');
+  const url = buildMailtoUrl('Pantros support');
   const supported = await Linking.canOpenURL(url);
 
   if (!supported) {

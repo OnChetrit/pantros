@@ -1,4 +1,4 @@
-# Pantry Rebuild Plan
+# Pantros Rebuild Plan
 
 ## Product Direction
 

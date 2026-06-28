@@ -88,11 +88,11 @@ export default function DeleteAccountScreen() {
     const providers = preview?.providers ?? [];
 
     if (providers.includes('apple')) {
-      return 'Deleting your Pantry account does not automatically remove Pantry from Sign in with Apple. After deletion, remove Pantry from your Apple account settings if you do not want that authorization to remain listed there.';
+      return 'Deleting your Pantros account does not automatically remove Pantros from Sign in with Apple. After deletion, remove Pantros from your Apple account settings if you do not want that authorization to remain listed there.';
     }
 
     if (providers.includes('google')) {
-      return 'Deleting your Pantry account does not automatically revoke Pantry access from your Google account. After deletion, remove Pantry from your Google connected apps settings if you do not want that authorization to remain there.';
+      return 'Deleting your Pantros account does not automatically revoke Pantros access from your Google account. After deletion, remove Pantros from your Google connected apps settings if you do not want that authorization to remain there.';
     }
 
     return null;

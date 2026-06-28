@@ -166,7 +166,7 @@ export default function LoginScreen() {
         >
           <AppScreen>
             <View style={styles.hero}>
-              <Text style={styles.brand}>Pantry</Text>
+              <Text style={styles.brand}>Pantros</Text>
             </View>
 
             <View style={styles.authCardWrap}>

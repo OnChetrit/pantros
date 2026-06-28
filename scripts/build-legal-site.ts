@@ -278,7 +278,7 @@ li + li {
   const homeBody = `
     <section class="section">
       <h2>Public legal pages</h2>
-      <p>These pages are generated from the same legal content source used inside the Pantry app.</p>
+      <p>These pages are generated from the same legal content source used inside the Pantros app.</p>
       <div class="home-list">
         ${documents
           .map(
@@ -294,7 +294,7 @@ li + li {
     </section>
     <section class="section">
       <h2>Contact</h2>
-      <p>Email support at <a href="${escapeHtml(buildMailtoUrl('Pantry support'))}">${escapeHtml(
+      <p>Email support at <a href="${escapeHtml(buildMailtoUrl('Pantros support'))}">${escapeHtml(
         legalConfig.supportEmail
       )}</a>.</p>
     </section>

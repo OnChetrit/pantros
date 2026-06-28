@@ -110,7 +110,7 @@ export function getLegalDocuments(): LegalDocument[] {
             },
             {
               type: 'bullet',
-              text: "Deleting your Pantry account does not automatically revoke any Apple or Google authorization you previously granted at the identity provider level. If you signed in with one of those providers, remove Pantry from that provider's connected-app settings separately if you no longer want the authorization to remain there.",
+              text: "Deleting your Pantros account does not automatically revoke any Apple or Google authorization you previously granted at the identity provider level. If you signed in with one of those providers, remove Pantros from that provider's connected-app settings separately if you no longer want the authorization to remain there.",
             },
             {
               type: 'bullet',

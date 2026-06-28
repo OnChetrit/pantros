@@ -146,7 +146,7 @@ export function AvatarBadge({
   name?: string | null;
   size?: number;
 }) {
-  const initials = (name ?? 'Pantry User')
+  const initials = (name ?? 'Pantros User')
     .split(' ')
     .filter(Boolean)
     .slice(0, 2)

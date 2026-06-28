@@ -172,7 +172,7 @@ function getRedirectUrl() {
   }
 
   return AuthSession.makeRedirectUri({
-    scheme: 'pantry',
+    scheme: 'pantros',
     path: 'auth/callback',
   });
 }

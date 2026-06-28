@@ -14,7 +14,7 @@ export function useAiConsent() {
     const decision = await new Promise<boolean>((resolve) => {
       Alert.alert(
         'Allow AI image scanning?',
-        'Pantry sends the selected image to OpenAI to extract barcode digits or expiration dates. The image is uploaded only for that scan, manual entry stays available, and you can withdraw consent later in Settings.',
+        'Pantros sends the selected image to OpenAI to extract barcode digits or expiration dates. The image is uploaded only for that scan, manual entry stays available, and you can withdraw consent later in Settings.',
         [
           {
             text: 'Not Now',

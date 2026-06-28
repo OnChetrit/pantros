@@ -278,7 +278,7 @@ export default function SettingsScreen() {
 
         <SectionCard
           title="AI Scanning"
-          subtitle="Barcode and expiration image scans are optional and require consent before Pantry sends a selected image to OpenAI."
+          subtitle="Barcode and expiration image scans are optional and require consent before Pantros sends a selected image to OpenAI."
         >
           <View style={{ gap: 10 }}>
             <ListRow
@@ -346,7 +346,7 @@ export default function SettingsScreen() {
           <View style={{ gap: 10 }}>
             <ListRow
               title="Privacy Policy"
-              subtitle="How Pantry collects, uses, shares, and deletes data."
+              subtitle="How Pantros collects, uses, shares, and deletes data."
               onPress={() => router.push('/legal/privacy')}
             />
             <ListRow

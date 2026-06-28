@@ -3,7 +3,7 @@
   "configVersion": 0,
   "workspaces": {
     "": {
-      "name": "pantry",
+      "name": "pantros",
       "dependencies": {
         "@expo/ui": "~55.0.17",
         "@react-native-async-storage/async-storage": "2.2.0",

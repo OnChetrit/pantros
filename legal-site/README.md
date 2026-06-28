@@ -1,6 +1,6 @@
 # Legal Site
 
-This folder is the deploy target for Pantry's public legal pages.
+This folder is the deploy target for Pantros's public legal pages.
 
 ## Why it lives here
 
@@ -28,9 +28,9 @@ This repo is configured to deploy `legal-site/dist/` to GitHub Pages from the
 
 Default public URLs for this repository:
 
-- `https://onchetrit.github.io/pantry/privacy/`
-- `https://onchetrit.github.io/pantry/terms/`
-- `https://onchetrit.github.io/pantry/support/`
+- `https://onchetrit.github.io/pantros/privacy/`
+- `https://onchetrit.github.io/pantros/terms/`
+- `https://onchetrit.github.io/pantros/support/`
 
 ## GitHub Pages setup
 

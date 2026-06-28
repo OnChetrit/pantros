@@ -38,7 +38,7 @@ export default function ProfileScreen() {
         >
           <View style={{ gap: 4 }}>
             <Text style={{ fontSize: 24, fontWeight: '800', color: appColors.text }}>
-              {profile?.fullName ?? 'Pantry User'}
+              {profile?.fullName ?? 'Pantros User'}
             </Text>
             <Text style={{ fontSize: 14, lineHeight: 21, color: appColors.muted }}>
               {profile?.email ?? 'No email available'}

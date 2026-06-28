@@ -1,0 +1,38 @@
+{
+  "configVersion": 0,
+  "apple": {
+    "version": "1.0",
+    "copyright": "2026 On Chetrit",
+    "categories": [
+      "FOOD_AND_DRINK",
+      "UTILITIES"
+    ],
+    "info": {
+      "en-US": {
+        "title": "Pantros",
+        "subtitle": "Shared pantry inventory",
+        "promoText": "Track pantry items, carts, reminders, and label scans in one shared household inventory.",
+        "description": "Pantros helps households and small teams keep pantry inventory organized.\n\nCreate or join shared pantry workspaces, track items with quantities, move products into shopping carts, and keep everyone working from the same inventory. Pantros is built for quick everyday use, whether you are checking what is still at home or preparing the next grocery run.\n\nFeatures:\n\n- Shared pantry workspaces for household or team inventory\n- Item lists with quantities, barcodes, expiration dates, and cart status\n- Shopping cart views derived from pantry items\n- Optional push reminders for items waiting in carts\n- Search and sorting for active pantry items\n- Optional barcode and expiration-label image scanning with clear consent\n- In-app privacy, terms, support, sign-out, and account deletion controls\n\nPantros uses cloud sync so your pantry and cart data stay available across devices and shared members.",
+        "keywords": [
+          "pantry",
+          "inventory",
+          "groceries",
+          "shopping",
+          "cart",
+          "expiration",
+          "barcode",
+          "household",
+          "kitchen",
+          "food"
+        ],
+        "releaseNotes": "Initial release of Pantros with shared pantry inventory, carts, reminders, and optional barcode and expiration scanning.",
+        "supportUrl": "https://onchetrit.github.io/pantros/support/",
+        "privacyPolicyUrl": "https://onchetrit.github.io/pantros/privacy/"
+      }
+    },
+    "release": {
+      "automaticRelease": false,
+      "phasedRelease": false
+    }
+  }
+}

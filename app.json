@@ -1,22 +1,22 @@
 {
   "expo": {
-    "name": "Pantry",
-    "slug": "pantry",
+    "name": "Pantros",
+    "slug": "pantros",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "pantry",
+    "scheme": "pantros",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon",
-      "bundleIdentifier": "com.onchetrit.pantry-ai",
+      "bundleIdentifier": "com.onchetrit.pantros",
       "usesAppleSignIn": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
-      "package": "com.onchetrit.pantryai",
+      "package": "com.onchetrit.pantros",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -24,7 +24,11 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "permissions": ["android.permission.RECORD_AUDIO", "android.permission.POST_NOTIFICATIONS"]
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.CAMERA"
+      ]
     },
     "web": {
       "output": "static",
@@ -74,7 +78,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "e905b4f0-8b99-4763-a6f4-e402de0e72c4"
+        "projectId": "dbfe8c7c-c4d6-4ce4-b645-0627983f7b50"
       }
     }
   }

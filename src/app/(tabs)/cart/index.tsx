@@ -79,7 +79,7 @@ export default function CartScreen() {
           <View style={styles.listEmpty}>
             <EmptyNotice
               title="Nothing to buy right now"
-              body="Items moved into a shopping list will appear here with the same native list layout as Pantry."
+              body="Items moved into a shopping list will appear here with the same native list layout as Pantros."
             />
           </View>
         }
