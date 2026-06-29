@@ -1,5 +1,5 @@
-import { Ionicons } from '@expo/vector-icons';
 import type { PantryItem } from '@/domain/models';
+import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -10,9 +10,9 @@ import {
   PANTRY_SWIPE_OPEN_DISTANCE,
   PantrySwipeAction,
 } from '@/components/pantry/pantry-item-row-swipe';
-import { appColors } from '@/lib/theme';
-import { formatExpirationLabel } from '@/lib/pantry-insights';
 import { triggerMediumImpact, triggerSelectionFeedback } from '@/lib/haptics';
+import { formatExpirationLabel } from '@/lib/pantry-insights';
+import { appColors } from '@/lib/theme';
 import Animated, {
   Extrapolation,
   interpolate,
@@ -65,6 +65,7 @@ export function PantryItemRow({
   const [isSwiping, setIsSwiping] = useState(false);
   const [rowWidth, setRowWidth] = useState(0);
   const translateX = useSharedValue(0);
+  const swipeHighlightActive = useSharedValue(0);
   const dragStartX = useSharedValue(0);
   const leftFullSwipeArmed = useSharedValue(false);
   const rightFullSwipeArmed = useSharedValue(false);
@@ -92,17 +93,19 @@ export function PantryItemRow({
     openSideRef.current = null;
     leftFullSwipeArmed.set(false);
     rightFullSwipeArmed.set(false);
+    swipeHighlightActive.value = 0;
     translateX.value = withSpring(0, SWIPE_SPRING);
     setIsSwiping(false);
-  }, [leftFullSwipeArmed, rightFullSwipeArmed, translateX]);
+  }, [leftFullSwipeArmed, rightFullSwipeArmed, swipeHighlightActive, translateX]);
 
   const resetRow = useCallback(() => {
     openSideRef.current = null;
     leftFullSwipeArmed.set(false);
     rightFullSwipeArmed.set(false);
+    swipeHighlightActive.value = 0;
     translateX.value = 0;
     setIsSwiping(false);
-  }, [leftFullSwipeArmed, rightFullSwipeArmed, translateX]);
+  }, [leftFullSwipeArmed, rightFullSwipeArmed, swipeHighlightActive, translateX]);
 
   const markRowOpen = useCallback(
     (side: SwipeSide) => {
@@ -115,9 +118,10 @@ export function PantryItemRow({
       openSideRef.current = side;
       leftFullSwipeArmed.set(false);
       rightFullSwipeArmed.set(false);
+      swipeHighlightActive.value = 1;
       setIsSwiping(true);
     },
-    [closeRow, hasLeftAction, leftFullSwipeArmed, onWillOpen, rightFullSwipeArmed]
+    [closeRow, hasLeftAction, leftFullSwipeArmed, onWillOpen, rightFullSwipeArmed, swipeHighlightActive]
   );
 
   const openRow = useCallback(
@@ -203,32 +207,33 @@ export function PantryItemRow({
     onWillOpen(swipeableRef.current);
     leftFullSwipeArmed.set(false);
     rightFullSwipeArmed.set(false);
+    swipeHighlightActive.value = 1;
     setIsSwiping(true);
-  }, [leftFullSwipeArmed, onWillOpen, rightFullSwipeArmed]);
+  }, [leftFullSwipeArmed, onWillOpen, rightFullSwipeArmed, swipeHighlightActive]);
 
   const handleSwipeClose = useCallback(() => {
     openSideRef.current = null;
     leftFullSwipeArmed.set(false);
     rightFullSwipeArmed.set(false);
+    swipeHighlightActive.value = 0;
     setIsSwiping(false);
-  }, [leftFullSwipeArmed, rightFullSwipeArmed]);
+  }, [leftFullSwipeArmed, rightFullSwipeArmed, swipeHighlightActive]);
 
   const handleCommitStart = useCallback(() => {
     onWillOpen(swipeableRef.current);
     openSideRef.current = null;
+    swipeHighlightActive.value = 1;
     setIsSwiping(true);
-  }, [onWillOpen]);
+  }, [onWillOpen, swipeHighlightActive]);
 
   const rowAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: translateX.value }],
+    transform: [{translateX: translateX.value}],
   }));
 
   const rowActiveBackgroundStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(
-      Math.abs(translateX.value),
-      [0, 18, openDistance],
-      [0, 0.74, 1],
-      Extrapolation.CLAMP
+    opacity: Math.max(
+      swipeHighlightActive.value,
+      interpolate(Math.abs(translateX.value), [0, 18, openDistance], [0, 0.74, 1], Extrapolation.CLAMP)
     ),
   }));
 
@@ -240,18 +245,31 @@ export function PantryItemRow({
     () =>
       Gesture.Pan()
         .activeOffsetX([-12, 12])
+        .onTouchesDown(() => {
+          swipeHighlightActive.value = 1;
+        })
+        .onTouchesUp(() => {
+          if (translateX.value === 0) {
+            swipeHighlightActive.value = 0;
+          }
+        })
+        .onTouchesCancelled(() => {
+          if (translateX.value === 0) {
+            swipeHighlightActive.value = 0;
+          }
+        })
         .onStart(() => {
           dragStartX.value = translateX.value;
           runOnJS(handleSwipeStart)();
         })
-        .onUpdate((event) => {
+        .onUpdate(event => {
           const rawValue = dragStartX.value + event.translationX;
           const minValue = -maxSwipeDistance;
           const maxValue = hasLeftAction ? maxSwipeDistance : 0;
 
           translateX.value = Math.min(Math.max(rawValue, minValue), maxValue);
         })
-        .onEnd((event) => {
+        .onEnd(event => {
           const value = translateX.value;
           const velocityX = event.velocityX;
           const shouldCommitLeft = hasLeftAction && value >= fullSwipeDistance;
@@ -259,39 +277,29 @@ export function PantryItemRow({
 
           if (shouldCommitLeft) {
             runOnJS(handleCommitStart)();
-            translateX.value = withTiming(
-              commitDistance,
-              { duration: COMMIT_ANIMATION_DURATION },
-              (finished) => {
-                if (finished) {
-                  runOnJS(handleLeftAction)();
-                }
+            translateX.value = withTiming(commitDistance, {duration: COMMIT_ANIMATION_DURATION}, finished => {
+              if (finished) {
+                runOnJS(handleLeftAction)();
               }
-            );
+            });
             return;
           }
 
           if (shouldCommitRight) {
             runOnJS(handleCommitStart)();
-            translateX.value = withTiming(
-              -commitDistance,
-              { duration: COMMIT_ANIMATION_DURATION },
-              (finished) => {
-                if (finished) {
-                  runOnJS(handleFullSwipeDelete)();
-                }
+            translateX.value = withTiming(-commitDistance, {duration: COMMIT_ANIMATION_DURATION}, finished => {
+              if (finished) {
+                runOnJS(handleFullSwipeDelete)();
               }
-            );
+            });
             return;
           }
 
           const shouldOpenLeft =
             hasLeftAction &&
-            (value > openDistance * SWIPE_OPEN_THRESHOLD_RATIO ||
-              velocityX > SWIPE_VELOCITY_THRESHOLD);
+            (value > openDistance * SWIPE_OPEN_THRESHOLD_RATIO || velocityX > SWIPE_VELOCITY_THRESHOLD);
           const shouldOpenRight =
-            value < -openDistance * SWIPE_OPEN_THRESHOLD_RATIO ||
-            velocityX < -SWIPE_VELOCITY_THRESHOLD;
+            value < -openDistance * SWIPE_OPEN_THRESHOLD_RATIO || velocityX < -SWIPE_VELOCITY_THRESHOLD;
 
           if (shouldOpenLeft) {
             translateX.value = withSpring(openDistance, SWIPE_SPRING);
@@ -321,6 +329,7 @@ export function PantryItemRow({
       maxSwipeDistance,
       markRowOpen,
       openDistance,
+      swipeHighlightActive,
       translateX,
     ]
   );
@@ -338,10 +347,7 @@ export function PantryItemRow({
     <GestureDetector gesture={panGesture}>
       <View style={styles.swipeContainer}>
         {hasLeftAction && leftActionLabel ? (
-          <View
-            pointerEvents={isSwiping ? 'box-none' : 'none'}
-            style={[styles.actionRail, styles.actionRailLeft]}
-          >
+          <View pointerEvents={isSwiping ? 'box-none' : 'none'} style={[styles.actionRail, styles.actionRailLeft]}>
             <PantrySwipeAction
               accessibilityLabel={leftActionLabel}
               armed={leftFullSwipeArmed}
@@ -355,10 +361,7 @@ export function PantryItemRow({
             />
           </View>
         ) : null}
-        <View
-          pointerEvents={isSwiping ? 'box-none' : 'none'}
-          style={[styles.actionRail, styles.actionRailRight]}
-        >
+        <View pointerEvents={isSwiping ? 'box-none' : 'none'} style={[styles.actionRail, styles.actionRailRight]}>
           <PantrySwipeAction
             accessibilityLabel="Delete"
             armed={rightFullSwipeArmed}
@@ -374,13 +377,10 @@ export function PantryItemRow({
         <Animated.View style={[styles.childrenContainer, rowAnimatedStyle]}>
           <Pressable
             onPress={handleRowPress}
-            onLayout={({ nativeEvent }) => {
+            onLayout={({nativeEvent}) => {
               setRowWidth(nativeEvent.layout.width);
             }}
-            style={({ pressed }) => [
-              styles.row,
-              pressed ? styles.rowPressed : null,
-            ]}
+            style={({pressed}) => [styles.row, pressed ? styles.rowPressed : null]}
           >
             <Animated.View pointerEvents="none" style={[styles.rowActiveBackground, rowActiveBackgroundStyle]} />
             <View style={styles.leadingBadge}>
@@ -395,9 +395,7 @@ export function PantryItemRow({
               ) : null}
               {item.isInCart ? <Text style={styles.quantity}>{quantityLabel}</Text> : null}
             </View>
-            {!isLast ? (
-              <Animated.View pointerEvents="none" style={[styles.divider, dividerAnimatedStyle]} />
-            ) : null}
+            {!isLast ? <Animated.View pointerEvents="none" style={[styles.divider, dividerAnimatedStyle]} /> : null}
           </Pressable>
         </Animated.View>
       </View>
@@ -416,7 +414,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   actionRail: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     justifyContent: 'center',
     zIndex: 0,
   },
@@ -439,7 +437,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   rowActiveBackground: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: appColors.listRowEmphasized,
   },
   rowPressed: {

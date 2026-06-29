@@ -109,6 +109,7 @@ const styles = StyleSheet.create({
     backgroundColor: appColors.background,
   },
   content: {
+    paddingHorizontal: 12,
     paddingBottom: 40,
   },
   emptyScreen: {

@@ -10,7 +10,7 @@ import { appColors } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
 
 export default function PantryScreen() {
-  const { deleteItem, moveItemToCart, pantryCarts, pantryItems, selectedPantry } = useAppContext();
+  const { deleteItem, moveItemToCart, moveItemToPantry, pantryCarts, pantryItems, selectedPantry } = useAppContext();
   const router = useRouter();
   const openSwipeableRef = useRef<SwipeableMethods | null>(null);
   const [sortOption, setSortOption] = useState<PantryListSortOption>('expiration');
@@ -104,15 +104,21 @@ export default function PantryScreen() {
           </View>
         }
         renderItem={({ item, index }) => {
+          const leftActionLabel = item.isInCart ? 'Move to Pantry' : 'Add to Cart';
+          const leftActionIcon = item.isInCart ? 'return-up-back-outline' : 'cart-outline';
+          const onLeftAction = item.isInCart
+            ? () => void moveItemToPantry(item.id)
+            : () => void handleAddToCart(item.id);
+
           return (
             <PantryItemRow
               item={item}
               isFirst={index === 0}
               isLast={index === sortedItems.length - 1}
               onPress={() => router.push(`/items/${item.id}`)}
-              leftActionLabel={item.isInCart ? undefined : 'Add to Cart'}
-              leftActionIcon="cart-outline"
-              onLeftAction={item.isInCart ? undefined : () => void handleAddToCart(item.id)}
+              leftActionLabel={leftActionLabel}
+              leftActionIcon={leftActionIcon}
+              onLeftAction={onLeftAction}
               onDelete={() => void deleteItem(item.id)}
               onWillOpen={handleWillOpen}
             />
@@ -129,6 +135,7 @@ const styles = StyleSheet.create({
     backgroundColor: appColors.background,
   },
   content: {
+    paddingHorizontal: 12,
     paddingBottom: 40,
   },
   emptyScreen: {
