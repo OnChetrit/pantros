@@ -5,8 +5,10 @@ import { Redirect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   Image,
   KeyboardAvoidingView,
+  Linking,
   Platform,
   Pressable,
   StyleSheet,
@@ -18,7 +20,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BottomSheetModal } from '@/components/ui/bottom-sheet-modal';
-import { EmptyNotice, appColors } from '@/components/ui/primitives';
+import { appColors } from '@/components/ui/primitives';
 import type { PantryItem, PantryItemInput } from '@/domain/models';
 import { useAiConsent } from '@/hooks/use-ai-consent';
 import { triggerMediumImpact } from '@/lib/haptics';
@@ -177,20 +179,89 @@ function SheetButton({
 function ScanPermissionState({
   title,
   body,
+  icon = 'camera-outline',
   actionLabel,
   onAction,
+  secondaryActionLabel,
+  onSecondaryAction,
+  onClose,
+  highlights = [],
 }: {
   title: string;
   body: string;
+  icon?: keyof typeof Ionicons.glyphMap;
   actionLabel?: string;
   onAction?: () => void;
+  secondaryActionLabel?: string;
+  onSecondaryAction?: () => void;
+  onClose?: () => void;
+  highlights?: string[];
 }) {
+  const insets = useSafeAreaInsets();
+
   return (
-    <View style={styles.permissionScreen}>
-      <EmptyNotice title={title} body={body} />
-      {actionLabel && onAction ? (
-        <SheetButton label={actionLabel} icon="camera-outline" onPress={onAction} />
-      ) : null}
+    <View style={[styles.permissionScreen, { paddingTop: insets.top + 12, paddingBottom: insets.bottom + 20 }]}>
+      <View style={styles.permissionTopBar}>
+        {onClose ? <IconCircleButton icon="close" label="Close scanner" onPress={onClose} /> : <View style={styles.topBarSpacer} />}
+      </View>
+
+      <View style={styles.permissionContent}>
+        <View style={styles.permissionIconOuter}>
+          <View style={styles.permissionIconInner}>
+            <Ionicons name={icon} size={34} color={appColors.tint} />
+          </View>
+        </View>
+
+        <View style={styles.permissionCopy}>
+          <Text style={styles.permissionTitle}>{title}</Text>
+          <Text style={styles.permissionBody}>{body}</Text>
+        </View>
+
+        {highlights.length > 0 ? (
+          <View style={styles.permissionHighlights}>
+            {highlights.map((highlight) => (
+              <View key={highlight} style={styles.permissionHighlightRow}>
+                <View style={styles.permissionHighlightIcon}>
+                  <Ionicons name="checkmark" size={15} color={appColors.tint} />
+                </View>
+                <Text style={styles.permissionHighlightText}>{highlight}</Text>
+              </View>
+            ))}
+          </View>
+        ) : null}
+      </View>
+
+      <View style={styles.permissionActions}>
+        {actionLabel && onAction ? (
+          <Pressable
+            accessibilityRole="button"
+            onPress={onAction}
+            style={({ pressed }) => [
+              styles.permissionActionButton,
+              styles.permissionActionButtonPrimary,
+              pressed ? styles.buttonPressed : null,
+            ]}
+          >
+            <Ionicons name="camera-outline" size={20} color={appColors.textInverse} />
+            <Text style={styles.permissionActionButtonPrimaryText}>{actionLabel}</Text>
+          </Pressable>
+        ) : null}
+
+        {secondaryActionLabel && onSecondaryAction ? (
+          <Pressable
+            accessibilityRole="button"
+            onPress={onSecondaryAction}
+            style={({ pressed }) => [
+              styles.permissionActionButton,
+              styles.permissionActionButtonSecondary,
+              pressed ? styles.buttonPressed : null,
+            ]}
+          >
+            <Ionicons name="create-outline" size={20} color={appColors.text} />
+            <Text style={styles.permissionActionButtonSecondaryText}>{secondaryActionLabel}</Text>
+          </Pressable>
+        ) : null}
+      </View>
     </View>
   );
 }
@@ -229,6 +300,34 @@ export default function ScanItemScreen() {
   const [isCapturingExpiration, setIsCapturingExpiration] = useState(false);
   const [sheetError, setSheetError] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const openManualEntry = useCallback(() => {
+    router.replace('/items/new');
+  }, [router]);
+
+  const openAppSettings = useCallback(() => {
+    void Linking.openSettings();
+  }, []);
+
+  const confirmCameraAccess = useCallback(
+    (canAskAgain: boolean) => {
+      Alert.alert(
+        'Use camera for scanning?',
+        canAskAgain
+          ? 'Confirm to show the camera permission prompt again.'
+          : 'Camera access is off for Pantros. Confirm to open Settings and turn it back on.',
+        [
+          { text: 'Not now', style: 'cancel' },
+          { text: 'Add manually', onPress: openManualEntry },
+          {
+            text: canAskAgain ? 'Confirm' : 'Open Settings',
+            onPress: canAskAgain ? () => void requestPermission() : openAppSettings,
+          },
+        ],
+      );
+    },
+    [openAppSettings, openManualEntry, requestPermission],
+  );
 
   useEffect(() => {
     pantryItemsRef.current = pantryItems;
@@ -479,6 +578,8 @@ export default function ScanItemScreen() {
       <ScanPermissionState
         title="No pantry selected"
         body="Items need an active pantry workspace before they can be scanned into inventory."
+        icon="file-tray-outline"
+        onClose={() => router.back()}
       />
     );
   }
@@ -492,12 +593,22 @@ export default function ScanItemScreen() {
   }
 
   if (!permission.granted) {
+    const canRequestPermission = permission.canAskAgain;
+
     return (
       <ScanPermissionState
-        title="Camera access needed"
-        body="Camera access is required to scan barcodes and expiration labels."
-        actionLabel={permission.canAskAgain ? 'Allow Camera' : undefined}
-        onAction={permission.canAskAgain ? () => void requestPermission() : undefined}
+        title="Confirm camera access"
+        body="Confirm again when you are ready to use the camera scanner."
+        actionLabel="Confirm Again"
+        onAction={() => confirmCameraAccess(canRequestPermission)}
+        secondaryActionLabel="Add item manually"
+        onSecondaryAction={openManualEntry}
+        onClose={() => router.back()}
+        highlights={[
+          'Scan barcodes into your pantry',
+          'Capture printed expiration dates',
+          'Manual entry stays available',
+        ]}
       />
     );
   }
@@ -752,10 +863,125 @@ const styles = StyleSheet.create({
   },
   permissionScreen: {
     flex: 1,
-    justifyContent: 'center',
-    gap: 16,
-    padding: 20,
+    justifyContent: 'space-between',
+    gap: 24,
+    paddingHorizontal: 20,
     backgroundColor: appColors.background,
+  },
+  permissionTopBar: {
+    minHeight: 44,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+  },
+  permissionContent: {
+    flex: 1,
+    justifyContent: 'center',
+    gap: 22,
+    width: '100%',
+    maxWidth: 420,
+    alignSelf: 'center',
+  },
+  permissionIconOuter: {
+    width: 106,
+    height: 106,
+    borderRadius: 53,
+    alignSelf: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: appColors.tintSoft,
+    borderWidth: 1,
+    borderColor: appColors.border,
+  },
+  permissionIconInner: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: appColors.card,
+    borderWidth: 1,
+    borderColor: appColors.borderStrong,
+  },
+  permissionCopy: {
+    gap: 10,
+  },
+  permissionTitle: {
+    color: appColors.text,
+    fontSize: 28,
+    fontWeight: '900',
+    lineHeight: 34,
+    textAlign: 'center',
+  },
+  permissionBody: {
+    color: appColors.muted,
+    fontSize: 16,
+    fontWeight: '600',
+    lineHeight: 24,
+    textAlign: 'center',
+  },
+  permissionHighlights: {
+    gap: 10,
+  },
+  permissionHighlightRow: {
+    minHeight: 46,
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: appColors.card,
+    borderWidth: 1,
+    borderColor: appColors.border,
+  },
+  permissionHighlightIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: appColors.tintSoft,
+  },
+  permissionHighlightText: {
+    flex: 1,
+    color: appColors.text,
+    fontSize: 14,
+    fontWeight: '700',
+    lineHeight: 19,
+  },
+  permissionActions: {
+    width: '100%',
+    maxWidth: 420,
+    alignSelf: 'center',
+    gap: 10,
+  },
+  permissionActionButton: {
+    minHeight: 54,
+    borderRadius: 18,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  permissionActionButtonPrimary: {
+    backgroundColor: appColors.tint,
+  },
+  permissionActionButtonSecondary: {
+    backgroundColor: appColors.card,
+    borderWidth: 1,
+    borderColor: appColors.border,
+  },
+  permissionActionButtonPrimaryText: {
+    color: appColors.textInverse,
+    fontSize: 15,
+    fontWeight: '800',
+  },
+  permissionActionButtonSecondaryText: {
+    color: appColors.text,
+    fontSize: 15,
+    fontWeight: '800',
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
