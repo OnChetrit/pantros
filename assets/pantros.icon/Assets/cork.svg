@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="Pantros app icon cork layer">
+  <defs>
+    <linearGradient id="capFace" x1="291" y1="190" x2="733" y2="270" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6fb878"/>
+      <stop offset=".36" stop-color="#4c965d"/>
+      <stop offset=".72" stop-color="#246c38"/>
+      <stop offset="1" stop-color="#195a2e"/>
+    </linearGradient>
+    <linearGradient id="capTop" x1="292" y1="160" x2="732" y2="160" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#a8e5ad"/>
+      <stop offset=".22" stop-color="#61ad70"/>
+      <stop offset=".52" stop-color="#367f4d"/>
+      <stop offset=".82" stop-color="#1c6638"/>
+      <stop offset="1" stop-color="#14552d"/>
+    </linearGradient>
+    <linearGradient id="capRim" x1="289" y1="285" x2="735" y2="285" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4db262"/>
+      <stop offset=".12" stop-color="#98f0a4"/>
+      <stop offset=".5" stop-color="#51b661"/>
+      <stop offset=".88" stop-color="#98f0a4"/>
+      <stop offset="1" stop-color="#2b8544"/>
+    </linearGradient>
+    <linearGradient id="capShadow" x1="512" y1="260" x2="512" y2="330" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0b391f" stop-opacity=".72"/>
+      <stop offset=".45" stop-color="#103f24" stop-opacity=".45"/>
+      <stop offset="1" stop-color="#103f24" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <path
+    d="M333 147c48-10 310-10 358 0 25 5 42 21 42 49v47c0 30-19 50-50 54-98 12-244 12-342 0-31-4-50-24-50-54v-47c0-28 17-44 42-49Z"
+    fill="url(#capFace)"/>
+  <ellipse
+    cx="512"
+    cy="178"
+    rx="221"
+    ry="34"
+    fill="url(#capTop)"/>
+  <path
+    d="M296 233c0 27 18 45 48 49 95 11 241 11 336 0 30-4 48-22 48-49v20c0 28-19 47-50 51-95 12-237 12-332 0-31-4-50-23-50-51v-20Z"
+    fill="#15562d"
+    opacity=".38"/>
+  <path
+    d="M310 154c58-13 345-13 404 0"
+    fill="none"
+    stroke="#c8f6c7"
+    stroke-width="8"
+    stroke-linecap="round"
+    opacity=".58"/>
+  <path
+    d="M289 264h446c17 0 30 13 30 30v2c0 20-16 35-36 38-126 14-308 14-434 0-20-3-36-18-36-38v-2c0-17 13-30 30-30Z"
+    fill="url(#capRim)"/>
+  <path
+    d="M302 296c120 13 300 13 420 0"
+    fill="none"
+    stroke="#e9ffd6"
+    stroke-width="8"
+    stroke-linecap="round"
+    opacity=".74"/>
+  <path
+    d="M310 310c122 19 282 19 404 0v24c-118 16-286 16-404 0v-24Z"
+    fill="url(#capShadow)"/>
+</svg>

@@ -8,7 +8,7 @@
     "scheme": "pantros",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon",
+      "icon": "./assets/pantros.icon",
       "bundleIdentifier": "com.onchetrit.pantros",
       "usesAppleSignIn": true,
       "infoPlist": {

@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="Pantros app icon liquid layer">
+  <defs>
+    <linearGradient id="liquidBody" x1="285" y1="518" x2="746" y2="846" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#c8ffc4"/>
+      <stop offset=".35" stop-color="#81dc83"/>
+      <stop offset=".72" stop-color="#53b562"/>
+      <stop offset="1" stop-color="#3e9852"/>
+    </linearGradient>
+    <linearGradient id="liquidTop" x1="282" y1="551" x2="742" y2="551" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#dffff0"/>
+      <stop offset=".24" stop-color="#baffbd"/>
+      <stop offset=".58" stop-color="#83dc85"/>
+      <stop offset="1" stop-color="#56b969"/>
+    </linearGradient>
+    <radialGradient id="liquidBloom" cx="412" cy="634" r="278" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#d7ffd0" stop-opacity=".72"/>
+      <stop offset=".58" stop-color="#a2ee9d" stop-opacity=".28"/>
+      <stop offset="1" stop-color="#54b660" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="liquidBottom" x1="289" y1="831" x2="735" y2="831" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#edffe6" stop-opacity=".9"/>
+      <stop offset=".52" stop-color="#b9f7ae" stop-opacity=".82"/>
+      <stop offset="1" stop-color="#efffe5" stop-opacity=".9"/>
+    </linearGradient>
+  </defs>
+
+  <path
+    d="M278 552c0-28 105-51 234-51s234 23 234 51v222c0 55-45 91-107 91H385c-62 0-107-36-107-91V552Z"
+    fill="url(#liquidBody)"/>
+  <ellipse
+    cx="512"
+    cy="552"
+    rx="234"
+    ry="51"
+    fill="url(#liquidTop)"/>
+  <path
+    d="M289 552c18 23 112 40 223 40s205-17 223-40"
+    fill="none"
+    stroke="#f0ffdf"
+    stroke-width="8"
+    stroke-linecap="round"
+    opacity=".82"/>
+  <path
+    d="M306 587c45-34 132-50 241-39 86 9 145 34 175 75v151c0 43-33 68-91 68H390c-57 0-84-25-84-68V587Z"
+    fill="url(#liquidBloom)"/>
+  <path
+    d="M292 827c43 25 84 35 148 35h142c68 0 110-10 150-35"
+    fill="none"
+    stroke="url(#liquidBottom)"
+    stroke-width="10"
+    stroke-linecap="round"
+    opacity=".86"/>
+</svg>
