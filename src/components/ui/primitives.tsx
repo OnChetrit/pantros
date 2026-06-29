@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import type { StyleProp, ViewStyle } from 'react-native';
 import type { PropsWithChildren, ReactNode, Ref } from 'react';
 import { appColors } from '@/lib/theme';
 
@@ -142,9 +143,15 @@ export function MetricGrid({ children }: PropsWithChildren) {
 export function AvatarBadge({
   name,
   size = 38,
+  imageUrl,
+  showBackground = true,
+  style,
 }: {
   name?: string | null;
   size?: number;
+  imageUrl?: string | null;
+  showBackground?: boolean;
+  style?: StyleProp<ViewStyle>;
 }) {
   const initials = (name ?? 'Pantros User')
     .split(' ')
@@ -161,10 +168,24 @@ export function AvatarBadge({
           width: size,
           height: size,
           borderRadius: size / 2,
+          backgroundColor: showBackground ? appColors.tint : 'transparent',
+          borderWidth: showBackground ? 1 : 0,
         },
+        style,
       ]}
     >
-      <Text style={[styles.avatarText, { fontSize: Math.max(12, size * 0.34) }]}>{initials}</Text>
+      {imageUrl ? (
+        <Image
+          source={{ uri: imageUrl }}
+          style={{
+            width: size,
+            height: size,
+            borderRadius: size / 2,
+          }}
+        />
+      ) : (
+        <Text style={[styles.avatarText, { fontSize: Math.max(12, size * 0.34) }]}>{initials}</Text>
+      )}
     </View>
   );
 }

@@ -139,6 +139,16 @@ function RootLayoutContent() {
                 title: '',
               }}
             />
+            <Stack.Screen
+              name="account/menu"
+              options={{
+                presentation: 'modal',
+                headerShown: true,
+                title: '',
+                animation: 'slide_from_bottom',
+                gestureDirection: 'vertical',
+              }}
+            />
           </Stack>
         </ThemeProvider>
       </AppProvider>
