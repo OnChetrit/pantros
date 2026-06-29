@@ -3,12 +3,13 @@ import { useMemo } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
 
 import { AvatarBadge } from '@/components/ui/primitives';
-import { appColors } from '@/lib/theme';
+import { useThemedStyles } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
 
 export function AvatarSidebarButton() {
   const router = useRouter();
   const { profile } = useAppContext();
+  const styles = useThemedStyles(createStyles);
 
   const expanderName = useMemo(
     () => profile?.fullName ?? profile?.email ?? 'Pantros User',
@@ -31,17 +32,17 @@ export function AvatarSidebarButton() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: import('@/lib/theme').AppThemeColors) => StyleSheet.create({
   avatarButton: {
     width: 36,
     height: 36,
     borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: appColors.card,
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: appColors.borderStrong,
-    shadowColor: appColors.shadow,
+    borderColor: colors.borderStrong,
+    shadowColor: colors.shadow,
     shadowOpacity: 0.08,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 4 },

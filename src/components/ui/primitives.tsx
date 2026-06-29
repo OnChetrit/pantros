@@ -1,4 +1,4 @@
-import { appColors } from '@/lib/theme';
+import { appColors, type AppThemeColors, useAppTheme, useThemedStyles } from '@/lib/theme';
 import type { PropsWithChildren, ReactNode, Ref } from 'react';
 import type { StyleProp, ViewStyle } from 'react-native';
 import { Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -13,6 +13,8 @@ type ButtonProps = {
 };
 
 export function AppScreen({children}: PropsWithChildren) {
+  const styles = useThemedStyles(createStyles);
+
   return <View style={styles.screen}>{children}</View>;
 }
 
@@ -26,6 +28,8 @@ export function SectionCard({
   subtitle?: string;
   rightSlot?: ReactNode;
 }>) {
+  const styles = useThemedStyles(createStyles);
+
   return (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
@@ -41,6 +45,8 @@ export function SectionCard({
 }
 
 export function AppButton({label, onPress, variant = 'primary', disabled}: ButtonProps) {
+  const styles = useThemedStyles(createStyles);
+
   return (
     <Pressable
       disabled={disabled}
@@ -75,6 +81,9 @@ export function AppTextInput({
   inputRef?: Ref<TextInput>;
   rightSlot?: ReactNode;
 }) {
+  const {colors} = useAppTheme();
+  const styles = useThemedStyles(createStyles);
+
   return (
     <View style={styles.inputShell}>
       <TextInput
@@ -82,7 +91,7 @@ export function AppTextInput({
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor={appColors.muted}
+        placeholderTextColor={colors.muted}
         autoCapitalize={autoCapitalize}
         autoCorrect={autoCorrect}
         autoFocus={autoFocus}
@@ -94,6 +103,8 @@ export function AppTextInput({
 }
 
 export function KeyValueRow({label, value}: {label: string; value: string}) {
+  const styles = useThemedStyles(createStyles);
+
   return (
     <View style={styles.row}>
       <Text style={styles.rowLabel}>{label}</Text>
@@ -103,6 +114,8 @@ export function KeyValueRow({label, value}: {label: string; value: string}) {
 }
 
 export function EmptyNotice({title, body}: {title: string; body: string}) {
+  const styles = useThemedStyles(createStyles);
+
   return (
     <View style={styles.emptyState}>
       <Text style={styles.emptyTitle}>{title}</Text>
@@ -120,6 +133,9 @@ export function MetricPill({
   label: string;
   tone?: 'default' | 'accent' | 'warning';
 }) {
+  const {colors} = useAppTheme();
+  const styles = useThemedStyles(createStyles);
+
   return (
     <View
       style={[
@@ -135,6 +151,8 @@ export function MetricPill({
 }
 
 export function MetricGrid({children}: PropsWithChildren) {
+  const styles = useThemedStyles(createStyles);
+
   return <View style={styles.metricGrid}>{children}</View>;
 }
 
@@ -151,6 +169,9 @@ export function AvatarBadge({
   showBackground?: boolean;
   style?: StyleProp<ViewStyle>;
 }) {
+  const {colors} = useAppTheme();
+  const styles = useThemedStyles(createStyles);
+
   const initials = (name ?? 'Pantros User')
     .split(' ')
     .filter(Boolean)
@@ -166,7 +187,7 @@ export function AvatarBadge({
           width: size,
           height: size,
           borderRadius: size / 2,
-          backgroundColor: showBackground ? appColors.tint : 'transparent',
+          backgroundColor: showBackground ? colors.tint : 'transparent',
           borderWidth: showBackground ? 1 : 0,
         },
         style,
@@ -201,6 +222,8 @@ export function ListRow({
   emphasized?: boolean;
   onPress?: () => void;
 }) {
+  const styles = useThemedStyles(createStyles);
+
   const content = (
     <>
       <View style={styles.listRowCopy}>
@@ -229,19 +252,19 @@ export function ListRow({
   return <View style={[styles.listRow, emphasized ? styles.listRowEmphasized : null]}>{content}</View>;
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppThemeColors) => StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: appColors.background,
+    backgroundColor: colors.background,
     padding: 20,
     gap: 16,
   },
   card: {
     borderRadius: 24,
     padding: 18,
-    backgroundColor: appColors.card,
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: appColors.border,
+    borderColor: colors.border,
     gap: 14,
   },
   cardHeader: {
@@ -257,12 +280,12 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: appColors.text,
+    color: colors.text,
   },
   cardSubtitle: {
     fontSize: 14,
     lineHeight: 21,
-    color: appColors.muted,
+    color: colors.muted,
   },
   button: {
     minHeight: 46,
@@ -272,18 +295,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   primaryButton: {
-    backgroundColor: appColors.tint,
+    backgroundColor: colors.tint,
   },
   secondaryButton: {
-    backgroundColor: appColors.tintSoft,
+    backgroundColor: colors.tintSoft,
   },
   primaryButtonText: {
-    color: appColors.textInverse,
+    color: colors.textInverse,
     fontWeight: '700',
     fontSize: 15,
   },
   secondaryButtonText: {
-    color: appColors.text,
+    color: colors.text,
     fontWeight: '700',
     fontSize: 15,
   },
@@ -293,9 +316,9 @@ const styles = StyleSheet.create({
   inputShell: {
     minHeight: 50,
     borderRadius: 16,
-    backgroundColor: appColors.input,
+    backgroundColor: colors.input,
     borderWidth: 1,
-    borderColor: appColors.border,
+    borderColor: colors.border,
     flexDirection: 'row',
     alignItems: 'center',
   },
@@ -303,7 +326,7 @@ const styles = StyleSheet.create({
     minHeight: 50,
     flex: 1,
     paddingHorizontal: 16,
-    color: appColors.text,
+    color: colors.text,
     fontSize: 15,
   },
   inputWithRightSlot: {
@@ -321,28 +344,28 @@ const styles = StyleSheet.create({
   },
   rowLabel: {
     flex: 1,
-    color: appColors.muted,
+    color: colors.muted,
     fontSize: 14,
   },
   rowValue: {
     flex: 1,
-    color: appColors.text,
+    color: colors.text,
     fontSize: 14,
     textAlign: 'right',
   },
   emptyState: {
     borderRadius: 20,
     padding: 16,
-    backgroundColor: appColors.empty,
+    backgroundColor: colors.empty,
     gap: 6,
   },
   emptyTitle: {
-    color: appColors.text,
+    color: colors.text,
     fontSize: 16,
     fontWeight: '700',
   },
   emptyBody: {
-    color: appColors.muted,
+    color: colors.muted,
     fontSize: 14,
     lineHeight: 20,
   },
@@ -357,26 +380,26 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    backgroundColor: appColors.metric,
+    backgroundColor: colors.metric,
     borderWidth: 1,
-    borderColor: appColors.border,
+    borderColor: colors.border,
     gap: 2,
   },
   metricPillAccent: {
-    backgroundColor: appColors.accentSoft,
-    borderColor: appColors.border,
+    backgroundColor: colors.accentSoft,
+    borderColor: colors.border,
   },
   metricPillWarning: {
-    backgroundColor: appColors.warningSoft,
-    borderColor: appColors.border,
+    backgroundColor: colors.warningSoft,
+    borderColor: colors.border,
   },
   metricValue: {
-    color: appColors.text,
+    color: colors.text,
     fontSize: 20,
     fontWeight: '800',
   },
   metricLabel: {
-    color: appColors.muted,
+    color: colors.muted,
     fontSize: 12,
     textTransform: 'uppercase',
     letterSpacing: 0.6,
@@ -384,12 +407,12 @@ const styles = StyleSheet.create({
   avatar: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: appColors.tint,
+    backgroundColor: colors.tint,
     borderWidth: 1,
-    borderColor: appColors.borderStrong,
+    borderColor: colors.borderStrong,
   },
   avatarText: {
-    color: appColors.text,
+    color: colors.text,
     fontWeight: '800',
   },
   listRow: {
@@ -400,12 +423,12 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    backgroundColor: appColors.listRow,
+    backgroundColor: colors.listRow,
     borderWidth: 1,
-    borderColor: appColors.border,
+    borderColor: colors.border,
   },
   listRowEmphasized: {
-    backgroundColor: appColors.listRowEmphasized,
+    backgroundColor: colors.listRowEmphasized,
   },
   listRowPressed: {
     opacity: 0.76,
@@ -415,17 +438,17 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   listRowTitle: {
-    color: appColors.text,
+    color: colors.text,
     fontSize: 15,
     fontWeight: '700',
   },
   listRowSubtitle: {
-    color: appColors.muted,
+    color: colors.muted,
     fontSize: 13,
     lineHeight: 18,
   },
   listRowValue: {
-    color: appColors.tint,
+    color: colors.tint,
     fontSize: 13,
     fontWeight: '700',
   },

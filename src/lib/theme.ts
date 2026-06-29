@@ -1,21 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {
-  Appearance,
-  DynamicColorIOS,
-  Platform,
-  useColorScheme,
-} from 'react-native';
-import type { ColorValue } from 'react-native';
-import {
-  createElement,
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
 import type { PropsWithChildren } from 'react';
+import { createContext, createElement, useContext, useEffect, useMemo, useState } from 'react';
+import type { ColorValue } from 'react-native';
+import { Appearance, DynamicColorIOS, Platform, useColorScheme } from 'react-native';
 
 type ThemePalette = {
   background: string;
@@ -45,6 +32,7 @@ type ThemePalette = {
 };
 
 type AdaptiveThemeColors = Record<keyof ThemePalette, ColorValue>;
+export type AppThemeColors = ThemePalette;
 
 export type ThemePreference = 'device' | 'light' | 'dark';
 
@@ -53,7 +41,7 @@ type ThemeContextValue = {
   setThemePreference: (preference: ThemePreference) => Promise<void>;
 };
 
-const THEME_PREFERENCE_KEY = 'pantros.themePreference';
+const THEME_PREFERENCE_KEY = 'app-theme';
 
 const lightColors: ThemePalette = {
   background: '#f5f8f2',
@@ -113,7 +101,7 @@ const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 function adaptive(light: string, dark: string) {
   if (Platform.OS === 'ios') {
-    return DynamicColorIOS({ light, dark });
+    return DynamicColorIOS({light, dark});
   }
 
   return dark;
@@ -150,25 +138,29 @@ function applyColorScheme(preference: ThemePreference) {
   Appearance.setColorScheme(preference === 'device' ? 'unspecified' : preference);
 }
 
-export function ThemePreferenceProvider({ children }: PropsWithChildren) {
-  const [themePreference, setThemePreferenceState] =
-    useState<ThemePreference>('device');
+function readThemePreference(value: string | null): ThemePreference {
+  if (value === 'light' || value === 'dark' || value === 'device') {
+    return value;
+  }
+
+  return 'device';
+}
+
+export function ThemePreferenceProvider({children}: PropsWithChildren) {
+  const [themePreference, setThemePreference] = useState<ThemePreference>('device');
 
   useEffect(() => {
     let cancelled = false;
 
     AsyncStorage.getItem(THEME_PREFERENCE_KEY)
-      .then((value) => {
+      .then(value => {
         if (cancelled) {
           return;
         }
 
-        const nextPreference =
-          value === 'light' || value === 'dark' || value === 'device'
-            ? value
-            : 'device';
+        const nextPreference = readThemePreference(value);
 
-        setThemePreferenceState(nextPreference);
+        setThemePreference(nextPreference);
         applyColorScheme(nextPreference);
       })
       .catch(() => {
@@ -182,31 +174,29 @@ export function ThemePreferenceProvider({ children }: PropsWithChildren) {
     };
   }, []);
 
-  const setThemePreference = useCallback(async (preference: ThemePreference) => {
-    setThemePreferenceState(preference);
+  const updateThemePreference = async (preference: ThemePreference) => {
+    setThemePreference(preference);
     applyColorScheme(preference);
     await AsyncStorage.setItem(THEME_PREFERENCE_KEY, preference);
-  }, []);
+  };
 
-  const value = useMemo(
-    () => ({
-      themePreference,
-      setThemePreference,
-    }),
-    [setThemePreference, themePreference]
+  return createElement(
+    ThemeContext.Provider,
+    {
+      value: {
+        themePreference,
+        setThemePreference: updateThemePreference,
+      },
+    },
+    children
   );
-
-  return createElement(ThemeContext.Provider, { value }, children);
 }
 
 export function useAppTheme() {
   const context = useContext(ThemeContext);
   const systemScheme = useColorScheme();
   const themePreference = context?.themePreference ?? 'device';
-  const scheme =
-    themePreference === 'device'
-      ? systemScheme === 'dark' ? 'dark' : 'light'
-      : themePreference;
+  const scheme = themePreference === 'device' ? (systemScheme === 'dark' ? 'dark' : 'light') : themePreference;
   const isDark = scheme === 'dark';
 
   return {
@@ -215,4 +205,10 @@ export function useAppTheme() {
     themePreference,
     setThemePreference: context?.setThemePreference,
   };
+}
+
+export function useThemedStyles<T>(createStyles: (colors: AppThemeColors) => T) {
+  const {colors} = useAppTheme();
+
+  return useMemo(() => createStyles(colors), [colors, createStyles]);
 }

@@ -19,7 +19,7 @@ import {
   formatAiConsentDate,
   hasActiveAiConsent,
 } from '@/lib/ai-consent';
-import { appColors, useAppTheme } from '@/lib/theme';
+import { appColors, useAppTheme, useThemedStyles } from '@/lib/theme';
 import {
   getDeviceTimeZone,
   registerForPushNotifications,
@@ -66,6 +66,8 @@ function formatReminderTime(value: Date) {
 }
 
 function MenuSection({ title, children }: MenuSectionProps) {
+  const styles = useThemedStyles(createStyles);
+
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>{title}</Text>
@@ -83,6 +85,8 @@ function MenuRow({
   danger = false,
   hideDivider = false,
 }: MenuRowProps) {
+  const styles = useThemedStyles(createStyles);
+
   const content = (
     <View style={[styles.menuRow, hideDivider ? null : styles.menuRowDivider]}>
       <View style={styles.menuRowLead}>
@@ -123,6 +127,7 @@ export function AccountMenuContent({
   onNavigate?: (destination: AccountMenuDestination) => void;
 }) {
   const router = useRouter();
+  const styles = useThemedStyles(createStyles);
   const { themePreference, setThemePreference } = useAppTheme();
   const {
     notificationBusy,
@@ -440,10 +445,10 @@ export function AccountMenuContent({
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: import('@/lib/theme').AppThemeColors) => StyleSheet.create({
   scrollView: {
     flex: 1,
-    backgroundColor: appColors.background,
+    backgroundColor: colors.background,
   },
   scrollContent: {
     paddingHorizontal: 16,
@@ -458,20 +463,20 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   profileAvatar: {
-    shadowColor: appColors.shadow,
+    shadowColor: colors.shadow,
     shadowOpacity: 0.08,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 6 },
     elevation: 4,
   },
   profileName: {
-    color: appColors.text,
+    color: colors.text,
     fontSize: 28,
     fontWeight: '800',
     textAlign: 'center',
   },
   profileEmail: {
-    color: appColors.muted,
+    color: colors.muted,
     fontSize: 14,
     lineHeight: 20,
     textAlign: 'center',
@@ -480,16 +485,16 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   sectionTitle: {
-    color: appColors.muted,
+    color: colors.muted,
     fontSize: 13,
     fontWeight: '700',
     paddingHorizontal: 4,
   },
   sectionCard: {
     borderRadius: 26,
-    backgroundColor: appColors.card,
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: appColors.border,
+    borderColor: colors.border,
     paddingHorizontal: 18,
     paddingVertical: 2,
   },
@@ -502,7 +507,7 @@ const styles = StyleSheet.create({
   },
   menuRowDivider: {
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: appColors.borderStrong,
+    borderBottomColor: colors.borderStrong,
   },
   menuRowPressed: {
     opacity: 0.76,
@@ -518,7 +523,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   menuRowLabel: {
-    color: appColors.text,
+    color: colors.text,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -533,7 +538,7 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   menuRowValue: {
-    color: appColors.muted,
+    color: colors.muted,
     fontSize: 15,
     textAlign: 'right',
     flexShrink: 1,
@@ -549,21 +554,21 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: appColors.input,
+    backgroundColor: colors.input,
   },
   themeChipActive: {
-    backgroundColor: appColors.tint,
+    backgroundColor: colors.tint,
   },
   themeChipPressed: {
     opacity: 0.8,
   },
   themeChipText: {
-    color: appColors.text,
+    color: colors.text,
     fontSize: 14,
     fontWeight: '700',
   },
   themeChipTextActive: {
-    color: appColors.textInverse,
+    color: colors.textInverse,
   },
   timeButton: {
     minWidth: 84,
@@ -571,13 +576,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 9,
     alignItems: 'center',
-    backgroundColor: appColors.input,
+    backgroundColor: colors.input,
   },
   timeButtonPressed: {
     opacity: 0.76,
   },
   timeButtonText: {
-    color: appColors.tint,
+    color: colors.tint,
     fontSize: 15,
     fontWeight: '700',
   },
@@ -587,25 +592,25 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: appColors.tintSoft,
+    backgroundColor: colors.tintSoft,
   },
   inlineDangerButton: {
-    backgroundColor: appColors.dangerSoft,
+    backgroundColor: colors.dangerSoft,
   },
   inlineActionButtonPressed: {
     opacity: 0.76,
   },
   inlineActionButtonText: {
-    color: appColors.text,
+    color: colors.text,
     fontSize: 15,
     fontWeight: '700',
   },
   inlineDangerButtonText: {
-    color: appColors.danger,
+    color: colors.danger,
   },
   notificationError: {
     marginTop: 10,
-    color: appColors.danger,
+    color: colors.danger,
     fontSize: 13,
     lineHeight: 18,
   },

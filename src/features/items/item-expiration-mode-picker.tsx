@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { appColors } from '@/components/ui/primitives';
+import { useThemedStyles } from '@/lib/theme';
 
 type ExpirationMode = 'manual' | 'relative' | 'scan';
 
@@ -18,6 +19,8 @@ function ModeChip({
   label: string;
   onPress: () => void;
 }) {
+  const styles = useThemedStyles(createStyles);
+
   return (
     <Pressable onPress={onPress} style={[styles.modeChip, active ? styles.modeChipActive : null]}>
       <Text style={[styles.modeChipText, active ? styles.modeChipTextActive : null]}>{label}</Text>
@@ -26,6 +29,8 @@ function ModeChip({
 }
 
 export function ItemExpirationModePicker({ mode, onChange }: ItemExpirationModePickerProps) {
+  const styles = useThemedStyles(createStyles);
+
   return (
     <View style={styles.modeRow}>
       <ModeChip active={mode === 'manual'} label="Manual" onPress={() => onChange('manual')} />
@@ -35,7 +40,7 @@ export function ItemExpirationModePicker({ mode, onChange }: ItemExpirationModeP
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: import('@/lib/theme').AppThemeColors) => StyleSheet.create({
   modeRow: {
     flexDirection: 'row',
     gap: 8,
@@ -46,20 +51,20 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: appColors.listRow,
+    backgroundColor: colors.listRow,
     borderWidth: 1,
-    borderColor: appColors.border,
+    borderColor: colors.border,
   },
   modeChipActive: {
-    backgroundColor: appColors.tintSoft,
-    borderColor: appColors.borderStrong,
+    backgroundColor: colors.tintSoft,
+    borderColor: colors.borderStrong,
   },
   modeChipText: {
-    color: appColors.muted,
+    color: colors.muted,
     fontSize: 14,
     fontWeight: '700',
   },
   modeChipTextActive: {
-    color: appColors.text,
+    color: colors.text,
   },
 });

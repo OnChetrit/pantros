@@ -3,7 +3,7 @@ import { useCallback, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { BottomSheetModal } from '@/components/ui/bottom-sheet-modal';
-import { appColors } from '@/lib/theme';
+import { appColors, useThemedStyles } from '@/lib/theme';
 
 export type PantryListSortOption = 'expiration' | 'name' | 'recent';
 
@@ -27,6 +27,7 @@ export function PantryFilterMenu({
   sortOption,
   onSelectSort,
 }: PantryFilterMenuProps) {
+  const styles = useThemedStyles(createStyles);
   const [isMenuVisible, setIsMenuVisible] = useState(false);
   const [pendingSortOption, setPendingSortOption] = useState<PantryListSortOption | null>(null);
 
@@ -92,7 +93,7 @@ export function PantryFilterMenu({
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: import('@/lib/theme').AppThemeColors) => StyleSheet.create({
   iconWrapper: {
     alignSelf: 'center',
     backgroundColor: 'transparent',
@@ -109,9 +110,9 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: appColors.card,
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: appColors.border,
+    borderColor: colors.border,
   },
   sheet: {
     gap: 14,
@@ -120,7 +121,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 2,
   },
   sheetTitle: {
-    color: appColors.text,
+    color: colors.text,
     fontSize: 20,
     fontWeight: '800',
   },
@@ -132,16 +133,16 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    backgroundColor: appColors.card,
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: appColors.border,
+    borderColor: colors.border,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
   },
   optionRowSelected: {
-    backgroundColor: appColors.tintSoft,
-    borderColor: appColors.borderStrong,
+    backgroundColor: colors.tintSoft,
+    borderColor: colors.borderStrong,
   },
   optionRowPressed: {
     opacity: 0.78,
@@ -153,16 +154,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: appColors.borderStrong,
-    backgroundColor: appColors.listRowEmphasized,
+    borderColor: colors.borderStrong,
+    backgroundColor: colors.listRowEmphasized,
   },
   optionMarkerSelected: {
-    backgroundColor: appColors.tint,
-    borderColor: appColors.tint,
+    backgroundColor: colors.tint,
+    borderColor: colors.tint,
   },
   optionLabel: {
     flex: 1,
-    color: appColors.text,
+    color: colors.text,
     fontSize: 16,
     fontWeight: '700',
   },

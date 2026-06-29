@@ -17,6 +17,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppButton, AppScreen, EmptyNotice, appColors } from '@/components/ui/primitives';
+import { useThemedStyles } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
 
 type AuthMode = 'signin' | 'signup';
@@ -35,6 +36,8 @@ type ProviderButtonProps = {
 };
 
 function ModeChip({label, active, onPress}: ModeChipProps) {
+  const styles = useThemedStyles(createStyles);
+
   return (
     <Pressable
       onPress={onPress}
@@ -50,6 +53,8 @@ function ModeChip({label, active, onPress}: ModeChipProps) {
 }
 
 function ProviderButton({icon, label, onPress, disabled}: ProviderButtonProps) {
+  const styles = useThemedStyles(createStyles);
+
   return (
     <Pressable
       accessibilityRole="button"
@@ -68,6 +73,7 @@ function renderAppleButton(disabled: boolean, onPress: () => void) {
 }
 
 export default function LoginScreen() {
+  const styles = useThemedStyles(createStyles);
   const {
     authBusy,
     errorMessage,
@@ -328,17 +334,17 @@ export default function LoginScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: import('@/lib/theme').AppThemeColors) => StyleSheet.create({
   flex: {
     flex: 1,
   },
   safeArea: {
     flex: 1,
-    backgroundColor: appColors.background,
+    backgroundColor: colors.background,
   },
   scrollView: {
     flex: 1,
-    backgroundColor: appColors.background,
+    backgroundColor: colors.background,
   },
   content: {
     paddingBottom: 24,
@@ -350,7 +356,7 @@ const styles = StyleSheet.create({
     paddingBottom: 18,
   },
   brand: {
-    color: appColors.tint,
+    color: colors.tint,
     fontSize: 42,
     lineHeight: 48,
     fontWeight: '800',
@@ -365,9 +371,9 @@ const styles = StyleSheet.create({
     maxWidth: 460,
     borderRadius: 28,
     padding: 18,
-    backgroundColor: appColors.card,
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: appColors.border,
+    borderColor: colors.border,
     gap: 14,
   },
   modeSwitch: {
@@ -376,9 +382,9 @@ const styles = StyleSheet.create({
     gap: 8,
     padding: 6,
     borderRadius: 22,
-    backgroundColor: appColors.background,
+    backgroundColor: colors.background,
     borderWidth: 1,
-    borderColor: appColors.border,
+    borderColor: colors.border,
   },
   modeIndicator: {
     position: 'absolute',
@@ -386,7 +392,7 @@ const styles = StyleSheet.create({
     left: 6,
     bottom: 6,
     borderRadius: 16,
-    backgroundColor: appColors.tint,
+    backgroundColor: colors.tint,
   },
   modeChip: {
     position: 'relative',
@@ -407,19 +413,19 @@ const styles = StyleSheet.create({
     opacity: 0.78,
   },
   modeChipText: {
-    color: appColors.muted,
+    color: colors.muted,
     fontSize: 14,
     fontWeight: '700',
   },
   modeChipTextActive: {
-    color: appColors.textInverse,
+    color: colors.textInverse,
   },
   providers: {
     alignItems: 'center',
     gap: 10,
   },
   providersLabel: {
-    color: appColors.muted,
+    color: colors.muted,
     fontSize: 14,
     fontWeight: '600',
     textAlign: 'center',
@@ -435,8 +441,8 @@ const styles = StyleSheet.create({
     height: 42,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: appColors.border,
-    backgroundColor: appColors.input,
+    borderColor: colors.border,
+    backgroundColor: colors.input,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -451,10 +457,10 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: appColors.border,
+    backgroundColor: colors.border,
   },
   dividerText: {
-    color: appColors.muted,
+    color: colors.muted,
     fontSize: 12,
     fontWeight: '600',
   },
@@ -462,28 +468,28 @@ const styles = StyleSheet.create({
     minHeight: 50,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: appColors.border,
-    backgroundColor: appColors.input,
+    borderColor: colors.border,
+    backgroundColor: colors.input,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    color: appColors.text,
+    color: colors.text,
     fontSize: 16,
   },
   bootstrapCard: {
     borderRadius: 24,
     padding: 18,
-    backgroundColor: appColors.card,
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: appColors.border,
+    borderColor: colors.border,
     gap: 12,
   },
   bootstrapTitle: {
-    color: appColors.text,
+    color: colors.text,
     fontSize: 18,
     fontWeight: '700',
   },
   bootstrapSubtitle: {
-    color: appColors.muted,
+    color: colors.muted,
     fontSize: 14,
     lineHeight: 20,
   },

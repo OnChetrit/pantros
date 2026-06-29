@@ -10,12 +10,14 @@ import type { SearchBarCommands } from 'react-native-screens';
 import { PantryItemRow } from '@/components/pantry/pantry-item-row';
 import { AppTextInput, EmptyNotice, appColors } from '@/components/ui/primitives';
 import { matchPantryItems } from '@/lib/pantry-insights';
+import { useThemedStyles } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
 
 const isIOS = Platform.OS === 'ios';
 
 export default function SearchScreen() {
   const {deleteItem, moveItemToCart, moveItemToPantry, pantryCarts, pantryItems, selectedPantry} = useAppContext();
+  const styles = useThemedStyles(createStyles);
   const {entry, nonce} = useLocalSearchParams<{entry?: string; nonce?: string}>();
   const router = useRouter();
   const [query, setQuery] = useState('');
@@ -249,17 +251,17 @@ export default function SearchScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: import('@/lib/theme').AppThemeColors) => StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: appColors.background,
+    backgroundColor: colors.background,
   },
   content: {
     paddingBottom: 40,
   },
   emptyScreen: {
     flex: 1,
-    backgroundColor: appColors.background,
+    backgroundColor: colors.background,
     padding: 20,
     justifyContent: 'center',
   },
@@ -274,17 +276,17 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 0.4,
     textTransform: 'uppercase',
-    color: appColors.muted,
+    color: colors.muted,
   },
   searchMeta: {
     fontSize: 13,
-    color: appColors.muted,
+    color: colors.muted,
     paddingHorizontal: 2,
   },
   primaryAction: {
     minHeight: 46,
     borderRadius: 16,
-    backgroundColor: appColors.tint,
+    backgroundColor: colors.tint,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 16,
@@ -295,7 +297,7 @@ const styles = StyleSheet.create({
   primaryActionText: {
     fontSize: 15,
     fontWeight: '700',
-    color: appColors.textInverse,
+    color: colors.textInverse,
     textAlign: 'center',
   },
   scanIconButton: {
@@ -304,7 +306,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: appColors.tintSoft,
+    backgroundColor: colors.tintSoft,
   },
   scanIconButtonPressed: {
     opacity: 0.75,
@@ -312,9 +314,9 @@ const styles = StyleSheet.create({
   scanAction: {
     minHeight: 46,
     borderRadius: 16,
-    backgroundColor: appColors.tintSoft,
+    backgroundColor: colors.tintSoft,
     borderWidth: 1,
-    borderColor: appColors.border,
+    borderColor: colors.border,
     paddingHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
@@ -327,7 +329,7 @@ const styles = StyleSheet.create({
   scanActionText: {
     fontSize: 15,
     fontWeight: '700',
-    color: appColors.text,
+    color: colors.text,
   },
   listEmpty: {
     paddingHorizontal: 16,

@@ -21,6 +21,7 @@ import type {
   AccountDeletionDecision,
   AccountDeletionPreview,
 } from '@/domain/models';
+import { useThemedStyles } from '@/lib/theme';
 import { fetchAccountDeletionPreview } from '@/services/supabase/account-service';
 import { useAppContext } from '@/state/app-context';
 
@@ -52,6 +53,7 @@ function createDefaultDecisions(
 }
 
 export function DeleteAccountContent() {
+  const styles = useThemedStyles(createStyles);
   const router = useRouter();
   const {
     accountDeletionBusy,
@@ -393,10 +395,10 @@ export function DeleteAccountContent() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: import('@/lib/theme').AppThemeColors) => StyleSheet.create({
   scrollView: {
     flex: 1,
-    backgroundColor: appColors.background,
+    backgroundColor: colors.background,
   },
   scrollContent: {
     paddingBottom: 48,
@@ -411,17 +413,17 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   mutedText: {
-    color: appColors.muted,
+    color: colors.muted,
     fontSize: 14,
     lineHeight: 21,
   },
   errorText: {
-    color: appColors.danger,
+    color: colors.danger,
     fontSize: 14,
     lineHeight: 21,
   },
   warningText: {
-    color: appColors.text,
+    color: colors.text,
     fontSize: 14,
     lineHeight: 21,
   },
@@ -431,40 +433,40 @@ const styles = StyleSheet.create({
   choice: {
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: appColors.border,
-    backgroundColor: appColors.input,
+    borderColor: colors.border,
+    backgroundColor: colors.input,
     padding: 14,
     gap: 5,
   },
   choiceSelected: {
-    borderColor: appColors.tint,
-    backgroundColor: appColors.tintSoft,
+    borderColor: colors.tint,
+    backgroundColor: colors.tintSoft,
   },
   deleteChoice: {
-    borderColor: appColors.dangerSoft,
+    borderColor: colors.dangerSoft,
   },
   deleteChoiceSelected: {
-    borderColor: appColors.danger,
-    backgroundColor: appColors.dangerSoft,
+    borderColor: colors.danger,
+    backgroundColor: colors.dangerSoft,
   },
   choiceTitle: {
-    color: appColors.text,
+    color: colors.text,
     fontSize: 15,
     fontWeight: '800',
   },
   choiceDescription: {
-    color: appColors.muted,
+    color: colors.muted,
     fontSize: 13,
     lineHeight: 19,
   },
   dangerText: {
-    color: appColors.danger,
+    color: colors.danger,
   },
   singleMemberWarning: {
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: appColors.danger,
-    backgroundColor: appColors.dangerSoft,
+    borderColor: colors.danger,
+    backgroundColor: colors.dangerSoft,
     padding: 14,
     gap: 5,
   },
@@ -472,26 +474,26 @@ const styles = StyleSheet.create({
     minHeight: 54,
     borderRadius: 16,
     overflow: 'hidden',
-    backgroundColor: appColors.input,
+    backgroundColor: colors.input,
     borderWidth: 1,
-    borderColor: appColors.border,
+    borderColor: colors.border,
     justifyContent: 'center',
   },
   picker: {
-    color: appColors.text,
+    color: colors.text,
     backgroundColor: 'transparent',
   },
   pickerItem: {
-    color: appColors.text,
+    color: colors.text,
     fontSize: 15,
   },
   confirmationInput: {
     minHeight: 50,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: appColors.border,
-    backgroundColor: appColors.input,
-    color: appColors.text,
+    borderColor: colors.border,
+    backgroundColor: colors.input,
+    color: colors.text,
     paddingHorizontal: 16,
     fontSize: 16,
     fontWeight: '700',
@@ -503,7 +505,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 16,
-    backgroundColor: appColors.danger,
+    backgroundColor: colors.danger,
   },
   deleteButtonPressed: {
     opacity: 0.78,
@@ -512,7 +514,7 @@ const styles = StyleSheet.create({
     opacity: 0.45,
   },
   deleteButtonText: {
-    color: appColors.textInverse,
+    color: colors.textInverse,
     fontSize: 15,
     fontWeight: '800',
   },

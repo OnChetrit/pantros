@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Stack, useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
+import { Stack, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -20,6 +20,7 @@ import { AppTextInput, EmptyNotice, appColors } from '@/components/ui/primitives
 import type { PantryItem, PantryItemInput } from '@/domain/models';
 import { useAiConsent } from '@/hooks/use-ai-consent';
 import { matchPantryItems } from '@/lib/pantry-insights';
+import { useThemedStyles } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
 
 import { extractBarcodeValue } from './barcode-ai';
@@ -43,7 +44,9 @@ function isValidIsoDate(value: string) {
   return !Number.isNaN(date.getTime());
 }
 
-function FieldLabel({ children }: { children: string }) {
+function FieldLabel({children}: {children: string}) {
+  const styles = useThemedStyles(createStyles);
+
   return <Text style={styles.fieldLabel}>{children}</Text>;
 }
 
@@ -57,10 +60,11 @@ export function ItemFormScreen({
   initialName?: string | null;
 }) {
   const router = useRouter();
-  const { addItem, itemBusy, pantryCarts, pantryItems, selectedPantry, selectedPantryId, updateItem } = useAppContext();
-  const { ensureAiConsent } = useAiConsent();
+  const styles = useThemedStyles(createStyles);
+  const {addItem, itemBusy, pantryCarts, pantryItems, selectedPantry, selectedPantryId, updateItem} = useAppContext();
+  const {ensureAiConsent} = useAiConsent();
 
-  const primaryCartId = pantryCarts.find((cart) => cart.isPrimary)?.id ?? pantryCarts[0]?.id ?? null;
+  const primaryCartId = pantryCarts.find(cart => cart.isPrimary)?.id ?? pantryCarts[0]?.id ?? null;
 
   const [name, setName] = useState(item?.name ?? initialName ?? '');
   const [quantity, setQuantity] = useState('1');
@@ -101,7 +105,7 @@ export function ItemFormScreen({
     const candidates = nameMatches.exactNameMatch ? [nameMatches.exactNameMatch] : [];
 
     for (const candidate of nameMatches.partialMatches) {
-      if (candidates.some((entry) => entry.id === candidate.id)) {
+      if (candidates.some(entry => entry.id === candidate.id)) {
         continue;
       }
 
@@ -123,7 +127,7 @@ export function ItemFormScreen({
     return nameMatches.exactNameMatch;
   }, [item, nameMatches]);
 
-  const nextCartId = isInCart ? item?.cartId ?? primaryCartId ?? null : null;
+  const nextCartId = isInCart ? (item?.cartId ?? primaryCartId ?? null) : null;
   const currentInput = useMemo<PantryItemInput | null>(() => {
     if (!selectedPantryId) {
       return null;
@@ -153,7 +157,7 @@ export function ItemFormScreen({
           image: item.image,
           expirationDate: item.expirationDate,
           isInCart: item.isInCart,
-          cartId: item.isInCart ? item.cartId ?? primaryCartId ?? null : null,
+          cartId: item.isInCart ? (item.cartId ?? primaryCartId ?? null) : null,
           quantity: item.isInCart ? 1 : 1,
         }
       : {
@@ -219,7 +223,7 @@ export function ItemFormScreen({
         'Permission required',
         source === 'camera'
           ? 'Camera access is required for this action.'
-          : 'Photo library access is required for this action.',
+          : 'Photo library access is required for this action.'
       );
       return;
     }
@@ -309,6 +313,8 @@ export function ItemFormScreen({
     Alert.alert('No pantry selected', 'Create or join a pantry before adding items.');
   };
 
+  console.log('appColors.border', appColors.border);
+
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.screen}>
       <Stack.Screen
@@ -323,16 +329,12 @@ export function ItemFormScreen({
               disabled={itemBusy || !canSave}
               accessibilityRole="button"
               accessibilityLabel={item ? 'Save item' : 'Add item'}
-              style={({ pressed }) => [
+              style={({pressed}) => [
                 styles.headerActionButton,
-                (pressed || itemBusy || !canSave) ? styles.headerActionButtonPressed : null,
+                pressed || itemBusy || !canSave ? styles.headerActionButtonPressed : null,
               ]}
             >
-              <Ionicons
-                name="checkmark"
-                size={24}
-                color={itemBusy || !canSave ? appColors.muted : appColors.tint}
-              />
+              <Ionicons name="checkmark" size={24} color={itemBusy || !canSave ? appColors.muted : appColors.tint} />
             </Pressable>
           ),
           unstable_headerLeftItems:
@@ -341,7 +343,7 @@ export function ItemFormScreen({
                   {
                     type: 'button',
                     label: 'Close',
-                    icon: { type: 'sfSymbol', name: 'xmark' },
+                    icon: {type: 'sfSymbol', name: 'xmark'},
                     onPress: () => router.back(),
                     tintColor: appColors.tint,
                   },
@@ -358,7 +360,7 @@ export function ItemFormScreen({
         <View style={styles.heroRow}>
           <Pressable onPress={() => openImageSourcePicker('image')} style={styles.imageButton}>
             {image ? (
-              <Image source={{ uri: image }} style={styles.imagePreview} />
+              <Image source={{uri: image}} style={styles.imagePreview} />
             ) : (
               <View style={styles.imagePlaceholder}>
                 <Text style={styles.imagePlaceholderText}>No Image</Text>
@@ -380,14 +382,14 @@ export function ItemFormScreen({
             <AppTextInput value={name} onChangeText={setName} placeholder="" />
             {duplicateCandidates.length > 0 ? (
               <View style={styles.suggestionList}>
-                {duplicateCandidates.map((candidate) => {
+                {duplicateCandidates.map(candidate => {
                   const isExact = candidate.id === exactDuplicate?.id;
 
                   return (
                     <Pressable
                       key={candidate.id}
                       onPress={() => router.replace(`/items/${candidate.id}`)}
-                      style={({ pressed }) => [
+                      style={({pressed}) => [
                         styles.suggestionRow,
                         isExact ? styles.suggestionRowExact : null,
                         pressed ? styles.suggestionRowPressed : null,
@@ -414,7 +416,7 @@ export function ItemFormScreen({
                   onPress={() => openImageSourcePicker('barcode')}
                   accessibilityRole="button"
                   accessibilityLabel="Scan barcode"
-                  style={({ pressed }) => [styles.inputIconButton, pressed ? styles.inputIconButtonPressed : null]}
+                  style={({pressed}) => [styles.inputIconButton, pressed ? styles.inputIconButtonPressed : null]}
                 >
                   <Ionicons name="scan-outline" size={20} color={appColors.tint} />
                 </Pressable>
@@ -449,7 +451,7 @@ export function ItemFormScreen({
                     const nextValue = Math.max(1, parsedQuantity ?? 1) - 1;
                     setQuantity(String(Math.max(1, nextValue)));
                   }}
-                  style={({ pressed }) => [styles.stepperButton, pressed ? styles.stepperButtonPressed : null]}
+                  style={({pressed}) => [styles.stepperButton, pressed ? styles.stepperButtonPressed : null]}
                 >
                   <Ionicons name="remove" size={18} color={appColors.text} />
                 </Pressable>
@@ -458,7 +460,7 @@ export function ItemFormScreen({
                   onPress={() => {
                     setQuantity(String((parsedQuantity ?? 1) + 1));
                   }}
-                  style={({ pressed }) => [styles.stepperButton, pressed ? styles.stepperButtonPressed : null]}
+                  style={({pressed}) => [styles.stepperButton, pressed ? styles.stepperButtonPressed : null]}
                 >
                   <Ionicons name="add" size={18} color={appColors.text} />
                 </Pressable>
@@ -475,14 +477,14 @@ export function ItemFormScreen({
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: import('@/lib/theme').AppThemeColors) => StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: appColors.background,
+    backgroundColor: colors.background,
   },
   scroll: {
     flex: 1,
-    backgroundColor: appColors.background,
+    backgroundColor: colors.background,
   },
   content: {
     paddingHorizontal: 16,
@@ -498,9 +500,9 @@ const styles = StyleSheet.create({
     height: 88,
     borderRadius: 44,
     overflow: 'hidden',
-    backgroundColor: appColors.input,
+    backgroundColor: colors.input,
     borderWidth: 1,
-    borderColor: appColors.border,
+    borderColor: colors.border,
   },
   imagePreview: {
     width: '100%',
@@ -510,10 +512,10 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: appColors.input,
+    backgroundColor: colors.input,
   },
   imagePlaceholderText: {
-    color: appColors.muted,
+    color: colors.muted,
     fontSize: 12,
     fontWeight: '700',
   },
@@ -530,9 +532,9 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 12,
     gap: 12,
-    backgroundColor: appColors.card,
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: appColors.border,
+    borderColor: colors.border,
   },
   fieldGroup: {
     gap: 6,
@@ -544,7 +546,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   fieldLabel: {
-    color: appColors.text,
+    color: colors.text,
     fontSize: 13,
     fontWeight: '700',
     textTransform: 'uppercase',
@@ -554,8 +556,8 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: appColors.border,
-    backgroundColor: appColors.input,
+    borderColor: colors.border,
+    backgroundColor: colors.input,
   },
   suggestionRow: {
     minHeight: 40,
@@ -565,22 +567,22 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: appColors.border,
+    borderBottomColor: colors.border,
   },
   suggestionRowExact: {
-    backgroundColor: appColors.tintSoft,
+    backgroundColor: colors.tintSoft,
   },
   suggestionRowPressed: {
     opacity: 0.7,
   },
   suggestionName: {
     flex: 1,
-    color: appColors.text,
+    color: colors.text,
     fontSize: 14,
     fontWeight: '700',
   },
   suggestionAction: {
-    color: appColors.tint,
+    color: colors.tint,
     fontSize: 12,
     fontWeight: '800',
   },
@@ -600,17 +602,17 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   inlineStatusText: {
-    color: appColors.muted,
+    color: colors.muted,
     fontSize: 13,
   },
   inlineError: {
     borderRadius: 14,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    backgroundColor: appColors.dangerSoft,
+    backgroundColor: colors.dangerSoft,
   },
   inlineErrorText: {
-    color: appColors.text,
+    color: colors.text,
     fontSize: 13,
     lineHeight: 18,
   },
@@ -621,9 +623,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: appColors.input,
+    backgroundColor: colors.input,
     borderWidth: 1,
-    borderColor: appColors.border,
+    borderColor: colors.border,
   },
   stepperButton: {
     width: 34,
@@ -631,15 +633,15 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: appColors.card,
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: appColors.border,
+    borderColor: colors.border,
   },
   stepperButtonPressed: {
     opacity: 0.6,
   },
   stepperValue: {
-    color: appColors.text,
+    color: colors.text,
     fontSize: 17,
     fontWeight: '800',
   },

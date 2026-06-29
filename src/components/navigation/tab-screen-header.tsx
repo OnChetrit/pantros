@@ -2,7 +2,7 @@ import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AvatarSidebarButton } from '@/components/navigation/avatar-sidebar';
-import { appColors } from '@/components/ui/primitives';
+import { useThemedStyles } from '@/lib/theme';
 
 export function TabScreenHeader({
   title,
@@ -14,6 +14,7 @@ export function TabScreenHeader({
   scrollY: Animated.Value;
 }) {
   const insets = useSafeAreaInsets();
+  const styles = useThemedStyles(createStyles);
   const progress = scrollY.interpolate({
     inputRange: [0, 52],
     outputRange: [0, 1],
@@ -84,11 +85,11 @@ export function TabScreenHeader({
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: import('@/lib/theme').AppThemeColors) => StyleSheet.create({
   screenHeader: {
-    backgroundColor: appColors.background,
+    backgroundColor: colors.background,
     borderBottomWidth: 0,
-    borderBottomColor: 'rgba(229, 220, 207, 0.72)',
+    borderBottomColor: colors.borderStrong,
     overflow: 'hidden',
   },
   largeTitle: {
@@ -96,7 +97,7 @@ const styles = StyleSheet.create({
     left: 20,
     right: 132,
     bottom: 6,
-    color: appColors.text,
+    color: colors.text,
     fontSize: 34,
     fontWeight: '900',
   },
@@ -108,7 +109,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 17,
     fontWeight: '800',
-    color: appColors.text,
+    color: colors.text,
   },
   headerActions: {
     position: 'absolute',
@@ -124,10 +125,10 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: appColors.card,
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: appColors.borderStrong,
-    shadowColor: appColors.shadow,
+    borderColor: colors.borderStrong,
+    shadowColor: colors.shadow,
     shadowOpacity: 0.08,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 4 },
@@ -138,7 +139,7 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.96 }],
   },
   addButtonIcon: {
-    color: appColors.tint,
+    color: colors.tint,
     fontSize: 24,
     fontWeight: '300',
     lineHeight: 24,

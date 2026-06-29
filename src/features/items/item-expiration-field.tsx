@@ -6,7 +6,7 @@ import { ActivityIndicator, Alert, Platform, Pressable, StyleSheet, Switch, Text
 
 import { appColors } from '@/components/ui/primitives';
 import { useAiConsent } from '@/hooks/use-ai-consent';
-import { useAppTheme } from '@/lib/theme';
+import { useAppTheme, useThemedStyles } from '@/lib/theme';
 
 import { extractExpirationDate } from './expiration-ai';
 import { ItemExpirationModePicker } from './item-expiration-mode-picker';
@@ -77,6 +77,7 @@ function initialRelativeState(value: string): {days: number; weeks: number; mont
 
 export function ItemExpirationField({value, onChange}: {value: string; onChange: (value: string) => void}) {
   const { ensureAiConsent } = useAiConsent();
+  const styles = useThemedStyles(createStyles);
   const initialDate = parseIsoDate(value) ?? startOfDay(new Date());
   const initialRelative = initialRelativeState(value);
   const [isEnabled, setIsEnabled] = useState(Boolean(value));
@@ -354,14 +355,14 @@ export function ItemExpirationField({value, onChange}: {value: string; onChange:
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: import('@/lib/theme').AppThemeColors) => StyleSheet.create({
   card: {
     borderRadius: 20,
     padding: 12,
     gap: 12,
-    backgroundColor: appColors.card,
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: appColors.border,
+    borderColor: colors.border,
   },
   toggleRow: {
     minHeight: 32,
@@ -371,7 +372,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   toggleTitle: {
-    color: appColors.text,
+    color: colors.text,
     fontSize: 13,
     fontWeight: '700',
     letterSpacing: 0.4,
@@ -380,19 +381,19 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    backgroundColor: appColors.metric,
+    backgroundColor: colors.metric,
     borderWidth: 1,
-    borderColor: appColors.border,
+    borderColor: colors.border,
     gap: 4,
   },
   previewLabel: {
-    color: appColors.muted,
+    color: colors.muted,
     fontSize: 12,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   previewValue: {
-    color: appColors.text,
+    color: colors.text,
     fontSize: 16,
     fontWeight: '800',
   },
@@ -402,9 +403,9 @@ const styles = StyleSheet.create({
   datePickerCard: {
     borderRadius: 18,
     overflow: 'hidden',
-    backgroundColor: appColors.input,
+    backgroundColor: colors.input,
     borderWidth: 1,
-    borderColor: appColors.border,
+    borderColor: colors.border,
     paddingHorizontal: 6,
     paddingVertical: 2,
   },
@@ -420,13 +421,13 @@ const styles = StyleSheet.create({
     minHeight: 156,
     borderRadius: 18,
     overflow: 'hidden',
-    backgroundColor: appColors.input,
+    backgroundColor: colors.input,
     borderWidth: 1,
-    borderColor: appColors.border,
+    borderColor: colors.border,
     justifyContent: 'center',
   },
   relativeLabel: {
-    color: appColors.muted,
+    color: colors.muted,
     fontSize: 12,
     fontWeight: '700',
     textTransform: 'uppercase',
@@ -435,10 +436,10 @@ const styles = StyleSheet.create({
     paddingTop: 12,
   },
   picker: {
-    color: appColors.text,
+    color: colors.text,
   },
   pickerItem: {
-    color: appColors.text,
+    color: colors.text,
     fontSize: 18,
   },
   scanActionButton: {
@@ -446,22 +447,22 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: appColors.tintSoft,
+    backgroundColor: colors.tintSoft,
     borderWidth: 1,
-    borderColor: appColors.border,
+    borderColor: colors.border,
     paddingHorizontal: 16,
   },
   scanActionPrimary: {
-    backgroundColor: appColors.tint,
-    borderColor: appColors.tint,
+    backgroundColor: colors.tint,
+    borderColor: colors.tint,
   },
   scanActionText: {
-    color: appColors.text,
+    color: colors.text,
     fontSize: 14,
     fontWeight: '700',
   },
   scanActionPrimaryText: {
-    color: appColors.textInverse,
+    color: colors.textInverse,
     fontSize: 14,
     fontWeight: '700',
   },
@@ -471,7 +472,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   scanStatusText: {
-    color: appColors.muted,
+    color: colors.muted,
     fontSize: 13,
     lineHeight: 18,
   },
@@ -480,23 +481,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 12,
     gap: 4,
-    backgroundColor: appColors.accentSoft,
+    backgroundColor: colors.accentSoft,
     borderWidth: 1,
-    borderColor: appColors.border,
+    borderColor: colors.border,
   },
   scanResultLabel: {
-    color: appColors.muted,
+    color: colors.muted,
     fontSize: 12,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   scanResultValue: {
-    color: appColors.text,
+    color: colors.text,
     fontSize: 17,
     fontWeight: '800',
   },
   scanResultMeta: {
-    color: appColors.muted,
+    color: colors.muted,
     fontSize: 12,
     lineHeight: 17,
   },
@@ -504,10 +505,10 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    backgroundColor: appColors.dangerSoft,
+    backgroundColor: colors.dangerSoft,
   },
   inlineErrorText: {
-    color: appColors.text,
+    color: colors.text,
     fontSize: 13,
     lineHeight: 18,
   },

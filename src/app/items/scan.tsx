@@ -9,6 +9,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { appColors } from '@/components/ui/primitives';
 import { triggerMediumImpact } from '@/lib/haptics';
 import { matchPantryItems } from '@/lib/pantry-insights';
+import { useThemedStyles } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
 
 const BARCODE_TYPES: BarcodeType[] = ['ean13', 'ean8', 'upc_a', 'upc_e', 'code128', 'code39', 'code93', 'itf14'];
@@ -35,6 +36,8 @@ function IconCircleButton({
   onPress: () => void;
   disabled?: boolean;
 }) {
+  const styles = useThemedStyles(createStyles);
+
   return (
     <Pressable
       accessibilityRole="button"
@@ -73,6 +76,7 @@ function ScanPermissionState({
   highlights?: string[];
 }) {
   const insets = useSafeAreaInsets();
+  const styles = useThemedStyles(createStyles);
 
   return (
     <View style={[styles.permissionScreen, { paddingTop: insets.top + 12, paddingBottom: insets.bottom + 20 }]}>
@@ -141,6 +145,7 @@ function ScanPermissionState({
 export default function ScanItemScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const styles = useThemedStyles(createStyles);
   const processingBarcodeRef = useRef(false);
   const openingItemRef = useRef(false);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -357,7 +362,7 @@ export default function ScanItemScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: import('@/lib/theme').AppThemeColors) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: '#000000',
@@ -366,14 +371,14 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: appColors.background,
+    backgroundColor: colors.background,
   },
   permissionScreen: {
     flex: 1,
     justifyContent: 'space-between',
     gap: 24,
     paddingHorizontal: 20,
-    backgroundColor: appColors.background,
+    backgroundColor: colors.background,
   },
   permissionTopBar: {
     minHeight: 44,
@@ -396,9 +401,9 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: appColors.tintSoft,
+    backgroundColor: colors.tintSoft,
     borderWidth: 1,
-    borderColor: appColors.border,
+    borderColor: colors.border,
   },
   permissionIconInner: {
     width: 70,
@@ -406,22 +411,22 @@ const styles = StyleSheet.create({
     borderRadius: 35,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: appColors.card,
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: appColors.borderStrong,
+    borderColor: colors.borderStrong,
   },
   permissionCopy: {
     gap: 10,
   },
   permissionTitle: {
-    color: appColors.text,
+    color: colors.text,
     fontSize: 28,
     fontWeight: '900',
     lineHeight: 34,
     textAlign: 'center',
   },
   permissionBody: {
-    color: appColors.muted,
+    color: colors.muted,
     fontSize: 16,
     fontWeight: '600',
     lineHeight: 24,
@@ -437,13 +442,13 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    backgroundColor: appColors.card,
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: appColors.border,
+    borderColor: colors.border,
   },
   highlightText: {
     flex: 1,
-    color: appColors.text,
+    color: colors.text,
     fontSize: 14,
     fontWeight: '700',
   },
@@ -463,20 +468,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
   },
   permissionActionButtonPrimary: {
-    backgroundColor: appColors.tint,
+    backgroundColor: colors.tint,
   },
   permissionActionButtonSecondary: {
-    backgroundColor: appColors.tintSoft,
+    backgroundColor: colors.tintSoft,
     borderWidth: 1,
-    borderColor: appColors.border,
+    borderColor: colors.border,
   },
   permissionActionButtonPrimaryText: {
-    color: appColors.textInverse,
+    color: colors.textInverse,
     fontSize: 15,
     fontWeight: '800',
   },
   permissionActionButtonSecondaryText: {
-    color: appColors.text,
+    color: colors.text,
     fontSize: 15,
     fontWeight: '800',
   },
@@ -547,9 +552,9 @@ const styles = StyleSheet.create({
   manualButton: {
     minHeight: 50,
     borderRadius: 18,
-    backgroundColor: appColors.card,
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: appColors.border,
+    borderColor: colors.border,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -557,7 +562,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
   },
   manualButtonText: {
-    color: appColors.text,
+    color: colors.text,
     fontSize: 15,
     fontWeight: '800',
   },
@@ -580,9 +585,9 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: appColors.card,
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: appColors.border,
+    borderColor: colors.border,
   },
   buttonPressed: {
     opacity: 0.75,
