@@ -6,12 +6,12 @@ import type { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSw
 import { PantryFilterMenu, type PantryListSortOption } from '@/components/pantry/pantry-filter-menu';
 import { PantryItemRow } from '@/components/pantry/pantry-item-row';
 import { EmptyNotice } from '@/components/ui/primitives';
-import { appColors } from '@/lib/theme';
 import { getCartItems } from '@/lib/pantry-insights';
+import { appColors } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
 
 export default function CartScreen() {
-  const { deleteItem, moveItemToPantry, pantryItems, selectedPantry } = useAppContext();
+  const {deleteItem, moveItemToPantry, pantryItems, selectedPantry} = useAppContext();
   const router = useRouter();
   const openSwipeableRef = useRef<SwipeableMethods | null>(null);
   const [sortOption, setSortOption] = useState<PantryListSortOption>('expiration');
@@ -72,9 +72,9 @@ export default function CartScreen() {
       <FlatList
         style={styles.screen}
         data={itemsInCart}
-        keyExtractor={(item) => item.id}
+        keyExtractor={item => item.id}
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, itemsInCart.length > 0 ? styles.filledContent : null]}
         ListEmptyComponent={
           <View style={styles.listEmpty}>
             <EmptyNotice
@@ -83,22 +83,21 @@ export default function CartScreen() {
             />
           </View>
         }
-        renderItem={({ item, index }) => {
-          return (
-            <PantryItemRow
-              item={item}
-              isFirst={index === 0}
-              isLast={index === itemsInCart.length - 1}
-              onPress={() => router.push(`/items/${item.id}`)}
-              onEdit={() => router.push(`/items/${item.id}`)}
-              leftActionLabel="Move to Pantry"
-              leftActionIcon="return-up-back-outline"
-              onLeftAction={() => void moveItemToPantry(item.id)}
-              onDelete={() => void deleteItem(item.id)}
-              onWillOpen={handleWillOpen}
-            />
-          );
-        }}
+        renderItem={({item, index}) => (
+          <PantryItemRow
+            item={item}
+            displayMode="cart"
+            isFirst={index === 0}
+            isLast={index === itemsInCart.length - 1}
+            onPress={() => router.push(`/items/${item.id}`)}
+            onEdit={() => router.push(`/items/${item.id}`)}
+            leftActionLabel="Move to Pantry"
+            leftActionIcon="return-up-back-outline"
+            onLeftAction={() => void moveItemToPantry(item.id)}
+            onDelete={() => void deleteItem(item.id)}
+            onWillOpen={handleWillOpen}
+          />
+        )}
       />
     </>
   );
@@ -111,7 +110,13 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: 12,
-    paddingBottom: 40,
+  },
+  filledContent: {
+    marginHorizontal: 12,
+    paddingHorizontal: 0,
+    borderRadius: 26,
+    backgroundColor: appColors.card,
+    overflow: 'hidden',
   },
   emptyScreen: {
     flex: 1,

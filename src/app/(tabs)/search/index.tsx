@@ -235,6 +235,7 @@ export default function SearchScreen() {
           return (
             <PantryItemRow
               item={item}
+              displayMode="pantry"
               isFirst={index === 0}
               isLast={index === visibleItems.length - 1}
               onPress={() => router.push(`/items/${item.id}`)}

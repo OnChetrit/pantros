@@ -1,6 +1,6 @@
 import { Stack, useRouter } from 'expo-router';
 import { useMemo, useRef, useState } from 'react';
-import { Alert, FlatList, StyleSheet, View } from 'react-native';
+import { Alert, FlatList, StyleSheet, Text, View } from 'react-native';
 import type { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
 
 import { PantryFilterMenu, type PantryListSortOption } from '@/components/pantry/pantry-filter-menu';
@@ -10,13 +10,13 @@ import { appColors } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
 
 export default function PantryScreen() {
-  const { deleteItem, moveItemToCart, moveItemToPantry, pantryCarts, pantryItems, selectedPantry } = useAppContext();
+  const {deleteItem, moveItemToCart, moveItemToPantry, pantryCarts, pantryItems, selectedPantry} = useAppContext();
   const router = useRouter();
   const openSwipeableRef = useRef<SwipeableMethods | null>(null);
   const [sortOption, setSortOption] = useState<PantryListSortOption>('expiration');
 
-  const sortedItems = useMemo(() => {
-    const compareBySort = (left: typeof pantryItems[number], right: typeof pantryItems[number]) => {
+  const {cartItems, pantryListItems} = useMemo(() => {
+    const compareBySort = (left: (typeof pantryItems)[number], right: (typeof pantryItems)[number]) => {
       if (sortOption === 'name') {
         return left.name.localeCompare(right.name);
       }
@@ -43,16 +43,15 @@ export default function PantryScreen() {
       return leftTime - rightTime;
     };
 
-    return [...pantryItems].sort((left, right) => {
-      if (left.isInCart !== right.isInCart) {
-        return Number(left.isInCart) - Number(right.isInCart);
-      }
+    const sorted = [...pantryItems].sort(compareBySort);
 
-      return compareBySort(left, right);
-    });
+    return {
+      pantryListItems: sorted.filter(item => !item.isInCart),
+      cartItems: sorted.filter(item => item.isInCart),
+    };
   }, [pantryItems, sortOption]);
 
-  const primaryCart = pantryCarts.find((cart) => cart.isPrimary) ?? pantryCarts[0] ?? null;
+  const primaryCart = pantryCarts.find(cart => cart.isPrimary) ?? pantryCarts[0] ?? null;
 
   const handleAddToCart = async (itemId: string) => {
     if (!primaryCart) {
@@ -82,6 +81,33 @@ export default function PantryScreen() {
     );
   }
 
+  const renderItemRow = (
+    item: (typeof pantryItems)[number],
+    index: number,
+    total: number,
+    displayMode: 'pantry' | 'cart'
+  ) => {
+    const leftActionLabel = item.isInCart ? 'Move to Pantry' : 'Add to Cart';
+    const leftActionIcon = item.isInCart ? 'return-up-back-outline' : 'cart-outline';
+    const onLeftAction = item.isInCart ? () => void moveItemToPantry(item.id) : () => void handleAddToCart(item.id);
+
+    return (
+      <PantryItemRow
+        item={item}
+        displayMode={displayMode}
+        isFirst={index === 0}
+        isLast={index === total - 1}
+        onPress={() => router.push(`/items/${item.id}`)}
+        onEdit={() => router.push(`/items/${item.id}`)}
+        leftActionLabel={leftActionLabel}
+        leftActionIcon={leftActionIcon}
+        onLeftAction={onLeftAction}
+        onDelete={() => void deleteItem(item.id)}
+        onWillOpen={handleWillOpen}
+      />
+    );
+  };
+
   return (
     <>
       <Stack.Screen
@@ -91,8 +117,8 @@ export default function PantryScreen() {
       />
       <FlatList
         style={styles.screen}
-        data={sortedItems}
-        keyExtractor={(item) => item.id}
+        data={pantryListItems}
+        keyExtractor={item => item.id}
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={styles.content}
         ListEmptyComponent={
@@ -103,27 +129,21 @@ export default function PantryScreen() {
             />
           </View>
         }
-        renderItem={({ item, index }) => {
-          const leftActionLabel = item.isInCart ? 'Move to Pantry' : 'Add to Cart';
-          const leftActionIcon = item.isInCart ? 'return-up-back-outline' : 'cart-outline';
-          const onLeftAction = item.isInCart
-            ? () => void moveItemToPantry(item.id)
-            : () => void handleAddToCart(item.id);
-
-          return (
-            <PantryItemRow
-              item={item}
-              isFirst={index === 0}
-              isLast={index === sortedItems.length - 1}
-              onPress={() => router.push(`/items/${item.id}`)}
-              onEdit={() => router.push(`/items/${item.id}`)}
-              leftActionLabel={leftActionLabel}
-              leftActionIcon={leftActionIcon}
-              onLeftAction={onLeftAction}
-              onDelete={() => void deleteItem(item.id)}
-              onWillOpen={handleWillOpen}
-            />
-          );
+        ListFooterComponent={
+          cartItems.length > 0 ? (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Cart</Text>
+              <View style={styles.sectionCard}>
+                {cartItems.map((item, index) => (
+                  <View key={item.id}>{renderItemRow(item, index, cartItems.length, 'cart')}</View>
+                ))}
+              </View>
+            </View>
+          ) : null
+        }
+        ListFooterComponentStyle={styles.footer}
+        renderItem={({item, index}) => {
+          return renderItemRow(item, index, pantryListItems.length, 'pantry');
         }}
       />
     </>
@@ -139,6 +159,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingBottom: 40,
   },
+  footer: {
+    marginTop: 18,
+  },
   emptyScreen: {
     flex: 1,
     backgroundColor: appColors.background,
@@ -148,5 +171,20 @@ const styles = StyleSheet.create({
   listEmpty: {
     paddingHorizontal: 16,
     paddingTop: 6,
+  },
+  section: {
+    gap: 10,
+  },
+  sectionTitle: {
+    color: appColors.muted,
+    fontSize: 13,
+    fontWeight: '700',
+    paddingHorizontal: 4,
+  },
+  sectionCard: {
+    borderRadius: 26,
+    backgroundColor: appColors.card,
+    paddingVertical: 2,
+    overflow: 'hidden',
   },
 });

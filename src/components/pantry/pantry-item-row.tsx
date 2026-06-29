@@ -40,6 +40,7 @@ type SwipeSide = 'left' | 'right';
 
 type PantryItemRowProps = {
   item: PantryItem;
+  displayMode?: 'pantry' | 'cart';
   isFirst: boolean;
   isLast: boolean;
   onPress: () => void;
@@ -53,6 +54,7 @@ type PantryItemRowProps = {
 
 export function PantryItemRow({
   item,
+  displayMode = 'pantry',
   isLast,
   onPress,
   onEdit,
@@ -72,13 +74,14 @@ export function PantryItemRow({
   const dragStartX = useSharedValue(0);
   const leftFullSwipeArmed = useSharedValue(false);
   const rightFullSwipeArmed = useSharedValue(false);
-  const quantityLabel = String(item.quantity);
   const hasLeftAction = Boolean(onLeftAction && leftActionLabel);
   const contextCartActionLabel = item.isInCart ? 'Remove from cart' : 'Add to Cart';
   const openDistance = PANTRY_SWIPE_OPEN_DISTANCE;
   const fullSwipeDistance = getPantryFullSwipeDistance(rowWidth);
   const commitDistance = Math.max(rowWidth, fullSwipeDistance + openDistance);
   const maxSwipeDistance = Math.max(commitDistance, rowWidth * MAX_SWIPE_ROW_RATIO);
+  const showExpiration = displayMode !== 'cart' && Boolean(item.expirationDate);
+  const showQuantity = displayMode === 'cart';
 
   const withActionLock = useCallback((action: () => void) => {
     if (actionLockRef.current) {
@@ -405,10 +408,10 @@ export function PantryItemRow({
         <Text style={styles.title}>{item.name}</Text>
       </View>
       <View style={styles.trailing}>
-        {item.expirationDate ? (
+        {showExpiration ? (
           <Text style={styles.expiration}>{formatExpirationLabel(item.expirationDate)}</Text>
         ) : null}
-        {item.isInCart ? <Text style={styles.quantity}>{quantityLabel}</Text> : null}
+        {showQuantity ? <Text style={styles.quantity}>{String(item.quantity)}</Text> : null}
       </View>
       {!isLast ? <Animated.View pointerEvents="none" style={[styles.divider, dividerAnimatedStyle]} /> : null}
     </Pressable>
