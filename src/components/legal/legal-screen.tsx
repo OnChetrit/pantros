@@ -30,6 +30,7 @@ export function LegalScreen({
   title,
   subtitle,
   actions,
+  showHeader = true,
   children,
 }: PropsWithChildren<{
   title: string;
@@ -39,6 +40,7 @@ export function LegalScreen({
     onPress: () => void;
     variant?: 'primary' | 'secondary';
   }[];
+  showHeader?: boolean;
 }>) {
   return (
     <ScrollView
@@ -46,7 +48,9 @@ export function LegalScreen({
       contentContainerStyle={{ paddingBottom: 40 }}
       contentInsetAdjustmentBehavior="automatic"
     >
-      <AppStackHeader title={title} showAccountMenu={false} minimalBackButton />
+      {showHeader ? (
+        <AppStackHeader title={title} showAccountMenu={false} minimalBackButton />
+      ) : null}
       <AppScreen>
         <SectionCard title={title} subtitle={subtitle}>
           {children}

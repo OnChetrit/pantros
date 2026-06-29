@@ -14,19 +14,10 @@ import {
   View,
 } from 'react-native';
 
-import {
-  AppButton,
-  AppScreen,
-  ListRow,
-  SectionCard,
-  appColors,
-} from '@/components/ui/primitives';
+import { AppButton, AppScreen, ListRow, SectionCard, appColors } from '@/components/ui/primitives';
 import { AI_CONSENT_VERSION, formatAiConsentDate, hasActiveAiConsent } from '@/lib/ai-consent';
 import { useAppTheme } from '@/lib/theme';
-import {
-  getDeviceTimeZone,
-  registerForPushNotifications,
-} from '@/services/supabase/notification-service';
+import { getDeviceTimeZone, registerForPushNotifications } from '@/services/supabase/notification-service';
 import { useAppContext } from '@/state/app-context';
 
 type ThemeChipProps = {
@@ -45,9 +36,7 @@ function ThemeChip({label, active, onPress}: ThemeChipProps) {
         pressed ? styles.themeChipPressed : null,
       ]}
     >
-      <Text style={[styles.themeChipText, active ? styles.themeChipTextActive : null]}>
-        {label}
-      </Text>
+      <Text style={[styles.themeChipText, active ? styles.themeChipTextActive : null]}>{label}</Text>
     </Pressable>
   );
 }
@@ -60,14 +49,12 @@ function parseReminderTime(value: string) {
 }
 
 function formatReminderTime(value: Date) {
-  return `${String(value.getHours()).padStart(2, '0')}:${String(
-    value.getMinutes()
-  ).padStart(2, '0')}`;
+  return `${String(value.getHours()).padStart(2, '0')}:${String(value.getMinutes()).padStart(2, '0')}`;
 }
 
 export default function SettingsScreen() {
   const router = useRouter();
-  const { themePreference, setThemePreference } = useAppTheme();
+  const {themePreference, setThemePreference} = useAppTheme();
   const {
     errorMessage,
     isAuthenticated,
@@ -139,9 +126,7 @@ export default function SettingsScreen() {
         const token = await registerForPushNotifications(true);
 
         if (!token) {
-          throw new Error(
-            'Notification permission is required to enable cart reminders.'
-          );
+          throw new Error('Notification permission is required to enable cart reminders.');
         }
       }
 
@@ -152,11 +137,7 @@ export default function SettingsScreen() {
         timeZone: getDeviceTimeZone(),
       });
     } catch (error) {
-      setNotificationError(
-        error instanceof Error
-          ? error.message
-          : 'Unable to save notification settings.'
-      );
+      setNotificationError(error instanceof Error ? error.message : 'Unable to save notification settings.');
     } finally {
       setNotificationActionBusy(false);
     }
@@ -177,11 +158,7 @@ export default function SettingsScreen() {
         timeZone: getDeviceTimeZone(),
       });
     } catch (error) {
-      setNotificationError(
-        error instanceof Error
-          ? error.message
-          : 'Unable to save the reminder time.'
-      );
+      setNotificationError(error instanceof Error ? error.message : 'Unable to save the reminder time.');
     } finally {
       setNotificationActionBusy(false);
     }
@@ -189,15 +166,12 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: appColors.background }}
-      contentContainerStyle={{ paddingBottom: 40 }}
+      style={{flex: 1, backgroundColor: appColors.background}}
+      contentContainerStyle={{paddingBottom: 40}}
       contentInsetAdjustmentBehavior="automatic"
     >
       <AppScreen>
-        <SectionCard
-          title="Appearance"
-          subtitle="Choose how Pantros follows light and dark mode."
-        >
+        <SectionCard title="Appearance" subtitle="Choose how Pantros follows light and dark mode.">
           <View style={styles.themeSwitch} onLayout={handleThemeSwitchLayout}>
             {themeIndicatorWidth > 0 ? (
               <Animated.View
@@ -229,10 +203,7 @@ export default function SettingsScreen() {
           </View>
         </SectionCard>
 
-        <SectionCard
-          title="Reminders"
-          subtitle="Daily cart reminders use your device time zone."
-        >
+        <SectionCard title="Reminders" subtitle="Daily cart reminders use your device time zone.">
           <View style={styles.notificationToggleRow}>
             <View style={styles.notificationToggleCopy}>
               <Text style={styles.notificationToggleTitle}>Cart reminders</Text>
@@ -243,7 +214,7 @@ export default function SettingsScreen() {
             <Switch
               value={notificationPreferences?.cartRemindersEnabled ?? false}
               disabled={!notificationPreferences || notificationsBusy}
-              onValueChange={(enabled) => {
+              onValueChange={enabled => {
                 void saveCartReminderSettings(enabled);
               }}
             />
@@ -258,14 +229,9 @@ export default function SettingsScreen() {
               <Pressable
                 disabled={!notificationPreferences || notificationsBusy}
                 onPress={() => setShowAndroidTimePicker(true)}
-                style={({ pressed }) => [
-                  styles.timeButton,
-                  pressed ? styles.timeButtonPressed : null,
-                ]}
+                style={({pressed}) => [styles.timeButton, pressed ? styles.timeButtonPressed : null]}
               >
-                <Text style={styles.timeButtonText}>
-                  {formatReminderTime(reminderTime)}
-                </Text>
+                <Text style={styles.timeButtonText}>{formatReminderTime(reminderTime)}</Text>
               </Pressable>
             ) : (
               <DateTimePicker
@@ -296,9 +262,7 @@ export default function SettingsScreen() {
             />
           ) : null}
 
-          {notificationError ? (
-            <Text style={styles.notificationError}>{notificationError}</Text>
-          ) : null}
+          {notificationError ? <Text style={styles.notificationError}>{notificationError}</Text> : null}
 
           <AppButton
             label={notificationsBusy ? 'Saving…' : 'Save time'}
@@ -308,10 +272,7 @@ export default function SettingsScreen() {
           />
         </SectionCard>
 
-        <SectionCard
-          title="AI Scanning"
-          subtitle="Optional barcode and expiration scans require consent."
-        >
+        <SectionCard title="AI Scanning" subtitle="Optional barcode and expiration scans require consent.">
           <ListRow
             title="Consent"
             subtitle={
@@ -330,11 +291,8 @@ export default function SettingsScreen() {
           />
         </SectionCard>
 
-        <SectionCard
-          title="Session"
-          subtitle="Current account and app state."
-        >
-          <View style={{ gap: 10 }}>
+        <SectionCard title="Session" subtitle="Current account and app state.">
+          <View style={{gap: 10}}>
             <ListRow title="Profile" subtitle={profile?.email ?? 'Not authenticated'} />
             <ListRow title="Status" subtitle={errorMessage ?? 'No errors'} />
           </View>
@@ -354,11 +312,8 @@ export default function SettingsScreen() {
           />
         </SectionCard>
 
-        <SectionCard
-          title="Legal"
-          subtitle="Review the current privacy policy, terms, and support contact details."
-        >
-          <View style={{ gap: 10 }}>
+        <SectionCard title="Legal" subtitle="Review the current privacy policy, terms, and support contact details.">
+          <View style={{gap: 10}}>
             <ListRow
               title="Privacy Policy"
               subtitle="How Pantros collects, uses, shares, and deletes data."
@@ -385,7 +340,7 @@ const styles = StyleSheet.create({
   notificationToggleRow: {
     minHeight: 52,
     flexDirection: 'row',
-    alignItems: 'center',
+    // alignItems: 'center',
     justifyContent: 'space-between',
     gap: 16,
   },

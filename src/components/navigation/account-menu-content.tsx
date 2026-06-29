@@ -26,7 +26,18 @@ import {
 } from '@/services/supabase/notification-service';
 import { useAppContext } from '@/state/app-context';
 
-type PendingRoute = '/account/delete' | '/legal/privacy' | '/legal/support' | '/legal/terms';
+export type AccountMenuDestination =
+  | 'delete'
+  | 'privacy'
+  | 'support'
+  | 'terms';
+
+const destinationHrefMap: Record<AccountMenuDestination, '/account/delete' | '/legal/privacy' | '/legal/support' | '/legal/terms'> = {
+  delete: '/account/delete',
+  privacy: '/legal/privacy',
+  support: '/legal/support',
+  terms: '/legal/terms',
+};
 
 type MenuSectionProps = {
   title: string;
@@ -106,7 +117,11 @@ function MenuRow({
   return content;
 }
 
-export function AccountMenuContent() {
+export function AccountMenuContent({
+  onNavigate,
+}: {
+  onNavigate?: (destination: AccountMenuDestination) => void;
+}) {
   const router = useRouter();
   const { themePreference, setThemePreference } = useAppTheme();
   const {
@@ -139,8 +154,13 @@ export function AccountMenuContent() {
     }
   }, [notificationPreferences]);
 
-  const handleNavigate = (href: PendingRoute) => {
-    router.replace(href);
+  const handleNavigate = (destination: AccountMenuDestination) => {
+    if (onNavigate) {
+      onNavigate(destination);
+      return;
+    }
+
+    router.replace(destinationHrefMap[destination]);
   };
 
   const handleSignOut = () => {
@@ -393,16 +413,16 @@ export function AccountMenuContent() {
       </MenuSection>
 
       <MenuSection title="Support">
-        <MenuRow icon="shield-outline" label="Privacy Policy" onPress={() => handleNavigate('/legal/privacy')} />
+        <MenuRow icon="shield-outline" label="Privacy Policy" onPress={() => handleNavigate('privacy')} />
         <MenuRow
           icon="document-text-outline"
           label="Terms of Service"
-          onPress={() => handleNavigate('/legal/terms')}
+          onPress={() => handleNavigate('terms')}
         />
         <MenuRow
           icon="help-buoy-outline"
           label="Contact Support"
-          onPress={() => handleNavigate('/legal/support')}
+          onPress={() => handleNavigate('support')}
           hideDivider
         />
       </MenuSection>
@@ -411,7 +431,7 @@ export function AccountMenuContent() {
         <MenuRow
           icon="trash-outline"
           label="Delete Account"
-          onPress={() => handleNavigate('/account/delete')}
+          onPress={() => handleNavigate('delete')}
           danger
         />
         <MenuRow icon="log-out-outline" label="Sign Out" onPress={handleSignOut} danger hideDivider />

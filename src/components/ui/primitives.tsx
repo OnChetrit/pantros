@@ -1,7 +1,7 @@
-import { Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import type { StyleProp, ViewStyle } from 'react-native';
-import type { PropsWithChildren, ReactNode, Ref } from 'react';
 import { appColors } from '@/lib/theme';
+import type { PropsWithChildren, ReactNode, Ref } from 'react';
+import type { StyleProp, ViewStyle } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 export { appColors } from '@/lib/theme';
 
@@ -12,7 +12,7 @@ type ButtonProps = {
   disabled?: boolean;
 };
 
-export function AppScreen({ children }: PropsWithChildren) {
+export function AppScreen({children}: PropsWithChildren) {
   return <View style={styles.screen}>{children}</View>;
 }
 
@@ -40,20 +40,18 @@ export function SectionCard({
   );
 }
 
-export function AppButton({ label, onPress, variant = 'primary', disabled }: ButtonProps) {
+export function AppButton({label, onPress, variant = 'primary', disabled}: ButtonProps) {
   return (
     <Pressable
       disabled={disabled}
       onPress={onPress}
-      style={({ pressed }) => [
+      style={({pressed}) => [
         styles.button,
         variant === 'primary' ? styles.primaryButton : styles.secondaryButton,
         (pressed || disabled) && styles.buttonPressed,
       ]}
     >
-      <Text style={variant === 'primary' ? styles.primaryButtonText : styles.secondaryButtonText}>
-        {label}
-      </Text>
+      <Text style={variant === 'primary' ? styles.primaryButtonText : styles.secondaryButtonText}>{label}</Text>
     </Pressable>
   );
 }
@@ -95,7 +93,7 @@ export function AppTextInput({
   );
 }
 
-export function KeyValueRow({ label, value }: { label: string; value: string }) {
+export function KeyValueRow({label, value}: {label: string; value: string}) {
   return (
     <View style={styles.row}>
       <Text style={styles.rowLabel}>{label}</Text>
@@ -104,7 +102,7 @@ export function KeyValueRow({ label, value }: { label: string; value: string }) 
   );
 }
 
-export function EmptyNotice({ title, body }: { title: string; body: string }) {
+export function EmptyNotice({title, body}: {title: string; body: string}) {
   return (
     <View style={styles.emptyState}>
       <Text style={styles.emptyTitle}>{title}</Text>
@@ -136,7 +134,7 @@ export function MetricPill({
   );
 }
 
-export function MetricGrid({ children }: PropsWithChildren) {
+export function MetricGrid({children}: PropsWithChildren) {
   return <View style={styles.metricGrid}>{children}</View>;
 }
 
@@ -157,7 +155,7 @@ export function AvatarBadge({
     .split(' ')
     .filter(Boolean)
     .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? '')
+    .map(part => part[0]?.toUpperCase() ?? '')
     .join('');
 
   return (
@@ -176,7 +174,7 @@ export function AvatarBadge({
     >
       {imageUrl ? (
         <Image
-          source={{ uri: imageUrl }}
+          source={{uri: imageUrl}}
           style={{
             width: size,
             height: size,
@@ -184,7 +182,7 @@ export function AvatarBadge({
           }}
         />
       ) : (
-        <Text style={[styles.avatarText, { fontSize: Math.max(12, size * 0.34) }]}>{initials}</Text>
+        <Text style={[styles.avatarText, {fontSize: Math.max(12, size * 0.34)}]}>{initials}</Text>
       )}
     </View>
   );
@@ -217,7 +215,7 @@ export function ListRow({
     return (
       <Pressable
         onPress={onPress}
-        style={({ pressed }) => [
+        style={({pressed}) => [
           styles.listRow,
           emphasized ? styles.listRowEmphasized : null,
           pressed ? styles.listRowPressed : null,
@@ -228,11 +226,7 @@ export function ListRow({
     );
   }
 
-  return (
-    <View style={[styles.listRow, emphasized ? styles.listRowEmphasized : null]}>
-      {content}
-    </View>
-  );
+  return <View style={[styles.listRow, emphasized ? styles.listRowEmphasized : null]}>{content}</View>;
 }
 
 const styles = StyleSheet.create({
@@ -395,7 +389,7 @@ const styles = StyleSheet.create({
     borderColor: appColors.borderStrong,
   },
   avatarText: {
-    color: appColors.textInverse,
+    color: appColors.text,
     fontWeight: '800',
   },
   listRow: {
