@@ -42,7 +42,7 @@ export default function TabsLayout() {
           contentStyle={{backgroundColor: colors.background}}
           disableTransparentOnScrollEdge
         >
-          <NativeTabs.Trigger.Icon sf="refrigerator.fill" />
+          <NativeTabs.Trigger.Icon sf="house.fill" />
           <NativeTabs.Trigger.Label>Pantry</NativeTabs.Trigger.Label>
         </NativeTabs.Trigger>
         <NativeTabs.Trigger

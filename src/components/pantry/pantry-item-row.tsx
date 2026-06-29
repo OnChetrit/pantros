@@ -39,7 +39,6 @@ type SwipeSide = 'left' | 'right';
 
 type PantryItemRowProps = {
   item: PantryItem;
-  cartName?: string | null;
   isFirst: boolean;
   isLast: boolean;
   onPress: () => void;
@@ -52,7 +51,6 @@ type PantryItemRowProps = {
 
 export function PantryItemRow({
   item,
-  cartName,
   isLast,
   onPress,
   leftActionLabel,
@@ -71,7 +69,6 @@ export function PantryItemRow({
   const leftFullSwipeArmed = useSharedValue(false);
   const rightFullSwipeArmed = useSharedValue(false);
   const quantityLabel = String(item.quantity);
-  const meta = item.isInCart ? cartName : null;
   const hasLeftAction = Boolean(onLeftAction && leftActionLabel);
   const openDistance = PANTRY_SWIPE_OPEN_DISTANCE;
   const fullSwipeDistance = getPantryFullSwipeDistance(rowWidth);
@@ -390,13 +387,12 @@ export function PantryItemRow({
             </View>
             <View style={styles.copy}>
               <Text style={styles.title}>{item.name}</Text>
-              {meta ? <Text style={styles.subtitle}>{meta}</Text> : null}
             </View>
             <View style={styles.trailing}>
               {item.expirationDate ? (
                 <Text style={styles.expiration}>{formatExpirationLabel(item.expirationDate)}</Text>
               ) : null}
-              {item.isInCart ? <Text style={styles.cartBadge}>{quantityLabel}</Text> : null}
+              {item.isInCart ? <Text style={styles.quantity}>{quantityLabel}</Text> : null}
             </View>
             {!isLast ? (
               <Animated.View pointerEvents="none" style={[styles.divider, dividerAnimatedStyle]} />
@@ -478,11 +474,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: appColors.text,
   },
-  subtitle: {
-    fontSize: 13,
-    lineHeight: 18,
-    color: appColors.muted,
-  },
   trailing: {
     alignItems: 'flex-end',
     gap: 6,
@@ -494,14 +485,10 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     color: appColors.muted,
   },
-  cartBadge: {
-    fontSize: 11,
+  quantity: {
+    fontSize: 16,
+    lineHeight: 19,
     fontWeight: '800',
     color: appColors.accent,
-    backgroundColor: appColors.accentSoft,
-    overflow: 'hidden',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 999,
   },
 });

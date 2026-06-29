@@ -19,6 +19,7 @@ const ACTION_OPEN_DISTANCE = ACTION_CIRCLE_SIZE + ACTION_GAP;
 const FULL_SWIPE_MIN_DISTANCE = ACTION_OPEN_DISTANCE * 2.35;
 const FULL_SWIPE_ROW_RATIO = 0.62;
 const ACTION_MIN_VISIBLE_WIDTH = 8;
+const ACTION_SCALE_START_DISTANCE = 35;
 const ACTION_SCALE_DISTANCE = 60;
 
 type PantrySwipeActionProps = {
@@ -45,9 +46,7 @@ export function PantrySwipeAction({
   onPress,
 }: PantrySwipeActionProps) {
   const isArmed = useDerivedValue(() =>
-    side === 'left'
-      ? translation.value >= fullSwipeDistance
-      : translation.value <= -fullSwipeDistance
+    side === 'left' ? translation.value >= fullSwipeDistance : translation.value <= -fullSwipeDistance
   );
 
   const armedProgress = useDerivedValue(() =>
@@ -72,22 +71,15 @@ export function PantrySwipeAction({
   );
 
   const slotStyle = useAnimatedStyle(() => {
-    const directionalValue =
-      side === 'left' ? Math.max(translation.value, 0) : Math.max(-translation.value, 0);
+    const directionalValue = side === 'left' ? Math.max(translation.value, 0) : Math.max(-translation.value, 0);
 
     return {
-      opacity: interpolate(
-        directionalValue,
-        [0, 18, ACTION_SCALE_DISTANCE],
-        [0, 0.6, 1],
-        Extrapolation.CLAMP
-      ),
+      opacity: interpolate(directionalValue, [0, 18, ACTION_SCALE_DISTANCE], [0, 0.6, 1], Extrapolation.CLAMP),
     };
   });
 
   const surfaceStyle = useAnimatedStyle(() => {
-    const directionalValue =
-      side === 'left' ? Math.max(translation.value, 0) : Math.max(-translation.value, 0);
+    const directionalValue = side === 'left' ? Math.max(translation.value, 0) : Math.max(-translation.value, 0);
     const width = Math.max(
       ACTION_MIN_VISIBLE_WIDTH,
       directionalValue > ACTION_OPEN_DISTANCE ? directionalValue - ACTION_GAP : ACTION_CIRCLE_SIZE
@@ -105,8 +97,8 @@ export function PantrySwipeAction({
         {
           scale: interpolate(
             directionalValue,
-            [0, 18, ACTION_SCALE_DISTANCE],
-            [0, 0.72, 1],
+            [0, ACTION_SCALE_START_DISTANCE, ACTION_SCALE_DISTANCE],
+            [0, 0, 1],
             Extrapolation.CLAMP
           ),
         },
@@ -116,10 +108,8 @@ export function PantrySwipeAction({
 
   const iconScaleStyle = useAnimatedStyle(() => {
     const direction = side === 'left' ? 1 : -1;
-    const directionalValue =
-      side === 'left' ? Math.max(translation.value, 0) : Math.max(-translation.value, 0);
-    const stretchedWidth =
-      directionalValue > ACTION_OPEN_DISTANCE ? directionalValue - ACTION_GAP : ACTION_CIRCLE_SIZE;
+    const directionalValue = side === 'left' ? Math.max(translation.value, 0) : Math.max(-translation.value, 0);
+    const stretchedWidth = directionalValue > ACTION_OPEN_DISTANCE ? directionalValue - ACTION_GAP : ACTION_CIRCLE_SIZE;
     const endOffset = (stretchedWidth - ACTION_CIRCLE_SIZE) / 2;
 
     return {
@@ -146,7 +136,7 @@ export function PantrySwipeAction({
           style={[
             styles.surface,
             side === 'left' ? styles.surfaceLeft : styles.surfaceRight,
-            { backgroundColor },
+            {backgroundColor},
             surfaceStyle,
           ]}
         >

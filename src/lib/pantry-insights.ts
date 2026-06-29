@@ -1,4 +1,4 @@
-import type { Cart, PantryItem } from '@/domain/models';
+import type { PantryItem } from '@/domain/models';
 
 type NormalizedBarcode = {
   raw: string;
@@ -143,19 +143,12 @@ export function formatExpirationLabel(value: string | null) {
   return `${days}d`;
 }
 
-export function formatPantryItemMeta(item: PantryItem, carts: Cart[]) {
+export function formatPantryItemMeta(item: PantryItem) {
   if (!item.isInCart) {
     return '';
   }
 
-  const cart = carts.find((entry) => entry.id === item.cartId);
-  const quantityLabel = item.quantity === 1 ? '1 unit' : `${item.quantity} units`;
-
-  if (cart) {
-    return `${quantityLabel} · ${cart.name}`;
-  }
-
-  return `${quantityLabel} · In cart`;
+  return item.quantity === 1 ? '1 unit' : `${item.quantity} units`;
 }
 
 export function matchPantryItems(items: PantryItem[], rawQuery: string): PantryItemMatchResult {

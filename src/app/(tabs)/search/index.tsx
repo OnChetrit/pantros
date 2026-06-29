@@ -230,12 +230,9 @@ export default function SearchScreen() {
           </View>
         }
         renderItem={({item, index}) => {
-          const cartName = pantryCarts.find(cart => cart.id === item.cartId)?.name ?? null;
-
           return (
             <PantryItemRow
               item={item}
-              cartName={cartName}
               isFirst={index === 0}
               isLast={index === visibleItems.length - 1}
               onPress={() => router.push(`/items/${item.id}`)}
