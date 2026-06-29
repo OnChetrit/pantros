@@ -4,7 +4,6 @@ import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, Platform, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 
-import { appColors } from '@/components/ui/primitives';
 import { useAiConsent } from '@/hooks/use-ai-consent';
 import { useAppTheme, useThemedStyles } from '@/lib/theme';
 

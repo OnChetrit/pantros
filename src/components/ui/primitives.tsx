@@ -1,4 +1,5 @@
-import { appColors, type AppThemeColors, useAppTheme, useThemedStyles } from '@/lib/theme';
+import type { AppThemeColors } from '@/lib/theme';
+import { useAppTheme, useThemedStyles } from '@/lib/theme';
 import type { PropsWithChildren, ReactNode, Ref } from 'react';
 import type { StyleProp, ViewStyle } from 'react-native';
 import { Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -133,7 +134,6 @@ export function MetricPill({
   label: string;
   tone?: 'default' | 'accent' | 'warning';
 }) {
-  const {colors} = useAppTheme();
   const styles = useThemedStyles(createStyles);
 
   return (

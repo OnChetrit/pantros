@@ -1,6 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { appColors } from '@/components/ui/primitives';
 import { useThemedStyles } from '@/lib/theme';
 
 type ExpirationMode = 'manual' | 'relative' | 'scan';

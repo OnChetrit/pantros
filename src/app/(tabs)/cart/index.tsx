@@ -11,7 +11,7 @@ import { getCartItems } from '@/lib/pantry-insights';
 import { useAppContext } from '@/state/app-context';
 
 export default function CartScreen() {
-  const { deleteItem, moveItemToPantry, pantryCarts, pantryItems, selectedPantry } = useAppContext();
+  const { deleteItem, moveItemToPantry, pantryItems, selectedPantry } = useAppContext();
   const router = useRouter();
   const openSwipeableRef = useRef<SwipeableMethods | null>(null);
   const [sortOption, setSortOption] = useState<PantryListSortOption>('expiration');

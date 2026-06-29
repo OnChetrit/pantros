@@ -3,20 +3,16 @@ import * as ImagePicker from 'expo-image-picker';
 import { Stack, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
-  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
-  Switch,
-  Text,
   View,
 } from 'react-native';
 
-import { AppTextInput, EmptyNotice, appColors } from '@/components/ui/primitives';
+import { EmptyNotice, appColors } from '@/components/ui/primitives';
 import type { PantryItem, PantryItemInput } from '@/domain/models';
 import { useAiConsent } from '@/hooks/use-ai-consent';
 import { matchPantryItems } from '@/lib/pantry-insights';
@@ -24,31 +20,16 @@ import { useThemedStyles } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
 
 import { extractBarcodeValue } from './barcode-ai';
+import { ItemBarcodeField } from './item-form/item-barcode-field';
+import { ItemCartSection } from './item-form/item-cart-section';
+import { ItemImagePicker } from './item-form/item-image-picker';
+import { ItemNameField } from './item-form/item-name-field';
+import {
+  buildItemInput,
+  hasItemInputChanges,
+  isValidIsoDate,
+} from './item-form/item-form.utils';
 import { ItemExpirationField } from './item-expiration-field';
-
-function normalizeOptionalText(value: string) {
-  const trimmed = value.trim();
-  return trimmed.length > 0 ? trimmed : null;
-}
-
-function isValidIsoDate(value: string) {
-  if (!value) {
-    return true;
-  }
-
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-    return false;
-  }
-
-  const date = new Date(`${value}T00:00:00`);
-  return !Number.isNaN(date.getTime());
-}
-
-function FieldLabel({children}: {children: string}) {
-  const styles = useThemedStyles(createStyles);
-
-  return <Text style={styles.fieldLabel}>{children}</Text>;
-}
 
 export function ItemFormScreen({
   initialBarcode,
@@ -67,7 +48,7 @@ export function ItemFormScreen({
   const primaryCartId = pantryCarts.find(cart => cart.isPrimary)?.id ?? pantryCarts[0]?.id ?? null;
 
   const [name, setName] = useState(item?.name ?? initialName ?? '');
-  const [quantity, setQuantity] = useState('1');
+  const [quantity, setQuantity] = useState(String(item?.quantity ?? 1));
   const [barcode, setBarcode] = useState(item?.barcode ?? initialBarcode ?? '');
   const [image, setImage] = useState(item?.image ?? '');
   const [expirationDate, setExpirationDate] = useState(item?.expirationDate ?? '');
@@ -86,6 +67,7 @@ export function ItemFormScreen({
     if (!item) {
       setBarcode(initialBarcode ?? '');
       setName(initialName ?? '');
+      setQuantity('1');
     }
   }, [initialBarcode, initialName, item]);
 
@@ -129,56 +111,20 @@ export function ItemFormScreen({
 
   const nextCartId = isInCart ? (item?.cartId ?? primaryCartId ?? null) : null;
   const currentInput = useMemo<PantryItemInput | null>(() => {
-    if (!selectedPantryId) {
-      return null;
-    }
-
-    return {
-      pantryId: selectedPantryId,
-      name: name.trim(),
-      barcode: normalizeOptionalText(barcode),
-      image: normalizeOptionalText(image),
-      expirationDate: normalizeOptionalText(expirationDate),
+    return buildItemInput({
+      selectedPantryId,
+      name,
+      barcode,
+      image,
+      expirationDate,
       isInCart,
-      cartId: nextCartId,
-      quantity: isInCart ? (parsedQuantity ?? 1) : 1,
-    };
+      nextCartId,
+      parsedQuantity,
+    });
   }, [barcode, expirationDate, image, isInCart, name, nextCartId, parsedQuantity, selectedPantryId]);
 
   const hasChanges = useMemo(() => {
-    if (!currentInput) {
-      return false;
-    }
-
-    const initialInput = item
-      ? {
-          name: item.name,
-          barcode: item.barcode,
-          image: item.image,
-          expirationDate: item.expirationDate,
-          isInCart: item.isInCart,
-          cartId: item.isInCart ? (item.cartId ?? primaryCartId ?? null) : null,
-          quantity: item.isInCart ? 1 : 1,
-        }
-      : {
-          name: '',
-          barcode: null,
-          image: null,
-          expirationDate: null,
-          isInCart: false,
-          cartId: null,
-          quantity: 1,
-        };
-
-    return (
-      currentInput.name !== initialInput.name ||
-      currentInput.barcode !== initialInput.barcode ||
-      currentInput.image !== initialInput.image ||
-      currentInput.expirationDate !== initialInput.expirationDate ||
-      currentInput.isInCart !== initialInput.isInCart ||
-      currentInput.cartId !== initialInput.cartId ||
-      currentInput.quantity !== initialInput.quantity
-    );
+    return hasItemInputChanges(currentInput, item, primaryCartId);
   }, [currentInput, item, primaryCartId]);
 
   const canSave =
@@ -313,8 +259,6 @@ export function ItemFormScreen({
     Alert.alert('No pantry selected', 'Create or join a pantry before adding items.');
   };
 
-  console.log('appColors.border', appColors.border);
-
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.screen}>
       <Stack.Screen
@@ -358,15 +302,7 @@ export function ItemFormScreen({
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.heroRow}>
-          <Pressable onPress={() => openImageSourcePicker('image')} style={styles.imageButton}>
-            {image ? (
-              <Image source={{uri: image}} style={styles.imagePreview} />
-            ) : (
-              <View style={styles.imagePlaceholder}>
-                <Text style={styles.imagePlaceholderText}>No Image</Text>
-              </View>
-            )}
-          </Pressable>
+          <ItemImagePicker image={image} onPress={() => openImageSourcePicker('image')} />
         </View>
 
         {!selectedPantry ? (
@@ -377,96 +313,32 @@ export function ItemFormScreen({
         ) : null}
 
         <View style={styles.card}>
-          <View style={styles.fieldGroup}>
-            <FieldLabel>Name</FieldLabel>
-            <AppTextInput value={name} onChangeText={setName} placeholder="" />
-            {duplicateCandidates.length > 0 ? (
-              <View style={styles.suggestionList}>
-                {duplicateCandidates.map(candidate => {
-                  const isExact = candidate.id === exactDuplicate?.id;
-
-                  return (
-                    <Pressable
-                      key={candidate.id}
-                      onPress={() => router.replace(`/items/${candidate.id}`)}
-                      style={({pressed}) => [
-                        styles.suggestionRow,
-                        isExact ? styles.suggestionRowExact : null,
-                        pressed ? styles.suggestionRowPressed : null,
-                      ]}
-                    >
-                      <Text style={styles.suggestionName}>{candidate.name}</Text>
-                      <Text style={styles.suggestionAction}>{isExact ? 'Open existing' : 'Use existing'}</Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            ) : null}
-          </View>
-
-          <View style={styles.fieldGroup}>
-            <FieldLabel>Barcode</FieldLabel>
-            <AppTextInput
-              value={barcode}
-              onChangeText={setBarcode}
-              placeholder=""
-              autoCapitalize="none"
-              rightSlot={
-                <Pressable
-                  onPress={() => openImageSourcePicker('barcode')}
-                  accessibilityRole="button"
-                  accessibilityLabel="Scan barcode"
-                  style={({pressed}) => [styles.inputIconButton, pressed ? styles.inputIconButtonPressed : null]}
-                >
-                  <Ionicons name="scan-outline" size={20} color={appColors.tint} />
-                </Pressable>
-              }
-            />
-            {barcodeBusy ? (
-              <View style={styles.inlineStatus}>
-                <ActivityIndicator color={appColors.tint} size="small" />
-                <Text style={styles.inlineStatusText}>Reading barcode from image…</Text>
-              </View>
-            ) : null}
-            {barcodeError ? (
-              <View style={styles.inlineError}>
-                <Text style={styles.inlineErrorText}>{barcodeError}</Text>
-              </View>
-            ) : null}
-          </View>
-
-          <View style={styles.fieldGroup}>
-            <View style={styles.fieldHeader}>
-              <FieldLabel>Add To Cart</FieldLabel>
-              <Switch value={isInCart} onValueChange={setIsInCart} />
-            </View>
-          </View>
-
-          {isInCart ? (
-            <View style={styles.fieldGroup}>
-              <FieldLabel>Quantity</FieldLabel>
-              <View style={styles.stepper}>
-                <Pressable
-                  onPress={() => {
-                    const nextValue = Math.max(1, parsedQuantity ?? 1) - 1;
-                    setQuantity(String(Math.max(1, nextValue)));
-                  }}
-                  style={({pressed}) => [styles.stepperButton, pressed ? styles.stepperButtonPressed : null]}
-                >
-                  <Ionicons name="remove" size={18} color={appColors.text} />
-                </Pressable>
-                <Text style={styles.stepperValue}>{parsedQuantity ?? 1}</Text>
-                <Pressable
-                  onPress={() => {
-                    setQuantity(String((parsedQuantity ?? 1) + 1));
-                  }}
-                  style={({pressed}) => [styles.stepperButton, pressed ? styles.stepperButtonPressed : null]}
-                >
-                  <Ionicons name="add" size={18} color={appColors.text} />
-                </Pressable>
-              </View>
-            </View>
-          ) : null}
+          <ItemNameField
+            name={name}
+            duplicateCandidates={duplicateCandidates}
+            exactDuplicateId={exactDuplicate?.id}
+            onChangeName={setName}
+            onSelectDuplicate={candidateId => router.replace(`/items/${candidateId}`)}
+          />
+          <ItemBarcodeField
+            barcode={barcode}
+            busy={barcodeBusy}
+            error={barcodeError}
+            onChangeBarcode={setBarcode}
+            onScanPress={() => openImageSourcePicker('barcode')}
+          />
+          <ItemCartSection
+            isInCart={isInCart}
+            quantity={parsedQuantity ?? 1}
+            onToggle={setIsInCart}
+            onDecrement={() => {
+              const nextValue = Math.max(1, parsedQuantity ?? 1) - 1;
+              setQuantity(String(Math.max(1, nextValue)));
+            }}
+            onIncrement={() => {
+              setQuantity(String((parsedQuantity ?? 1) + 1));
+            }}
+          />
         </View>
 
         <ItemExpirationField value={expirationDate} onChange={setExpirationDate} />
@@ -495,30 +367,6 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) => StyleShee
     alignItems: 'center',
     justifyContent: 'center',
   },
-  imageButton: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
-    overflow: 'hidden',
-    backgroundColor: colors.input,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  imagePreview: {
-    width: '100%',
-    height: '100%',
-  },
-  imagePlaceholder: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.input,
-  },
-  imagePlaceholderText: {
-    color: colors.muted,
-    fontSize: 12,
-    fontWeight: '700',
-  },
   headerActionButton: {
     width: 32,
     height: 32,
@@ -535,114 +383,5 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) => StyleShee
     backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
-  },
-  fieldGroup: {
-    gap: 6,
-  },
-  fieldHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  fieldLabel: {
-    color: colors.text,
-    fontSize: 13,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
-  },
-  suggestionList: {
-    borderRadius: 14,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.input,
-  },
-  suggestionRow: {
-    minHeight: 40,
-    paddingHorizontal: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
-  },
-  suggestionRowExact: {
-    backgroundColor: colors.tintSoft,
-  },
-  suggestionRowPressed: {
-    opacity: 0.7,
-  },
-  suggestionName: {
-    flex: 1,
-    color: colors.text,
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  suggestionAction: {
-    color: colors.tint,
-    fontSize: 12,
-    fontWeight: '800',
-  },
-  inputIconButton: {
-    width: 34,
-    height: 34,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  inputIconButtonPressed: {
-    opacity: 0.55,
-  },
-  inlineStatus: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  inlineStatusText: {
-    color: colors.muted,
-    fontSize: 13,
-  },
-  inlineError: {
-    borderRadius: 14,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    backgroundColor: colors.dangerSoft,
-  },
-  inlineErrorText: {
-    color: colors.text,
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  stepper: {
-    minHeight: 48,
-    borderRadius: 16,
-    paddingHorizontal: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: colors.input,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  stepperButton: {
-    width: 34,
-    height: 34,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  stepperButtonPressed: {
-    opacity: 0.6,
-  },
-  stepperValue: {
-    color: colors.text,
-    fontSize: 17,
-    fontWeight: '800',
   },
 });
