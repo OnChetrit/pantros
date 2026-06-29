@@ -1,8 +1,10 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { Picker } from '@react-native-picker/picker';
 import { Redirect, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
+  Animated,
+  Easing,
+  LayoutChangeEvent,
   Platform,
   Pressable,
   ScrollView,
@@ -12,7 +14,6 @@ import {
   View,
 } from 'react-native';
 
-import { AppStackHeader } from '@/components/navigation/app-stack-header';
 import {
   AppButton,
   AppScreen,
@@ -21,11 +22,35 @@ import {
   appColors,
 } from '@/components/ui/primitives';
 import { AI_CONSENT_VERSION, formatAiConsentDate, hasActiveAiConsent } from '@/lib/ai-consent';
+import { useAppTheme } from '@/lib/theme';
 import {
   getDeviceTimeZone,
   registerForPushNotifications,
 } from '@/services/supabase/notification-service';
 import { useAppContext } from '@/state/app-context';
+
+type ThemeChipProps = {
+  label: string;
+  active: boolean;
+  onPress: () => void;
+};
+
+function ThemeChip({label, active, onPress}: ThemeChipProps) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({pressed}) => [
+        styles.themeChip,
+        active ? styles.themeChipActive : null,
+        pressed ? styles.themeChipPressed : null,
+      ]}
+    >
+      <Text style={[styles.themeChipText, active ? styles.themeChipTextActive : null]}>
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
 
 function parseReminderTime(value: string) {
   const [hours, minutes] = value.split(':').map(Number);
@@ -42,18 +67,15 @@ function formatReminderTime(value: Date) {
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const { themePreference, setThemePreference } = useAppTheme();
   const {
     errorMessage,
     isAuthenticated,
     notificationBusy,
     notificationPreferences,
-    pantries,
     profile,
     refreshAppState,
     saveNotificationPreferences,
-    selectedPantry,
-    selectedPantryId,
-    selectPantry,
     signOut,
     status,
     withdrawAiConsent,
@@ -64,13 +86,26 @@ export default function SettingsScreen() {
   const [notificationActionBusy, setNotificationActionBusy] = useState(false);
   const [notificationError, setNotificationError] = useState<string | null>(null);
   const [showAndroidTimePicker, setShowAndroidTimePicker] = useState(false);
+  const [themeSwitchWidth, setThemeSwitchWidth] = useState(0);
   const aiConsentEnabled = hasActiveAiConsent(profile);
+  const themeAnimation = useRef(
+    new Animated.Value(themePreference === 'device' ? 0 : themePreference === 'light' ? 1 : 2)
+  ).current;
 
   useEffect(() => {
     if (notificationPreferences) {
       setReminderTime(parseReminderTime(notificationPreferences.cartReminderTime));
     }
   }, [notificationPreferences]);
+
+  useEffect(() => {
+    Animated.timing(themeAnimation, {
+      toValue: themePreference === 'device' ? 0 : themePreference === 'light' ? 1 : 2,
+      duration: 220,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+  }, [themeAnimation, themePreference]);
 
   if (status === 'idle' || status === 'loading') {
     return null;
@@ -81,6 +116,15 @@ export default function SettingsScreen() {
   }
 
   const notificationsBusy = notificationBusy || notificationActionBusy;
+  const themeIndicatorWidth = themeSwitchWidth > 0 ? (themeSwitchWidth - 12 - 16) / 3 : 0;
+  const themeIndicatorTranslateX = themeAnimation.interpolate({
+    inputRange: [0, 1, 2],
+    outputRange: [0, themeIndicatorWidth + 8, themeIndicatorWidth * 2 + 16],
+  });
+
+  const handleThemeSwitchLayout = (event: LayoutChangeEvent) => {
+    setThemeSwitchWidth(event.nativeEvent.layout.width);
+  };
 
   const saveCartReminderSettings = async (enabled: boolean) => {
     if (!notificationPreferences) {
@@ -149,19 +193,53 @@ export default function SettingsScreen() {
       contentContainerStyle={{ paddingBottom: 40 }}
       contentInsetAdjustmentBehavior="automatic"
     >
-      <AppStackHeader title="Settings" showAccountMenu={false} minimalBackButton />
       <AppScreen>
         <SectionCard
-          title="Cart Reminders"
-          subtitle="Receive one reminder each day when any pantry you belong to has items waiting in a cart."
+          title="Appearance"
+          subtitle="Choose how Pantros follows light and dark mode."
+          borderless
+        >
+          <View style={styles.themeSwitch} onLayout={handleThemeSwitchLayout}>
+            {themeIndicatorWidth > 0 ? (
+              <Animated.View
+                pointerEvents="none"
+                style={[
+                  styles.themeIndicator,
+                  {
+                    width: themeIndicatorWidth,
+                    transform: [{translateX: themeIndicatorTranslateX}],
+                  },
+                ]}
+              />
+            ) : null}
+            <ThemeChip
+              label="Device"
+              active={themePreference === 'device'}
+              onPress={() => void setThemePreference?.('device')}
+            />
+            <ThemeChip
+              label="Light"
+              active={themePreference === 'light'}
+              onPress={() => void setThemePreference?.('light')}
+            />
+            <ThemeChip
+              label="Dark"
+              active={themePreference === 'dark'}
+              onPress={() => void setThemePreference?.('dark')}
+            />
+          </View>
+        </SectionCard>
+
+        <SectionCard
+          title="Reminders"
+          subtitle="Daily cart reminders use your device time zone."
+          borderless
         >
           <View style={styles.notificationToggleRow}>
             <View style={styles.notificationToggleCopy}>
-              <Text style={styles.notificationToggleTitle}>Push notifications</Text>
+              <Text style={styles.notificationToggleTitle}>Cart reminders</Text>
               <Text style={styles.notificationToggleSubtitle}>
-                {notificationPreferences?.cartRemindersEnabled
-                  ? `Enabled for ${notificationPreferences.timeZone}`
-                  : 'Disabled'}
+                {notificationPreferences?.cartRemindersEnabled ? 'On' : 'Off'}
               </Text>
             </View>
             <Switch
@@ -176,9 +254,7 @@ export default function SettingsScreen() {
           <View style={styles.timeRow}>
             <View style={styles.notificationToggleCopy}>
               <Text style={styles.notificationToggleTitle}>Reminder time</Text>
-              <Text style={styles.notificationToggleSubtitle}>
-                Uses the current device time zone.
-              </Text>
+              <Text style={styles.notificationToggleSubtitle}>Uses the current device time zone.</Text>
             </View>
             {Platform.OS === 'android' ? (
               <Pressable
@@ -227,7 +303,7 @@ export default function SettingsScreen() {
           ) : null}
 
           <AppButton
-            label={notificationsBusy ? 'Saving…' : 'Save Reminder Time'}
+            label={notificationsBusy ? 'Saving…' : 'Save time'}
             onPress={() => void saveReminderTime()}
             variant="secondary"
             disabled={!notificationPreferences || notificationsBusy}
@@ -235,70 +311,20 @@ export default function SettingsScreen() {
         </SectionCard>
 
         <SectionCard
-          title="Workspace Scope"
-          subtitle="Pantry selection belongs to the shared app state, so switching workspaces here updates every feature surface."
-        >
-          <View style={styles.pickerField}>
-            <Picker
-              selectedValue={selectedPantryId}
-              onValueChange={(value) => {
-                if (typeof value === 'string' && value) {
-                  selectPantry(value);
-                }
-              }}
-              enabled={pantries.length > 0}
-              style={styles.picker}
-              itemStyle={styles.pickerItem}
-              dropdownIconColor={String(appColors.tint)}
-            >
-              {pantries.length === 0 ? (
-                <Picker.Item label="No pantry loaded" value="" />
-              ) : null}
-              {pantries.map((pantry) => (
-                <Picker.Item key={pantry.id} label={pantry.name} value={pantry.id} />
-              ))}
-            </Picker>
-          </View>
-
-          <View style={{ gap: 10 }}>
-            <ListRow
-              title="Selected pantry"
-              subtitle={selectedPantry?.name ?? 'None selected'}
-            />
-            <ListRow
-              title="Expiration reminder time"
-              subtitle={selectedPantry?.settings.reminderTime ?? 'Not configured'}
-            />
-            <ListRow
-              title="Share code"
-              subtitle={selectedPantry?.shareCode ?? 'Not generated'}
-            />
-          </View>
-        </SectionCard>
-
-        <SectionCard
           title="AI Scanning"
-          subtitle="Barcode and expiration image scans are optional and require consent before Pantros sends a selected image to OpenAI."
+          subtitle="Optional barcode and expiration scans require consent."
+          borderless
         >
-          <View style={{ gap: 10 }}>
-            <ListRow
-              title="Consent status"
-              subtitle={
-                aiConsentEnabled
-                  ? `Accepted on ${formatAiConsentDate(profile?.aiConsentGrantedAt ?? null)}`
-                  : 'Not accepted or withdrawn'
-              }
-              rightValue={profile?.aiConsentVersion ?? AI_CONSENT_VERSION}
-            />
-            <ListRow
-              title="Processor"
-              subtitle="OpenAI receives the selected scan image only to extract barcode digits or expiration dates."
-            />
-            <ListRow
-              title="Withdrawal"
-              subtitle="Turning this off blocks future AI uploads. Manual barcode and date entry still work."
-            />
-          </View>
+          <ListRow
+            title="Consent"
+            subtitle={
+              aiConsentEnabled
+                ? `Accepted on ${formatAiConsentDate(profile?.aiConsentGrantedAt ?? null)}`
+                : 'Not enabled'
+            }
+            rightValue={profile?.aiConsentVersion ?? AI_CONSENT_VERSION}
+            borderless
+          />
 
           <AppButton
             label={aiConsentEnabled ? 'Withdraw AI Consent' : 'AI Consent Not Accepted'}
@@ -309,28 +335,23 @@ export default function SettingsScreen() {
         </SectionCard>
 
         <SectionCard
-          title="Application State"
-          subtitle="Manual controls for the current bootstrap and session lifecycle while the feature set is still expanding."
+          title="Session"
+          subtitle="Current account and app state."
+          borderless
         >
           <View style={{ gap: 10 }}>
-            <ListRow title="Profile" subtitle={profile?.email ?? 'Not authenticated'} />
-            <ListRow
-              title="Last app message"
-              subtitle={errorMessage ?? 'No errors'}
-            />
+            <ListRow title="Profile" subtitle={profile?.email ?? 'Not authenticated'} borderless />
+            <ListRow title="Status" subtitle={errorMessage ?? 'No errors'} borderless />
           </View>
 
-          <AppButton
-            label="Refresh App State"
-            onPress={() => void refreshAppState()}
-            variant="secondary"
-          />
+          <AppButton label="Refresh" onPress={() => void refreshAppState()} variant="secondary" />
           <AppButton label="Sign Out" onPress={() => void signOut()} />
         </SectionCard>
 
         <SectionCard
           title="Delete Account"
           subtitle="Permanently delete your account, leave shared pantries, and choose what happens to pantries you own."
+          borderless
         >
           <AppButton
             label="Review Account Deletion"
@@ -342,22 +363,26 @@ export default function SettingsScreen() {
         <SectionCard
           title="Legal"
           subtitle="Review the current privacy policy, terms, and support contact details."
+          borderless
         >
           <View style={{ gap: 10 }}>
             <ListRow
               title="Privacy Policy"
               subtitle="How Pantros collects, uses, shares, and deletes data."
               onPress={() => router.push('/legal/privacy')}
+              borderless
             />
             <ListRow
               title="Terms of Service"
               subtitle="Basic service terms for shared pantry use."
               onPress={() => router.push('/legal/terms')}
+              borderless
             />
             <ListRow
               title="Contact Support"
               subtitle="Get help with account, reminder, or deletion issues."
               onPress={() => router.push('/legal/support')}
+              borderless
             />
           </View>
         </SectionCard>
@@ -407,8 +432,6 @@ const styles = StyleSheet.create({
     paddingVertical: 9,
     alignItems: 'center',
     backgroundColor: appColors.input,
-    borderWidth: 1,
-    borderColor: appColors.border,
   },
   timeButtonPressed: {
     opacity: 0.72,
@@ -418,21 +441,43 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
   },
-  pickerField: {
-    minHeight: 52,
+  themeSwitch: {
+    position: 'relative',
+    flexDirection: 'row',
+    gap: 8,
+    padding: 6,
+    borderRadius: 22,
+    backgroundColor: appColors.background,
+  },
+  themeIndicator: {
+    position: 'absolute',
+    top: 6,
+    left: 6,
+    bottom: 6,
     borderRadius: 16,
-    overflow: 'hidden',
-    backgroundColor: appColors.input,
-    borderWidth: 1,
-    borderColor: appColors.border,
+    backgroundColor: appColors.tint,
+  },
+  themeChip: {
+    position: 'relative',
+    flex: 1,
+    minHeight: 44,
+    borderRadius: 16,
+    alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 12,
   },
-  picker: {
-    color: appColors.text,
-    backgroundColor: 'transparent',
+  themeChipActive: {
+    borderColor: 'transparent',
   },
-  pickerItem: {
-    color: appColors.text,
-    fontSize: 16,
+  themeChipPressed: {
+    opacity: 0.78,
+  },
+  themeChipText: {
+    color: appColors.muted,
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  themeChipTextActive: {
+    color: appColors.textInverse,
   },
 });

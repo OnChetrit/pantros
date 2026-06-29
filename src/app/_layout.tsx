@@ -7,7 +7,8 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect, useMemo } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-import { useAppTheme } from '@/lib/theme';
+import { useTabStackScreenOptions } from '@/components/navigation/tab-stack-layout';
+import { ThemePreferenceProvider, useAppTheme } from '@/lib/theme';
 import { AppProvider } from '@/state/app-context';
 
 export const unstable_settings = {
@@ -15,8 +16,26 @@ export const unstable_settings = {
 };
 
 export default function RootLayout() {
+  return (
+    <ThemePreferenceProvider>
+      <RootLayoutContent />
+    </ThemePreferenceProvider>
+  );
+}
+
+function RootLayoutContent() {
   const { colors, isDark } = useAppTheme();
   const router = useRouter();
+  const profileScreenOptions = useTabStackScreenOptions({
+    title: 'Profile',
+    showAccountMenu: false,
+    minimalBackButton: true,
+  });
+  const settingsScreenOptions = useTabStackScreenOptions({
+    title: 'Settings',
+    showAccountMenu: false,
+    minimalBackButton: true,
+  });
   const navigationTheme = useMemo(() => {
     const baseTheme = isDark ? DarkTheme : DefaultTheme;
 
@@ -80,6 +99,8 @@ export default function RootLayout() {
             <Stack.Screen name="index" options={{headerShown: false}} />
             <Stack.Screen name="(auth)" options={{headerShown: false}} />
             <Stack.Screen name="(tabs)" options={{headerShown: false}} />
+            <Stack.Screen name="profile" options={profileScreenOptions} />
+            <Stack.Screen name="settings" options={settingsScreenOptions} />
             <Stack.Screen
               name="items/scan"
               options={{

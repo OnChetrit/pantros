@@ -8,14 +8,13 @@ import { appColors } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
 
 type RouteItem = {
-  href: '/profile' | '/notifications' | '/settings';
+  href: '/profile' | '/settings';
   label: string;
   marker: string;
 };
 
 const routeItems: RouteItem[] = [
   { href: '/profile', label: 'Profile', marker: 'P' },
-  { href: '/notifications', label: 'Notifications', marker: 'N' },
   { href: '/settings', label: 'Settings', marker: 'S' },
 ];
 
@@ -138,8 +137,6 @@ const styles = StyleSheet.create({
     padding: 14,
     borderRadius: 22,
     backgroundColor: appColors.card,
-    borderWidth: 1,
-    borderColor: appColors.border,
   },
   panelHeaderCopy: {
     flex: 1,
@@ -173,8 +170,6 @@ const styles = StyleSheet.create({
   routeRow: {
     borderRadius: 18,
     backgroundColor: appColors.card,
-    borderWidth: 1,
-    borderColor: appColors.border,
     padding: 12,
     flexDirection: 'row',
     alignItems: 'center',
@@ -182,7 +177,6 @@ const styles = StyleSheet.create({
   },
   routeRowActive: {
     backgroundColor: appColors.tintSoft,
-    borderColor: appColors.borderStrong,
   },
   routeRowPressed: {
     opacity: 0.78,
@@ -194,12 +188,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: appColors.listRowEmphasized,
-    borderWidth: 1,
-    borderColor: appColors.borderStrong,
   },
   routeMarkerActive: {
     backgroundColor: appColors.tint,
-    borderColor: appColors.tint,
   },
   routeMarkerText: {
     color: appColors.tint,
@@ -219,8 +210,6 @@ const styles = StyleSheet.create({
     marginTop: 'auto',
     borderRadius: 18,
     backgroundColor: appColors.dangerSoft,
-    borderWidth: 1,
-    borderColor: appColors.danger,
     paddingHorizontal: 16,
     paddingVertical: 14,
     alignItems: 'center',

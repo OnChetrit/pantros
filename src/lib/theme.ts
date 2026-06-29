@@ -1,5 +1,21 @@
-import { DynamicColorIOS, Platform, useColorScheme } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+  Appearance,
+  DynamicColorIOS,
+  Platform,
+  useColorScheme,
+} from 'react-native';
 import type { ColorValue } from 'react-native';
+import {
+  createElement,
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
+import type { PropsWithChildren } from 'react';
 
 type ThemePalette = {
   background: string;
@@ -30,6 +46,15 @@ type ThemePalette = {
 
 type AdaptiveThemeColors = Record<keyof ThemePalette, ColorValue>;
 
+export type ThemePreference = 'device' | 'light' | 'dark';
+
+type ThemeContextValue = {
+  themePreference: ThemePreference;
+  setThemePreference: (preference: ThemePreference) => Promise<void>;
+};
+
+const THEME_PREFERENCE_KEY = 'pantros.themePreference';
+
 const lightColors: ThemePalette = {
   background: '#f5f8f2',
   card: '#fbfdf8',
@@ -58,31 +83,33 @@ const lightColors: ThemePalette = {
 };
 
 const darkColors: ThemePalette = {
-  background: '#0f1511',
-  card: '#151d17',
-  border: '#263329',
-  borderStrong: '#35443a',
-  text: '#eff7f0',
-  textInverse: '#0f1511',
-  muted: '#a9b8ac',
+  background: '#090909',
+  card: '#181818',
+  border: '#181818',
+  borderStrong: '#202020',
+  text: '#f4f4f5',
+  textInverse: '#090909',
+  muted: '#a1a1aa',
   tint: '#8fc79e',
-  tintSoft: '#1d2d22',
-  accent: '#b5d7b9',
-  accentSoft: '#19261d',
+  tintSoft: '#171c18',
+  accent: '#cbd5cf',
+  accentSoft: '#171917',
   warning: '#e3a06b',
-  warningSoft: '#2d1f17',
-  danger: '#ef7f6d',
-  dangerSoft: '#341c18',
-  input: '#1a241d',
-  empty: '#1b2a20',
-  metric: '#172019',
-  listRow: '#141b16',
-  listRowEmphasized: '#1b261e',
-  rowPressed: '#1f2b22',
-  overlay: 'rgba(0, 0, 0, 0.28)',
-  grabber: '#516354',
+  warningSoft: '#2a1d15',
+  danger: '#f08c78',
+  dangerSoft: '#301916',
+  input: '#1b1b1b',
+  empty: '#191919',
+  metric: '#1a1a1a',
+  listRow: '#1c1c1c',
+  listRowEmphasized: '#222222',
+  rowPressed: '#262626',
+  overlay: 'rgba(0, 0, 0, 0.36)',
+  grabber: '#4a4a4a',
   shadow: '#000000',
 };
+
+const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 function adaptive(light: string, dark: string) {
   if (Platform.OS === 'ios') {
@@ -119,12 +146,73 @@ export const appColors: AdaptiveThemeColors = {
   shadow: adaptive(lightColors.shadow, darkColors.shadow),
 };
 
+function applyColorScheme(preference: ThemePreference) {
+  Appearance.setColorScheme(preference === 'device' ? 'unspecified' : preference);
+}
+
+export function ThemePreferenceProvider({ children }: PropsWithChildren) {
+  const [themePreference, setThemePreferenceState] =
+    useState<ThemePreference>('device');
+
+  useEffect(() => {
+    let cancelled = false;
+
+    AsyncStorage.getItem(THEME_PREFERENCE_KEY)
+      .then((value) => {
+        if (cancelled) {
+          return;
+        }
+
+        const nextPreference =
+          value === 'light' || value === 'dark' || value === 'device'
+            ? value
+            : 'device';
+
+        setThemePreferenceState(nextPreference);
+        applyColorScheme(nextPreference);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          applyColorScheme('device');
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const setThemePreference = useCallback(async (preference: ThemePreference) => {
+    setThemePreferenceState(preference);
+    applyColorScheme(preference);
+    await AsyncStorage.setItem(THEME_PREFERENCE_KEY, preference);
+  }, []);
+
+  const value = useMemo(
+    () => ({
+      themePreference,
+      setThemePreference,
+    }),
+    [setThemePreference, themePreference]
+  );
+
+  return createElement(ThemeContext.Provider, { value }, children);
+}
+
 export function useAppTheme() {
-  const scheme = useColorScheme();
-  const isDark = scheme !== 'light';
+  const context = useContext(ThemeContext);
+  const systemScheme = useColorScheme();
+  const themePreference = context?.themePreference ?? 'device';
+  const scheme =
+    themePreference === 'device'
+      ? systemScheme === 'dark' ? 'dark' : 'light'
+      : themePreference;
+  const isDark = scheme === 'dark';
 
   return {
     isDark,
     colors: isDark ? darkColors : lightColors,
+    themePreference,
+    setThemePreference: context?.setThemePreference,
   };
 }
