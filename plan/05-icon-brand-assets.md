@@ -1,6 +1,6 @@
 # 05 — App Icon and Brand Assets
 
-Status: Pending
+Status: Implemented; pending production build validation
 
 ## Goal
 
@@ -9,26 +9,26 @@ App Store.
 
 ## Current issues
 
-- The iOS icon project references an Expo symbol.
-- The PNG icon source contains an alpha channel.
+- Production validation still needs to confirm the generated AppIcon catalog
+  in an archived build.
 
 ## Implementation
 
-- [ ] Design an original Pantros app icon.
-- [ ] Provide a 1024×1024 source.
-- [ ] Ensure there are no transparent regions.
-- [ ] Do not pre-round the icon corners.
-- [ ] Replace the Expo icon asset/configuration.
+- [x] Design an original Pantros app icon.
+- [x] Provide a 1024×1024 source.
+- [x] Ensure there are no transparent regions.
+- [x] Do not pre-round the icon corners.
+- [x] Replace the Expo icon asset/configuration.
 - [ ] Confirm generated iPhone icon sizes.
-- [ ] Align splash-screen branding with the final icon.
-- [ ] Confirm ownership/licensing for every visual asset.
+- [x] Align splash-screen branding with the final icon.
+- [x] Confirm ownership/licensing for every visual asset.
 
 ## Verification
 
 - [ ] Inspect the icon on light and dark home-screen backgrounds.
 - [ ] Inspect Settings, Spotlight, notification, and App Store variants.
 - [ ] Validate the production archive's AppIcon asset catalog.
-- [ ] Confirm no Expo placeholder imagery remains.
+- [x] Confirm no Expo placeholder imagery remains.
 
 ## Done when
 
