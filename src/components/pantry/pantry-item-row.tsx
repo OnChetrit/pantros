@@ -149,7 +149,7 @@ export function PantryItemRow({
 
   swipeableRef.current = swipeableMethods;
 
-  const handleDelete = useCallback(() => {
+  const confirmDelete = useCallback(() => {
     withActionLock(() => {
       void triggerMediumImpact();
       Alert.alert('Delete Item', `Delete "${item.name}"?`, [
@@ -170,6 +170,10 @@ export function PantryItemRow({
     });
   }, [closeRow, item.name, onDelete, withActionLock]);
 
+  const handleDelete = useCallback(() => {
+    confirmDelete();
+  }, [confirmDelete]);
+
   const handleLeftAction = useCallback(() => {
     withActionLock(() => {
       void triggerMediumImpact();
@@ -179,12 +183,9 @@ export function PantryItemRow({
   }, [closeRow, onLeftAction, withActionLock]);
 
   const handleFullSwipeDelete = useCallback(() => {
-    withActionLock(() => {
-      void triggerMediumImpact();
-      closeRow();
-      onDelete();
-    });
-  }, [closeRow, onDelete, withActionLock]);
+    closeRow();
+    confirmDelete();
+  }, [closeRow, confirmDelete]);
 
   const handleLeftArmedChange = useCallback((isArmed: boolean) => {
     if (isArmed) {
