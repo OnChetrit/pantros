@@ -238,6 +238,7 @@ export default function SearchScreen() {
               isFirst={index === 0}
               isLast={index === visibleItems.length - 1}
               onPress={() => router.push(`/items/${item.id}`)}
+              onEdit={() => router.push(`/items/${item.id}`)}
               leftActionLabel={item.isInCart ? 'Move to Pantry' : 'Add to Cart'}
               leftActionIcon={item.isInCart ? 'return-up-back-outline' : 'cart-outline'}
               onLeftAction={item.isInCart ? () => void moveItemToPantry(item.id) : () => void handleAddToCart(item.id)}

@@ -1,7 +1,8 @@
 import type { PantryItem } from '@/domain/models';
+import { Button as SwiftUIButton, ContextMenu, Host, RNHostView } from '@expo/ui/swift-ui';
 import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import type { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
 
@@ -42,6 +43,7 @@ type PantryItemRowProps = {
   isFirst: boolean;
   isLast: boolean;
   onPress: () => void;
+  onEdit: () => void;
   leftActionLabel?: string;
   leftActionIcon?: keyof typeof Ionicons.glyphMap;
   onLeftAction?: () => void;
@@ -53,6 +55,7 @@ export function PantryItemRow({
   item,
   isLast,
   onPress,
+  onEdit,
   leftActionLabel,
   leftActionIcon = 'cart-outline',
   onLeftAction,
@@ -71,6 +74,7 @@ export function PantryItemRow({
   const rightFullSwipeArmed = useSharedValue(false);
   const quantityLabel = String(item.quantity);
   const hasLeftAction = Boolean(onLeftAction && leftActionLabel);
+  const contextCartActionLabel = item.isInCart ? 'Remove from cart' : 'Add to Cart';
   const openDistance = PANTRY_SWIPE_OPEN_DISTANCE;
   const fullSwipeDistance = getPantryFullSwipeDistance(rowWidth);
   const commitDistance = Math.max(rowWidth, fullSwipeDistance + openDistance);
@@ -177,6 +181,14 @@ export function PantryItemRow({
   const handleDelete = useCallback(() => {
     confirmDelete();
   }, [confirmDelete]);
+
+  const handleEditAction = useCallback(() => {
+    withActionLock(() => {
+      void triggerMediumImpact();
+      closeRow();
+      onEdit();
+    });
+  }, [closeRow, onEdit, withActionLock]);
 
   const handleLeftAction = useCallback(() => {
     withActionLock(() => {
@@ -343,6 +355,65 @@ export function PantryItemRow({
     onPress();
   };
 
+  const showFallbackContextMenu = useCallback(() => {
+    closeRow();
+    void triggerMediumImpact();
+
+    Alert.alert(
+      item.name,
+      undefined,
+      [
+        {
+          text: 'Edit item',
+          onPress: handleEditAction,
+        },
+        ...(hasLeftAction
+          ? [
+              {
+                text: contextCartActionLabel,
+                onPress: handleLeftAction,
+              },
+            ]
+          : []),
+        {
+          text: 'Delete item',
+          style: 'destructive',
+          onPress: handleDelete,
+        },
+      ],
+      {
+        cancelable: true,
+      }
+    );
+  }, [closeRow, contextCartActionLabel, handleDelete, handleEditAction, handleLeftAction, hasLeftAction, item.name]);
+
+  const rowContent = (
+    <Pressable
+      onPress={handleRowPress}
+      onLongPress={Platform.OS === 'ios' ? undefined : showFallbackContextMenu}
+      delayLongPress={280}
+      onLayout={({nativeEvent}) => {
+        setRowWidth(nativeEvent.layout.width);
+      }}
+      style={({pressed}) => [styles.row, pressed ? styles.rowPressed : null]}
+    >
+      <Animated.View pointerEvents="none" style={[styles.rowActiveBackground, rowActiveBackgroundStyle]} />
+      <View style={styles.leadingBadge}>
+        <Text style={styles.leadingBadgeText}>{item.name.charAt(0).toUpperCase()}</Text>
+      </View>
+      <View style={styles.copy}>
+        <Text style={styles.title}>{item.name}</Text>
+      </View>
+      <View style={styles.trailing}>
+        {item.expirationDate ? (
+          <Text style={styles.expiration}>{formatExpirationLabel(item.expirationDate)}</Text>
+        ) : null}
+        {item.isInCart ? <Text style={styles.quantity}>{quantityLabel}</Text> : null}
+      </View>
+      {!isLast ? <Animated.View pointerEvents="none" style={[styles.divider, dividerAnimatedStyle]} /> : null}
+    </Pressable>
+  );
+
   return (
     <GestureDetector gesture={panGesture}>
       <View style={styles.swipeContainer}>
@@ -375,28 +446,33 @@ export function PantryItemRow({
           />
         </View>
         <Animated.View style={[styles.childrenContainer, rowAnimatedStyle]}>
-          <Pressable
-            onPress={handleRowPress}
-            onLayout={({nativeEvent}) => {
-              setRowWidth(nativeEvent.layout.width);
-            }}
-            style={({pressed}) => [styles.row, pressed ? styles.rowPressed : null]}
-          >
-            <Animated.View pointerEvents="none" style={[styles.rowActiveBackground, rowActiveBackgroundStyle]} />
-            <View style={styles.leadingBadge}>
-              <Text style={styles.leadingBadgeText}>{item.name.charAt(0).toUpperCase()}</Text>
-            </View>
-            <View style={styles.copy}>
-              <Text style={styles.title}>{item.name}</Text>
-            </View>
-            <View style={styles.trailing}>
-              {item.expirationDate ? (
-                <Text style={styles.expiration}>{formatExpirationLabel(item.expirationDate)}</Text>
-              ) : null}
-              {item.isInCart ? <Text style={styles.quantity}>{quantityLabel}</Text> : null}
-            </View>
-            {!isLast ? <Animated.View pointerEvents="none" style={[styles.divider, dividerAnimatedStyle]} /> : null}
-          </Pressable>
+          {Platform.OS === 'ios' ? (
+            <Host matchContents={{vertical: true}} style={styles.contextMenuHost}>
+              <ContextMenu>
+                <ContextMenu.Trigger>
+                  <RNHostView>{rowContent}</RNHostView>
+                </ContextMenu.Trigger>
+                <ContextMenu.Items>
+                  <SwiftUIButton label="Edit item" systemImage="pencil" onPress={handleEditAction} />
+                  {hasLeftAction ? (
+                    <SwiftUIButton
+                      label={contextCartActionLabel}
+                      systemImage={item.isInCart ? 'cart.badge.minus' : 'cart.badge.plus'}
+                      onPress={handleLeftAction}
+                    />
+                  ) : null}
+                  <SwiftUIButton
+                    label="Delete item"
+                    role="destructive"
+                    systemImage="trash"
+                    onPress={handleDelete}
+                  />
+                </ContextMenu.Items>
+              </ContextMenu>
+            </Host>
+          ) : (
+            rowContent
+          )}
         </Animated.View>
       </View>
     </GestureDetector>
@@ -412,6 +488,9 @@ const styles = StyleSheet.create({
   childrenContainer: {
     backgroundColor: 'transparent',
     zIndex: 1,
+  },
+  contextMenuHost: {
+    width: '100%',
   },
   actionRail: {
     ...StyleSheet.absoluteFill,

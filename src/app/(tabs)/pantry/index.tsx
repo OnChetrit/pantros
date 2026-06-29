@@ -116,6 +116,7 @@ export default function PantryScreen() {
               isFirst={index === 0}
               isLast={index === sortedItems.length - 1}
               onPress={() => router.push(`/items/${item.id}`)}
+              onEdit={() => router.push(`/items/${item.id}`)}
               leftActionLabel={leftActionLabel}
               leftActionIcon={leftActionIcon}
               onLeftAction={onLeftAction}

@@ -90,6 +90,7 @@ export default function CartScreen() {
               isFirst={index === 0}
               isLast={index === itemsInCart.length - 1}
               onPress={() => router.push(`/items/${item.id}`)}
+              onEdit={() => router.push(`/items/${item.id}`)}
               leftActionLabel="Move to Pantry"
               leftActionIcon="return-up-back-outline"
               onLeftAction={() => void moveItemToPantry(item.id)}
