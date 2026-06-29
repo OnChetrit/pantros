@@ -31,39 +31,34 @@ export default function ProfileScreen() {
         <SectionCard
           title="Account"
           subtitle="Current account details."
-          borderless
         >
           <View style={{ gap: 10 }}>
-            <ListRow title="Name" subtitle={profile?.fullName ?? 'Pantros User'} borderless />
-            <ListRow title="Email" subtitle={profile?.email ?? 'No email available'} borderless />
-            <ListRow title="Pantries" subtitle={String(pantries.length)} borderless />
-            <ListRow title="Members" subtitle={String(selectedPantry?.members.length ?? 0)} borderless />
+            <ListRow title="Name" subtitle={profile?.fullName ?? 'Pantros User'} />
+            <ListRow title="Email" subtitle={profile?.email ?? 'No email available'} />
+            <ListRow title="Pantries" subtitle={String(pantries.length)} />
+            <ListRow title="Members" subtitle={String(selectedPantry?.members.length ?? 0)} />
           </View>
         </SectionCard>
 
         <SectionCard
           title="Privacy and Support"
           subtitle="Helpful links and account policy details."
-          borderless
         >
           <View style={{ gap: 10 }}>
             <ListRow
               title="Privacy Policy"
               subtitle="Data collection and retention."
               onPress={() => router.push('/legal/privacy')}
-              borderless
             />
             <ListRow
               title="Terms of Service"
               subtitle="Shared pantry service terms."
               onPress={() => router.push('/legal/terms')}
-              borderless
             />
             <ListRow
               title="Support"
               subtitle="Contact details for app issues."
               onPress={() => router.push('/legal/support')}
-              borderless
             />
           </View>
         </SectionCard>

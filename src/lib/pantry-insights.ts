@@ -1,5 +1,19 @@
 import type { Cart, PantryItem } from '@/domain/models';
 
+type NormalizedBarcode = {
+  raw: string;
+  digits: string | null;
+};
+
+export type PantryItemMatchResult = {
+  normalizedQuery: string;
+  exactMatch: PantryItem | null;
+  exactNameMatch: PantryItem | null;
+  exactBarcodeMatch: PantryItem | null;
+  partialMatches: PantryItem[];
+  visibleResults: PantryItem[];
+};
+
 function parseDate(value: string | null) {
   if (!value) {
     return null;
@@ -18,6 +32,60 @@ function startOfToday() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   return today;
+}
+
+function normalizeItemName(value: string) {
+  return value.trim().replace(/\s+/g, ' ').toLowerCase();
+}
+
+function normalizeBarcode(value: string | null): NormalizedBarcode | null {
+  if (!value) {
+    return null;
+  }
+
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return null;
+  }
+
+  const digits = trimmed.replace(/\D/g, '');
+
+  return {
+    raw: trimmed.toLowerCase(),
+    digits: digits.length > 0 ? digits : null,
+  };
+}
+
+function isBarcodeLikeQuery(value: NormalizedBarcode | null) {
+  const digitCount = value?.digits?.length ?? 0;
+  return digitCount >= 8 && digitCount <= 14;
+}
+
+function isExactBarcodeMatch(item: PantryItem, query: NormalizedBarcode | null) {
+  const itemBarcode = normalizeBarcode(item.barcode);
+
+  if (!itemBarcode || !query) {
+    return false;
+  }
+
+  return (
+    itemBarcode.raw === query.raw ||
+    Boolean(itemBarcode.digits && query.digits && itemBarcode.digits === query.digits)
+  );
+}
+
+function isVisibleBarcodeMatch(item: PantryItem, query: NormalizedBarcode | null) {
+  const itemBarcode = normalizeBarcode(item.barcode);
+
+  if (!itemBarcode || !query) {
+    return false;
+  }
+
+  return (
+    itemBarcode.raw.includes(query.raw) ||
+    Boolean(itemBarcode.digits && query.digits && itemBarcode.digits.includes(query.digits))
+  );
 }
 
 export function getCartItems(items: PantryItem[]) {
@@ -90,17 +158,57 @@ export function formatPantryItemMeta(item: PantryItem, carts: Cart[]) {
   return `${quantityLabel} · In cart`;
 }
 
-export function searchItems(items: PantryItem[], query: string) {
-  const normalizedQuery = query.trim().toLowerCase();
+export function matchPantryItems(items: PantryItem[], rawQuery: string): PantryItemMatchResult {
+  const normalizedQuery = normalizeItemName(rawQuery);
 
   if (!normalizedQuery) {
-    return items;
+    return {
+      normalizedQuery,
+      exactMatch: null,
+      exactNameMatch: null,
+      exactBarcodeMatch: null,
+      partialMatches: [],
+      visibleResults: items,
+    };
   }
 
-  return items.filter((item) => {
-    return (
-      item.name.toLowerCase().includes(normalizedQuery) ||
-      item.barcode?.toLowerCase().includes(normalizedQuery)
-    );
-  });
+  const normalizedBarcodeQuery = normalizeBarcode(rawQuery);
+  let exactNameMatch: PantryItem | null = null;
+  let exactBarcodeMatch: PantryItem | null = null;
+  const partialMatches: PantryItem[] = [];
+  const visibleResults: PantryItem[] = [];
+
+  for (const item of items) {
+    const normalizedName = normalizeItemName(item.name);
+    const nameMatchesExactly = normalizedName === normalizedQuery;
+    const nameMatchesPartially = normalizedName.includes(normalizedQuery);
+    const barcodeMatchesVisibly = isVisibleBarcodeMatch(item, normalizedBarcodeQuery);
+
+    if (nameMatchesExactly && !exactNameMatch) {
+      exactNameMatch = item;
+    } else if (nameMatchesPartially) {
+      partialMatches.push(item);
+    }
+
+    if (nameMatchesPartially || barcodeMatchesVisibly) {
+      visibleResults.push(item);
+    }
+  }
+
+  if (isBarcodeLikeQuery(normalizedBarcodeQuery)) {
+    exactBarcodeMatch = items.find((item) => isExactBarcodeMatch(item, normalizedBarcodeQuery)) ?? null;
+  }
+
+  return {
+    normalizedQuery,
+    exactMatch: exactNameMatch ?? exactBarcodeMatch,
+    exactNameMatch,
+    exactBarcodeMatch,
+    partialMatches,
+    visibleResults,
+  };
+}
+
+export function searchItems(items: PantryItem[], query: string) {
+  return matchPantryItems(items, query).visibleResults;
 }

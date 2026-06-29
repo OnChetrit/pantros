@@ -20,15 +20,13 @@ export function SectionCard({
   subtitle,
   children,
   rightSlot,
-  borderless = false,
 }: PropsWithChildren<{
   title: string;
   subtitle?: string;
   rightSlot?: ReactNode;
-  borderless?: boolean;
 }>) {
   return (
-    <View style={[styles.card, borderless ? styles.cardBorderless : null]}>
+    <View style={styles.card}>
       <View style={styles.cardHeader}>
         <View style={styles.cardCopy}>
           <Text style={styles.cardTitle}>{title}</Text>
@@ -177,14 +175,12 @@ export function ListRow({
   rightValue,
   emphasized = false,
   onPress,
-  borderless = false,
 }: {
   title: string;
   subtitle?: string;
   rightValue?: string;
   emphasized?: boolean;
   onPress?: () => void;
-  borderless?: boolean;
 }) {
   const content = (
     <>
@@ -202,7 +198,6 @@ export function ListRow({
         onPress={onPress}
         style={({ pressed }) => [
           styles.listRow,
-          borderless ? styles.listRowBorderless : null,
           emphasized ? styles.listRowEmphasized : null,
           pressed ? styles.listRowPressed : null,
         ]}
@@ -213,7 +208,7 @@ export function ListRow({
   }
 
   return (
-    <View style={[styles.listRow, borderless ? styles.listRowBorderless : null, emphasized ? styles.listRowEmphasized : null]}>
+    <View style={[styles.listRow, emphasized ? styles.listRowEmphasized : null]}>
       {content}
     </View>
   );
@@ -233,9 +228,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: appColors.border,
     gap: 14,
-  },
-  cardBorderless: {
-    borderWidth: 0,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -396,9 +388,6 @@ const styles = StyleSheet.create({
     backgroundColor: appColors.listRow,
     borderWidth: 1,
     borderColor: appColors.border,
-  },
-  listRowBorderless: {
-    borderWidth: 0,
   },
   listRowEmphasized: {
     backgroundColor: appColors.listRowEmphasized,

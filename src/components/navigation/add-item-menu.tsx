@@ -27,7 +27,7 @@ const ADD_ITEM_ACTIONS = [
   {
     id: 'manual',
     label: 'Add manually',
-    description: 'Enter item details',
+    description: 'Search first, then create',
     icon: 'create-outline',
   },
 ] as const;
@@ -190,7 +190,7 @@ export function AddItemMenu() {
       return;
     }
 
-    router.push('/items/new');
+    router.navigate(`/search?entry=manual&nonce=${Date.now()}`);
   }, [closeMenu, router]);
 
   const addItemGesture = useMemo(() => {

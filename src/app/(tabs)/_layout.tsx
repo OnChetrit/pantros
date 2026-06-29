@@ -2,7 +2,6 @@ import { Redirect } from 'expo-router';
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
 import { StyleSheet, View } from 'react-native';
 
-import { AddItemMenu } from '@/components/navigation/add-item-menu';
 import { appColors } from '@/components/ui/primitives';
 import { useAppTheme } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
@@ -60,12 +59,15 @@ export default function TabsLayout() {
           contentStyle={{backgroundColor: colors.background}}
           disableTransparentOnScrollEdge
         >
-          <NativeTabs.Trigger.Icon sf="magnifyingglass" />
-          <NativeTabs.Trigger.Label>Search</NativeTabs.Trigger.Label>
+          <NativeTabs.Trigger.Icon
+            sf={{
+              default: 'plus.magnifyingglass',
+              selected: 'plus.magnifyingglass',
+            }}
+          />
+          <NativeTabs.Trigger.Label hidden>Search + Add</NativeTabs.Trigger.Label>
         </NativeTabs.Trigger>
       </NativeTabs>
-
-      <AddItemMenu />
     </View>
   );
 }

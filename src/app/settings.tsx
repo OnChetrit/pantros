@@ -197,7 +197,6 @@ export default function SettingsScreen() {
         <SectionCard
           title="Appearance"
           subtitle="Choose how Pantros follows light and dark mode."
-          borderless
         >
           <View style={styles.themeSwitch} onLayout={handleThemeSwitchLayout}>
             {themeIndicatorWidth > 0 ? (
@@ -233,7 +232,6 @@ export default function SettingsScreen() {
         <SectionCard
           title="Reminders"
           subtitle="Daily cart reminders use your device time zone."
-          borderless
         >
           <View style={styles.notificationToggleRow}>
             <View style={styles.notificationToggleCopy}>
@@ -313,7 +311,6 @@ export default function SettingsScreen() {
         <SectionCard
           title="AI Scanning"
           subtitle="Optional barcode and expiration scans require consent."
-          borderless
         >
           <ListRow
             title="Consent"
@@ -323,7 +320,6 @@ export default function SettingsScreen() {
                 : 'Not enabled'
             }
             rightValue={profile?.aiConsentVersion ?? AI_CONSENT_VERSION}
-            borderless
           />
 
           <AppButton
@@ -337,11 +333,10 @@ export default function SettingsScreen() {
         <SectionCard
           title="Session"
           subtitle="Current account and app state."
-          borderless
         >
           <View style={{ gap: 10 }}>
-            <ListRow title="Profile" subtitle={profile?.email ?? 'Not authenticated'} borderless />
-            <ListRow title="Status" subtitle={errorMessage ?? 'No errors'} borderless />
+            <ListRow title="Profile" subtitle={profile?.email ?? 'Not authenticated'} />
+            <ListRow title="Status" subtitle={errorMessage ?? 'No errors'} />
           </View>
 
           <AppButton label="Refresh" onPress={() => void refreshAppState()} variant="secondary" />
@@ -351,7 +346,6 @@ export default function SettingsScreen() {
         <SectionCard
           title="Delete Account"
           subtitle="Permanently delete your account, leave shared pantries, and choose what happens to pantries you own."
-          borderless
         >
           <AppButton
             label="Review Account Deletion"
@@ -363,26 +357,22 @@ export default function SettingsScreen() {
         <SectionCard
           title="Legal"
           subtitle="Review the current privacy policy, terms, and support contact details."
-          borderless
         >
           <View style={{ gap: 10 }}>
             <ListRow
               title="Privacy Policy"
               subtitle="How Pantros collects, uses, shares, and deletes data."
               onPress={() => router.push('/legal/privacy')}
-              borderless
             />
             <ListRow
               title="Terms of Service"
               subtitle="Basic service terms for shared pantry use."
               onPress={() => router.push('/legal/terms')}
-              borderless
             />
             <ListRow
               title="Contact Support"
               subtitle="Get help with account, reminder, or deletion issues."
               onPress={() => router.push('/legal/support')}
-              borderless
             />
           </View>
         </SectionCard>

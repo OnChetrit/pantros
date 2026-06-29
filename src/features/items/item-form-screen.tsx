@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -19,6 +19,7 @@ import {
 import { AppTextInput, EmptyNotice, appColors } from '@/components/ui/primitives';
 import type { PantryItem, PantryItemInput } from '@/domain/models';
 import { useAiConsent } from '@/hooks/use-ai-consent';
+import { matchPantryItems } from '@/lib/pantry-insights';
 import { useAppContext } from '@/state/app-context';
 
 import { extractBarcodeValue } from './barcode-ai';
@@ -46,16 +47,24 @@ function FieldLabel({ children }: { children: string }) {
   return <Text style={styles.fieldLabel}>{children}</Text>;
 }
 
-export function ItemFormScreen({ item }: { item?: PantryItem }) {
+export function ItemFormScreen({
+  initialBarcode,
+  item,
+  initialName,
+}: {
+  initialBarcode?: string | null;
+  item?: PantryItem;
+  initialName?: string | null;
+}) {
   const router = useRouter();
   const { addItem, itemBusy, pantryCarts, pantryItems, selectedPantry, selectedPantryId, updateItem } = useAppContext();
   const { ensureAiConsent } = useAiConsent();
 
   const primaryCartId = pantryCarts.find((cart) => cart.isPrimary)?.id ?? pantryCarts[0]?.id ?? null;
 
-  const [name, setName] = useState(item?.name ?? '');
+  const [name, setName] = useState(item?.name ?? initialName ?? '');
   const [quantity, setQuantity] = useState('1');
-  const [barcode, setBarcode] = useState(item?.barcode ?? '');
+  const [barcode, setBarcode] = useState(item?.barcode ?? initialBarcode ?? '');
   const [image, setImage] = useState(item?.image ?? '');
   const [expirationDate, setExpirationDate] = useState(item?.expirationDate ?? '');
   const [isInCart, setIsInCart] = useState(item?.isInCart ?? false);
@@ -64,31 +73,55 @@ export function ItemFormScreen({ item }: { item?: PantryItem }) {
   const [barcodeError, setBarcodeError] = useState<string | null>(null);
 
   const title = item ? 'Edit Item' : 'Add Item';
-  const normalizedName = name.trim().toLowerCase();
   const parsedQuantity = useMemo(() => {
     const value = Number.parseInt(quantity, 10);
     return Number.isFinite(value) && value > 0 ? value : null;
   }, [quantity]);
 
-  const duplicateCandidates = useMemo(() => {
-    const query = normalizedName;
-
-    if (item || query.length < 2) {
-      return [];
+  useEffect(() => {
+    if (!item) {
+      setBarcode(initialBarcode ?? '');
+      setName(initialName ?? '');
     }
+  }, [initialBarcode, initialName, item]);
 
-    return pantryItems
-      .filter((entry) => entry.name.toLowerCase().includes(query))
-      .slice(0, 4);
-  }, [item, normalizedName, pantryItems]);
-
-  const exactDuplicate = useMemo(() => {
-    if (item || !normalizedName) {
+  const nameMatches = useMemo(() => {
+    if (item) {
       return null;
     }
 
-    return pantryItems.find((entry) => entry.name.trim().toLowerCase() === normalizedName) ?? null;
-  }, [item, normalizedName, pantryItems]);
+    return matchPantryItems(pantryItems, name);
+  }, [item, name, pantryItems]);
+
+  const duplicateCandidates = useMemo(() => {
+    if (item || !nameMatches || nameMatches.normalizedQuery.length < 2) {
+      return [];
+    }
+
+    const candidates = nameMatches.exactNameMatch ? [nameMatches.exactNameMatch] : [];
+
+    for (const candidate of nameMatches.partialMatches) {
+      if (candidates.some((entry) => entry.id === candidate.id)) {
+        continue;
+      }
+
+      candidates.push(candidate);
+
+      if (candidates.length === 4) {
+        break;
+      }
+    }
+
+    return candidates;
+  }, [item, nameMatches]);
+
+  const exactDuplicate = useMemo(() => {
+    if (item || !nameMatches?.normalizedQuery) {
+      return null;
+    }
+
+    return nameMatches.exactNameMatch;
+  }, [item, nameMatches]);
 
   const nextCartId = isInCart ? item?.cartId ?? primaryCartId ?? null : null;
   const currentInput = useMemo<PantryItemInput | null>(() => {
