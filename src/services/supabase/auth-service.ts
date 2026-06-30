@@ -108,20 +108,28 @@ export async function updateAiConsent(
         status: 'withdrawn';
       }
 ): Promise<UserProfile> {
-  const patch =
+  const query = supabase.from('profiles');
+  const consentTimestamp = new Date().toISOString();
+  const { data, error } =
     input.status === 'granted'
-      ? {
-          id: userId,
-          ai_consent_version: input.version,
-          ai_consent_granted_at: new Date().toISOString(),
-          ai_consent_withdrawn_at: null,
-        }
-      : {
-          id: userId,
-          ai_consent_withdrawn_at: new Date().toISOString(),
-        };
-
-  const { data, error } = await supabase.from('profiles').upsert(patch).select('*').single();
+      ? await query
+          .upsert({
+            id: userId,
+            ai_consent_version: input.version,
+            ai_consent_granted_at: consentTimestamp,
+            ai_consent_withdrawn_at: null,
+          })
+          .select('*')
+          .single()
+      : await query
+          .upsert({
+            id: userId,
+            ai_consent_version: null,
+            ai_consent_granted_at: null,
+            ai_consent_withdrawn_at: consentTimestamp,
+          })
+          .select('*')
+          .single();
 
   if (error) {
     throw error;
