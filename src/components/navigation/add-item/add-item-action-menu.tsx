@@ -8,15 +8,15 @@ import { appColors } from '@/components/ui/primitives';
 import type { AppThemeColors } from '@/lib/theme';
 
 import {
-  MENU_MAX_WIDTH,
-  MENU_MIN_HEIGHT,
-  MENU_PILL_HEIGHT,
-  MENU_ROW_GAP,
-  MENU_ROW_HEIGHT,
-  MENU_VERTICAL_PADDING,
-  PRIMARY_ADD_ITEM_ACTION,
-  SECONDARY_ADD_ITEM_ACTIONS,
-  type AddItemAction,
+    MENU_MAX_WIDTH,
+    MENU_MIN_HEIGHT,
+    MENU_PILL_HEIGHT,
+    MENU_ROW_GAP,
+    MENU_ROW_HEIGHT,
+    MENU_VERTICAL_PADDING,
+    PRIMARY_ADD_ITEM_ACTION,
+    SECONDARY_ADD_ITEM_ACTIONS,
+    type AddItemAction,
 } from './add-item-menu.constants';
 
 type AddItemActionMenuProps = {
@@ -64,7 +64,10 @@ export function AddItemActionMenu({
 
   return (
     <>
-      <Animated.View pointerEvents={isMenuOpen ? 'auto' : 'none'} style={[styles.menuBackdrop, { opacity: backdropOpacity }]}>
+      <Animated.View
+        pointerEvents={isMenuOpen ? 'auto' : 'none'}
+        style={[styles.menuBackdrop, {opacity: backdropOpacity}]}
+      >
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Close add item menu"
@@ -78,7 +81,7 @@ export function AddItemActionMenu({
         accessibilityViewIsModal
         onLayout={onLayout}
         pointerEvents={isMenuOpen ? 'auto' : 'none'}
-        style={[styles.actionMenuAnchor, { width: menuWidth }]}
+        style={[styles.actionMenuAnchor, {width: menuWidth}]}
       >
         <Animated.View
           style={[
@@ -87,7 +90,7 @@ export function AddItemActionMenu({
               backgroundColor: Platform.OS === 'ios' ? 'transparent' : colors.card,
               borderColor: colors.border,
               opacity: menuOpacity,
-              transform: [{ translateX: menuTranslateX }, { translateY: menuTranslateY }, { scale: menuScale }],
+              transform: [{translateX: menuTranslateX}, {translateY: menuTranslateY}, {scale: menuScale}],
             },
           ]}
         >
@@ -101,8 +104,8 @@ export function AddItemActionMenu({
               isInteractive
             />
           ) : null}
-          <Animated.View style={[styles.menuContent, { transform: [{ translateY: menuItemTranslateY }] }]}>
-            {SECONDARY_ADD_ITEM_ACTIONS.map((action) => {
+          <Animated.View style={[styles.menuContent, {transform: [{translateY: menuItemTranslateY}]}]}>
+            {SECONDARY_ADD_ITEM_ACTIONS.map(action => {
               const isHighlighted = highlightedAction === action.id;
 
               return (
@@ -112,10 +115,7 @@ export function AddItemActionMenu({
                   accessibilityLabel={action.label}
                   accessibilityHint={action.description}
                   onPress={() => onNavigate(action.id)}
-                  style={[
-                    styles.actionRow,
-                    isHighlighted ? { backgroundColor: colors.tintSoft } : null,
-                  ]}
+                  style={[styles.actionRow, isHighlighted ? {backgroundColor: colors.tintSoft} : null]}
                 >
                   <View
                     style={[
@@ -126,21 +126,17 @@ export function AddItemActionMenu({
                       },
                     ]}
                   >
-                    <Ionicons
-                      name={action.icon}
-                      size={21}
-                      color={isHighlighted ? colors.textInverse : colors.tint}
-                    />
+                    <Ionicons name={action.icon} size={21} color={isHighlighted ? colors.textInverse : colors.tint} />
                   </View>
                   <View style={styles.actionCopy}>
-                    <Text style={[styles.actionLabel, { color: colors.text }]}>{action.label}</Text>
-                    <Text style={[styles.actionDescription, { color: colors.muted }]}>{action.description}</Text>
+                    <Text style={[styles.actionLabel, {color: colors.text}]}>{action.label}</Text>
+                    <Text style={[styles.actionDescription, {color: colors.muted}]}>{action.description}</Text>
                   </View>
                   <Ionicons name="chevron-forward" size={18} color={colors.muted} />
                 </Pressable>
               );
             })}
-            <Animated.View style={{ transform: [{ scale: primaryActionScale }] }}>
+            <Animated.View style={{transform: [{scale: primaryActionScale}]}}>
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={PRIMARY_ADD_ITEM_ACTION.label}
@@ -148,12 +144,12 @@ export function AddItemActionMenu({
                 onPress={() => onNavigate(PRIMARY_ADD_ITEM_ACTION.id)}
                 style={[
                   styles.primaryAction,
-                  { backgroundColor: colors.tint },
+                  {backgroundColor: colors.tint},
                   highlightedAction === PRIMARY_ADD_ITEM_ACTION.id ? styles.primaryActionHighlighted : null,
                 ]}
               >
                 <Ionicons name={PRIMARY_ADD_ITEM_ACTION.icon} size={24} color={colors.textInverse} />
-                <Text style={[styles.primaryActionLabel, { color: colors.textInverse }]}>
+                <Text style={[styles.primaryActionLabel, {color: colors.textInverse}]}>
                   {PRIMARY_ADD_ITEM_ACTION.label}
                 </Text>
               </Pressable>
@@ -167,7 +163,7 @@ export function AddItemActionMenu({
 
 const styles = StyleSheet.create({
   menuBackdrop: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: '#000000',
   },
   actionMenuAnchor: {
@@ -186,7 +182,7 @@ const styles = StyleSheet.create({
     shadowColor: appColors.shadow,
     shadowOpacity: 0.26,
     shadowRadius: 28,
-    shadowOffset: { width: 0, height: 14 },
+    shadowOffset: {width: 0, height: 14},
     elevation: 16,
   },
   menuGlass: {
@@ -236,10 +232,10 @@ const styles = StyleSheet.create({
     shadowColor: appColors.shadow,
     shadowOpacity: 0.16,
     shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
+    shadowOffset: {width: 0, height: 6},
   },
   primaryActionHighlighted: {
-    transform: [{ scale: 0.98 }],
+    transform: [{scale: 0.98}],
   },
   primaryActionLabel: {
     fontSize: 18,

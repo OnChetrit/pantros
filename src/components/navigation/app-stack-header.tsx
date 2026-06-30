@@ -36,12 +36,9 @@ export function AppStackHeader({
               : 'systemChromeMaterialLight'
             : undefined,
         headerBackground:
-          Platform.OS === 'ios' && transparentBlur
-            ? () => <View style={StyleSheet.absoluteFillObject} />
-            : undefined,
+          Platform.OS === 'ios' && transparentBlur ? () => <View style={StyleSheet.absoluteFill} /> : undefined,
         headerStyle: {
-          backgroundColor:
-            Platform.OS === 'ios' && transparentBlur ? 'transparent' : colors.background,
+          backgroundColor: Platform.OS === 'ios' && transparentBlur ? 'transparent' : colors.background,
         },
         headerTintColor: colors.tint,
         headerTitleStyle: {

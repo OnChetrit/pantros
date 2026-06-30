@@ -16,10 +16,7 @@ import {
 
 import { DeleteAccountContent } from '@/components/account/delete-account-content';
 import { LegalDocumentScreen } from '@/components/legal/legal-document-screen';
-import {
-  AccountMenuContent,
-  type AccountMenuDestination,
-} from '@/components/navigation/account-menu-content';
+import { AccountMenuContent, type AccountMenuDestination } from '@/components/navigation/account-menu-content';
 import { getLegalDocument } from '@/content/legal-content';
 import { contactSupport } from '@/lib/support';
 import { appColors, useAppTheme } from '@/lib/theme';
@@ -39,9 +36,7 @@ export default function AccountMenuScreen() {
   const {colors} = useAppTheme();
   const [pageStack, setPageStack] = useState<AccountMenuPage[]>(['menu']);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [pageWidth, setPageWidth] = useState(
-    Dimensions.get('window').width
-  );
+  const [pageWidth, setPageWidth] = useState(Dimensions.get('window').width);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const animatedIndex = useRef(new Animated.Value(0)).current;
   const currentPage = pageStack[activeIndex] ?? 'menu';
@@ -56,7 +51,7 @@ export default function AccountMenuScreen() {
         duration: 260,
         easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
-      }).start(({ finished }) => {
+      }).start(({finished}) => {
         if (!finished) {
           return;
         }
@@ -68,17 +63,20 @@ export default function AccountMenuScreen() {
     [animatedIndex]
   );
 
-  const handleNavigate = useCallback((destination: AccountMenuDestination) => {
-    if (isTransitioning || currentPage === destination) {
-      return;
-    }
+  const handleNavigate = useCallback(
+    (destination: AccountMenuDestination) => {
+      if (isTransitioning || currentPage === destination) {
+        return;
+      }
 
-    const nextIndex = activeIndex + 1;
+      const nextIndex = activeIndex + 1;
 
-    setPageStack((currentStack) => [...currentStack, destination]);
-    setActiveIndex(nextIndex);
-    runTransition(nextIndex);
-  }, [activeIndex, currentPage, isTransitioning, runTransition]);
+      setPageStack(currentStack => [...currentStack, destination]);
+      setActiveIndex(nextIndex);
+      runTransition(nextIndex);
+    },
+    [activeIndex, currentPage, isTransitioning, runTransition]
+  );
 
   const handleGoBack = useCallback(() => {
     if (isTransitioning || activeIndex === 0) {
@@ -89,7 +87,7 @@ export default function AccountMenuScreen() {
 
     setActiveIndex(nextIndex);
     runTransition(nextIndex, () => {
-      setPageStack((currentStack) => currentStack.slice(0, -1));
+      setPageStack(currentStack => currentStack.slice(0, -1));
     });
   }, [activeIndex, isTransitioning, runTransition]);
 
@@ -97,13 +95,16 @@ export default function AccountMenuScreen() {
     router.back();
   }, [router]);
 
-  const handleLayout = useCallback((event: LayoutChangeEvent) => {
-    const nextWidth = event.nativeEvent.layout.width;
+  const handleLayout = useCallback(
+    (event: LayoutChangeEvent) => {
+      const nextWidth = event.nativeEvent.layout.width;
 
-    if (nextWidth > 0 && Math.abs(nextWidth - pageWidth) > 1) {
-      setPageWidth(nextWidth);
-    }
-  }, [pageWidth]);
+      if (nextWidth > 0 && Math.abs(nextWidth - pageWidth) > 1) {
+        setPageWidth(nextWidth);
+      }
+    },
+    [pageWidth]
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -111,13 +112,10 @@ export default function AccountMenuScreen() {
         return undefined;
       }
 
-      const subscription = BackHandler.addEventListener(
-        'hardwareBackPress',
-        () => {
-          handleGoBack();
-          return true;
-        }
-      );
+      const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+        handleGoBack();
+        return true;
+      });
 
       return () => {
         subscription.remove();
@@ -125,75 +123,69 @@ export default function AccountMenuScreen() {
     }, [handleGoBack, isRootPage])
   );
 
-  const renderPage = useCallback((page: AccountMenuPage) => {
-    if (page === 'menu') {
-      return <AccountMenuContent onNavigate={handleNavigate} />;
-    }
+  const renderPage = useCallback(
+    (page: AccountMenuPage) => {
+      if (page === 'menu') {
+        return <AccountMenuContent onNavigate={handleNavigate} />;
+      }
 
-    if (page === 'delete') {
-      return <DeleteAccountContent />;
-    }
+      if (page === 'delete') {
+        return <DeleteAccountContent />;
+      }
 
-    const document = getLegalDocument(page);
+      const document = getLegalDocument(page);
 
-    if (!document) {
-      return null;
-    }
-
-    return (
-      <LegalDocumentScreen
-        document={document}
-        showHeader={false}
-        actions={
-          page === 'support'
-            ? [
-                {
-                  label: 'Email Support',
-                  onPress: () => {
-                    void contactSupport();
-                  },
-                },
-              ]
-            : undefined
-        }
-      />
-    );
-  }, [handleNavigate]);
-
-  const stackedPages = useMemo(() => (
-    pageStack.map((page, index) => {
-      const translateX = Animated.multiply(
-        Animated.subtract(animatedIndex, index),
-        -pageWidth
-      );
-      const isVisibleLayer = index === activeIndex || index === activeIndex + 1;
+      if (!document) {
+        return null;
+      }
 
       return (
-        <Animated.View
-          key={`${page}-${index}`}
-          pointerEvents={index === activeIndex && !isTransitioning ? 'auto' : 'none'}
-          style={[
-            styles.page,
-            {
-              backgroundColor: colors.background,
-              transform: [{ translateX }],
-              zIndex: isVisibleLayer ? 2 : 1,
-            },
-          ]}
-        >
-          {renderPage(page)}
-        </Animated.View>
+        <LegalDocumentScreen
+          document={document}
+          showHeader={false}
+          actions={
+            page === 'support'
+              ? [
+                  {
+                    label: 'Email Support',
+                    onPress: () => {
+                      void contactSupport();
+                    },
+                  },
+                ]
+              : undefined
+          }
+        />
       );
-    })
-  ), [
-    activeIndex,
-    animatedIndex,
-    colors.background,
-    isTransitioning,
-    pageStack,
-    pageWidth,
-    renderPage,
-  ]);
+    },
+    [handleNavigate]
+  );
+
+  const stackedPages = useMemo(
+    () =>
+      pageStack.map((page, index) => {
+        const translateX = Animated.multiply(Animated.subtract(animatedIndex, index), -pageWidth);
+        const isVisibleLayer = index === activeIndex || index === activeIndex + 1;
+
+        return (
+          <Animated.View
+            key={`${page}-${index}`}
+            pointerEvents={index === activeIndex && !isTransitioning ? 'auto' : 'none'}
+            style={[
+              styles.page,
+              {
+                backgroundColor: colors.background,
+                transform: [{translateX}],
+                zIndex: isVisibleLayer ? 2 : 1,
+              },
+            ]}
+          >
+            {renderPage(page)}
+          </Animated.View>
+        );
+      }),
+    [activeIndex, animatedIndex, colors.background, isTransitioning, pageStack, pageWidth, renderPage]
+  );
 
   return (
     <>
@@ -204,7 +196,7 @@ export default function AccountMenuScreen() {
           headerBackVisible: false,
           headerShadowVisible: true,
           headerTransparent: Platform.OS === 'ios',
-          headerBackground: Platform.OS === 'ios' ? () => <View style={StyleSheet.absoluteFillObject} /> : undefined,
+          headerBackground: Platform.OS === 'ios' ? () => <View style={StyleSheet.absoluteFill} /> : undefined,
           headerStyle: {
             backgroundColor: Platform.OS === 'ios' ? 'transparent' : colors.background,
           },
@@ -214,10 +206,7 @@ export default function AccountMenuScreen() {
                 <Pressable
                   accessibilityLabel="Go back in account menu"
                   onPress={handleGoBack}
-                  style={({ pressed }) => [
-                    styles.headerButton,
-                    pressed ? styles.closeButtonPressed : null,
-                  ]}
+                  style={({pressed}) => [styles.headerButton, pressed ? styles.closeButtonPressed : null]}
                 >
                   <Ionicons
                     name={Platform.OS === 'ios' ? 'chevron-back' : 'arrow-back'}
@@ -230,10 +219,7 @@ export default function AccountMenuScreen() {
             <Pressable
               accessibilityLabel="Close account menu"
               onPress={handleClose}
-              style={({ pressed }) => [
-                styles.headerButton,
-                pressed ? styles.closeButtonPressed : null,
-              ]}
+              style={({pressed}) => [styles.headerButton, pressed ? styles.closeButtonPressed : null]}
             >
               <Ionicons
                 name="close"
@@ -257,7 +243,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   page: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
   headerButton: {
     minWidth: 36,

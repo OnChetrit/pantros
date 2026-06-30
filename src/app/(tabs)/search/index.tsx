@@ -1,7 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useFocusEffect } from '@react-navigation/native';
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Stack, useRouter } from 'expo-router';
+import { useMemo, useRef, useState } from 'react';
 import type { TextInput } from 'react-native';
 import { Alert, FlatList, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
@@ -18,7 +17,6 @@ const isIOS = Platform.OS === 'ios';
 export default function SearchScreen() {
   const {deleteItem, moveItemToCart, moveItemToPantry, pantryCarts, pantryItems, selectedPantry} = useAppContext();
   const styles = useThemedStyles(createStyles);
-  const {entry, nonce} = useLocalSearchParams<{entry?: string; nonce?: string}>();
   const router = useRouter();
   const [query, setQuery] = useState('');
   const searchInputRef = useRef<TextInput>(null);
@@ -29,54 +27,6 @@ export default function SearchScreen() {
   const results = useMemo(() => matchPantryItems(pantryItems, query), [pantryItems, query]);
   const visibleItems = results.visibleResults;
   const primaryCart = pantryCarts.find(cart => cart.isPrimary) ?? pantryCarts[0] ?? null;
-
-  const focusSearch = useCallback(() => {
-    if (isIOS) {
-      searchBarRef.current?.focus();
-      return;
-    }
-
-    searchInputRef.current?.focus();
-  }, []);
-
-  const blurSearch = useCallback(() => {
-    if (isIOS) {
-      searchBarRef.current?.blur();
-      return;
-    }
-
-    searchInputRef.current?.blur();
-  }, []);
-
-  useEffect(() => {
-    if (entry !== 'manual') {
-      return;
-    }
-
-    setQuery('');
-
-    const frame = requestAnimationFrame(() => {
-      if (isIOS) {
-        searchBarRef.current?.clearText();
-      } else {
-        searchInputRef.current?.clear();
-      }
-
-      focusSearch();
-    });
-
-    return () => cancelAnimationFrame(frame);
-  }, [entry, focusSearch, nonce]);
-
-  useFocusEffect(
-    useCallback(() => {
-      const frame = requestAnimationFrame(() => {
-        focusSearch();
-      });
-
-      return () => cancelAnimationFrame(frame);
-    }, [focusSearch])
-  );
 
   const handleAddToCart = async (itemId: string) => {
     if (!primaryCart) {
@@ -96,8 +46,6 @@ export default function SearchScreen() {
   };
 
   const handlePrimaryAction = () => {
-    blurSearch();
-
     if (results.exactMatch) {
       router.push(`/items/${results.exactMatch.id}`);
       return;
@@ -111,7 +59,6 @@ export default function SearchScreen() {
   };
 
   const handleScanBarcode = () => {
-    blurSearch();
     router.push('/items/scan');
   };
 
@@ -253,88 +200,89 @@ export default function SearchScreen() {
   );
 }
 
-const createStyles = (colors: import('@/lib/theme').AppThemeColors) => StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  content: {
-    paddingBottom: 40,
-  },
-  emptyScreen: {
-    flex: 1,
-    backgroundColor: colors.background,
-    padding: 20,
-    justifyContent: 'center',
-  },
-  searchSection: {
-    paddingHorizontal: 16,
-    paddingTop: 4,
-    paddingBottom: 12,
-    gap: 8,
-  },
-  eyebrow: {
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 0.4,
-    textTransform: 'uppercase',
-    color: colors.muted,
-  },
-  searchMeta: {
-    fontSize: 13,
-    color: colors.muted,
-    paddingHorizontal: 2,
-  },
-  primaryAction: {
-    minHeight: 46,
-    borderRadius: 16,
-    backgroundColor: colors.tint,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 16,
-  },
-  primaryActionPressed: {
-    opacity: 0.75,
-  },
-  primaryActionText: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: colors.textInverse,
-    textAlign: 'center',
-  },
-  scanIconButton: {
-    width: 34,
-    height: 34,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.tintSoft,
-  },
-  scanIconButtonPressed: {
-    opacity: 0.75,
-  },
-  scanAction: {
-    minHeight: 46,
-    borderRadius: 16,
-    backgroundColor: colors.tintSoft,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingHorizontal: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  scanActionPressed: {
-    opacity: 0.75,
-  },
-  scanActionText: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  listEmpty: {
-    paddingHorizontal: 16,
-    paddingTop: 6,
-  },
-});
+const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
+  StyleSheet.create({
+    screen: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    content: {
+      paddingBottom: 40,
+    },
+    emptyScreen: {
+      flex: 1,
+      backgroundColor: colors.background,
+      padding: 20,
+      justifyContent: 'center',
+    },
+    searchSection: {
+      paddingHorizontal: 16,
+      paddingTop: 4,
+      paddingBottom: 12,
+      gap: 8,
+    },
+    eyebrow: {
+      fontSize: 12,
+      fontWeight: '700',
+      letterSpacing: 0.4,
+      textTransform: 'uppercase',
+      color: colors.muted,
+    },
+    searchMeta: {
+      fontSize: 13,
+      color: colors.muted,
+      paddingHorizontal: 2,
+    },
+    primaryAction: {
+      minHeight: 46,
+      borderRadius: 16,
+      backgroundColor: colors.tint,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: 16,
+    },
+    primaryActionPressed: {
+      opacity: 0.75,
+    },
+    primaryActionText: {
+      fontSize: 15,
+      fontWeight: '700',
+      color: colors.textInverse,
+      textAlign: 'center',
+    },
+    scanIconButton: {
+      width: 34,
+      height: 34,
+      borderRadius: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.tintSoft,
+    },
+    scanIconButtonPressed: {
+      opacity: 0.75,
+    },
+    scanAction: {
+      minHeight: 46,
+      borderRadius: 16,
+      backgroundColor: colors.tintSoft,
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingHorizontal: 16,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+    },
+    scanActionPressed: {
+      opacity: 0.75,
+    },
+    scanActionText: {
+      fontSize: 15,
+      fontWeight: '700',
+      color: colors.text,
+    },
+    listEmpty: {
+      paddingHorizontal: 16,
+      paddingTop: 6,
+    },
+  });
