@@ -1,3 +1,5 @@
+/// <reference types="node" />
+
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 

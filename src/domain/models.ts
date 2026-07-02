@@ -72,9 +72,6 @@ export type UserProfile = {
   fullName: string | null;
   avatarUrl: string | null;
   createdAt: string;
-  aiConsentVersion: string | null;
-  aiConsentGrantedAt: string | null;
-  aiConsentWithdrawnAt: string | null;
 };
 
 export type AccountDeletionMember = {

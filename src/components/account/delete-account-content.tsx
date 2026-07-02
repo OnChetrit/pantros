@@ -65,7 +65,13 @@ export function DeleteAccountContent() {
       return;
     }
 
-    void loadPreview();
+    const timeout = setTimeout(() => {
+      void loadPreview();
+    }, 0);
+
+    return () => {
+      clearTimeout(timeout);
+    };
   }, [isAuthenticated, status]);
 
   const allPantriesResolved = useMemo(() => {

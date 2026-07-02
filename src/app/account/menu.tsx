@@ -1,7 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useFocusEffect } from '@react-navigation/native';
-import { Stack, useRouter } from 'expo-router';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { Stack, useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useMemo, useState } from 'react';
 import {
   Animated,
   BackHandler,
@@ -38,7 +37,7 @@ export default function AccountMenuScreen() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [pageWidth, setPageWidth] = useState(Dimensions.get('window').width);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const animatedIndex = useRef(new Animated.Value(0)).current;
+  const [animatedIndex] = useState(() => new Animated.Value(0));
   const currentPage = pageStack[activeIndex] ?? 'menu';
   const isRootPage = currentPage === 'menu';
 

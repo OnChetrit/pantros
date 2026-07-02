@@ -1,56 +1,11 @@
-import type { PantryItem } from '@/domain/models';
-import { Button as SwiftUIButton, ContextMenu, Host, RNHostView } from '@expo/ui/swift-ui';
-import { Ionicons } from '@expo/vector-icons';
-import { useCallback, useMemo, useRef, useState } from 'react';
-import { Alert, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import type { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
+import { Alert } from 'react-native';
+
+import { triggerMediumImpact } from '@/lib/haptics';
 
 import {
-  getPantryFullSwipeDistance,
-  PANTRY_SWIPE_OPEN_DISTANCE,
-  PantrySwipeAction,
-} from '@/components/pantry/pantry-item-row-swipe';
-import { triggerMediumImpact, triggerSelectionFeedback } from '@/lib/haptics';
-import { formatExpirationLabel } from '@/lib/pantry-insights';
-import { appColors } from '@/lib/theme';
-import Animated, {
-  Extrapolation,
-  interpolate,
-  runOnJS,
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-  withTiming,
-} from 'react-native-reanimated';
-
-const SUCCESS_COLOR = '#34C759';
-const DESTRUCTIVE_COLOR = '#FF3B30';
-const SWIPE_OPEN_THRESHOLD_RATIO = 0.48;
-const SWIPE_VELOCITY_THRESHOLD = 560;
-const MAX_SWIPE_ROW_RATIO = 0.92;
-const COMMIT_ANIMATION_DURATION = 170;
-const SWIPE_SPRING = {
-  damping: 22,
-  stiffness: 280,
-  mass: 0.85,
-};
-
-type SwipeSide = 'left' | 'right';
-
-type PantryItemRowProps = {
-  item: PantryItem;
-  displayMode?: 'pantry' | 'cart';
-  isFirst: boolean;
-  isLast: boolean;
-  onPress: () => void;
-  onEdit: () => void;
-  leftActionLabel?: string;
-  leftActionIcon?: keyof typeof Ionicons.glyphMap;
-  onLeftAction?: () => void;
-  onDelete: () => void;
-  onWillOpen: (row: SwipeableMethods | null) => void;
-};
+  PantryItemRowContent,
+  type PantryItemRowProps,
+} from './pantry-item-row.shared';
 
 export function PantryItemRow({
   item,
@@ -59,517 +14,62 @@ export function PantryItemRow({
   onPress,
   onEdit,
   leftActionLabel,
-  leftActionIcon = 'cart-outline',
   onLeftAction,
   onDelete,
-  onWillOpen,
 }: PantryItemRowProps) {
-  const swipeableRef = useRef<SwipeableMethods | null>(null);
-  const actionLockRef = useRef(false);
-  const openSideRef = useRef<SwipeSide | null>(null);
-  const [isSwiping, setIsSwiping] = useState(false);
-  const [rowWidth, setRowWidth] = useState(0);
-  const translateX = useSharedValue(0);
-  const swipeHighlightActive = useSharedValue(0);
-  const dragStartX = useSharedValue(0);
-  const leftFullSwipeArmed = useSharedValue(false);
-  const rightFullSwipeArmed = useSharedValue(false);
   const hasLeftAction = Boolean(onLeftAction && leftActionLabel);
-  const contextCartActionLabel = item.isInCart ? 'Remove from cart' : 'Add to Cart';
-  const openDistance = PANTRY_SWIPE_OPEN_DISTANCE;
-  const fullSwipeDistance = getPantryFullSwipeDistance(rowWidth);
-  const commitDistance = Math.max(rowWidth, fullSwipeDistance + openDistance);
-  const maxSwipeDistance = Math.max(commitDistance, rowWidth * MAX_SWIPE_ROW_RATIO);
-  const showExpiration = displayMode !== 'cart' && Boolean(item.expirationDate);
-  const showQuantity = displayMode === 'cart';
 
-  const withActionLock = useCallback((action: () => void) => {
-    if (actionLockRef.current) {
-      return;
-    }
-
-    actionLockRef.current = true;
-    action();
-
-    setTimeout(() => {
-      actionLockRef.current = false;
-    }, 350);
-  }, []);
-
-  const closeRow = useCallback(() => {
-    openSideRef.current = null;
-    leftFullSwipeArmed.set(false);
-    rightFullSwipeArmed.set(false);
-    swipeHighlightActive.value = 0;
-    translateX.value = withSpring(0, SWIPE_SPRING);
-    setIsSwiping(false);
-  }, [leftFullSwipeArmed, rightFullSwipeArmed, swipeHighlightActive, translateX]);
-
-  const resetRow = useCallback(() => {
-    openSideRef.current = null;
-    leftFullSwipeArmed.set(false);
-    rightFullSwipeArmed.set(false);
-    swipeHighlightActive.value = 0;
-    translateX.value = 0;
-    setIsSwiping(false);
-  }, [leftFullSwipeArmed, rightFullSwipeArmed, swipeHighlightActive, translateX]);
-
-  const markRowOpen = useCallback(
-    (side: SwipeSide) => {
-      if (side === 'left' && !hasLeftAction) {
-        closeRow();
-        return;
-      }
-
-      onWillOpen(swipeableRef.current);
-      openSideRef.current = side;
-      leftFullSwipeArmed.set(false);
-      rightFullSwipeArmed.set(false);
-      swipeHighlightActive.value = 1;
-      setIsSwiping(true);
-    },
-    [closeRow, hasLeftAction, leftFullSwipeArmed, onWillOpen, rightFullSwipeArmed, swipeHighlightActive]
-  );
-
-  const openRow = useCallback(
-    (side: SwipeSide) => {
-      if (side === 'left' && !hasLeftAction) {
-        closeRow();
-        return;
-      }
-
-      markRowOpen(side);
-      translateX.value = withSpring(side === 'left' ? openDistance : -openDistance, SWIPE_SPRING);
-    },
-    [closeRow, hasLeftAction, markRowOpen, openDistance, translateX]
-  );
-
-  const swipeableMethods = useMemo<SwipeableMethods>(
-    () => ({
-      close: closeRow,
-      openLeft: () => {
-        openRow('left');
+  const confirmDelete = () => {
+    void triggerMediumImpact();
+    Alert.alert('Delete Item', `Delete "${item.name}"?`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: onDelete,
       },
-      openRight: () => {
-        openRow('right');
-      },
-      reset: resetRow,
-    }),
-    [closeRow, openRow, resetRow]
-  );
-
-  swipeableRef.current = swipeableMethods;
-
-  const confirmDelete = useCallback(() => {
-    withActionLock(() => {
-      void triggerMediumImpact();
-      Alert.alert('Delete Item', `Delete "${item.name}"?`, [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-          onPress: closeRow,
-        },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => {
-            closeRow();
-            onDelete();
-          },
-        },
-      ]);
-    });
-  }, [closeRow, item.name, onDelete, withActionLock]);
-
-  const handleDelete = useCallback(() => {
-    confirmDelete();
-  }, [confirmDelete]);
-
-  const handleEditAction = useCallback(() => {
-    withActionLock(() => {
-      void triggerMediumImpact();
-      closeRow();
-      onEdit();
-    });
-  }, [closeRow, onEdit, withActionLock]);
-
-  const handleLeftAction = useCallback(() => {
-    withActionLock(() => {
-      void triggerMediumImpact();
-      closeRow();
-      onLeftAction?.();
-    });
-  }, [closeRow, onLeftAction, withActionLock]);
-
-  const handleFullSwipeDelete = useCallback(() => {
-    closeRow();
-    confirmDelete();
-  }, [closeRow, confirmDelete]);
-
-  const handleLeftArmedChange = useCallback((isArmed: boolean) => {
-    if (isArmed) {
-      void triggerSelectionFeedback();
-    }
-  }, []);
-
-  const handleRightArmedChange = useCallback((isArmed: boolean) => {
-    if (isArmed) {
-      void triggerSelectionFeedback();
-    }
-  }, []);
-
-  const handleSwipeStart = useCallback(() => {
-    onWillOpen(swipeableRef.current);
-    leftFullSwipeArmed.set(false);
-    rightFullSwipeArmed.set(false);
-    swipeHighlightActive.value = 1;
-    setIsSwiping(true);
-  }, [leftFullSwipeArmed, onWillOpen, rightFullSwipeArmed, swipeHighlightActive]);
-
-  const handleSwipeClose = useCallback(() => {
-    openSideRef.current = null;
-    leftFullSwipeArmed.set(false);
-    rightFullSwipeArmed.set(false);
-    swipeHighlightActive.value = 0;
-    setIsSwiping(false);
-  }, [leftFullSwipeArmed, rightFullSwipeArmed, swipeHighlightActive]);
-
-  const handleCommitStart = useCallback(() => {
-    onWillOpen(swipeableRef.current);
-    openSideRef.current = null;
-    swipeHighlightActive.value = 1;
-    setIsSwiping(true);
-  }, [onWillOpen, swipeHighlightActive]);
-
-  const rowAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{translateX: translateX.value}],
-  }));
-
-  const rowActiveBackgroundStyle = useAnimatedStyle(() => ({
-    opacity: Math.max(
-      swipeHighlightActive.value,
-      interpolate(Math.abs(translateX.value), [0, 18, openDistance], [0, 0.74, 1], Extrapolation.CLAMP)
-    ),
-  }));
-
-  const dividerAnimatedStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(Math.abs(translateX.value), [0, 12], [1, 0], Extrapolation.CLAMP),
-  }));
-
-  const panGesture = useMemo(
-    () =>
-      Gesture.Pan()
-        .activeOffsetX([-12, 12])
-        .onTouchesDown(() => {
-          swipeHighlightActive.value = 1;
-        })
-        .onTouchesUp(() => {
-          if (translateX.value === 0) {
-            swipeHighlightActive.value = 0;
-          }
-        })
-        .onTouchesCancelled(() => {
-          if (translateX.value === 0) {
-            swipeHighlightActive.value = 0;
-          }
-        })
-        .onStart(() => {
-          dragStartX.value = translateX.value;
-          runOnJS(handleSwipeStart)();
-        })
-        .onUpdate(event => {
-          const rawValue = dragStartX.value + event.translationX;
-          const minValue = -maxSwipeDistance;
-          const maxValue = hasLeftAction ? maxSwipeDistance : 0;
-
-          translateX.value = Math.min(Math.max(rawValue, minValue), maxValue);
-        })
-        .onEnd(event => {
-          const value = translateX.value;
-          const velocityX = event.velocityX;
-          const shouldCommitLeft = hasLeftAction && value >= fullSwipeDistance;
-          const shouldCommitRight = value <= -fullSwipeDistance;
-
-          if (shouldCommitLeft) {
-            runOnJS(handleCommitStart)();
-            translateX.value = withTiming(commitDistance, {duration: COMMIT_ANIMATION_DURATION}, finished => {
-              if (finished) {
-                runOnJS(handleLeftAction)();
-              }
-            });
-            return;
-          }
-
-          if (shouldCommitRight) {
-            runOnJS(handleCommitStart)();
-            translateX.value = withTiming(-commitDistance, {duration: COMMIT_ANIMATION_DURATION}, finished => {
-              if (finished) {
-                runOnJS(handleFullSwipeDelete)();
-              }
-            });
-            return;
-          }
-
-          const shouldOpenLeft =
-            hasLeftAction &&
-            (value > openDistance * SWIPE_OPEN_THRESHOLD_RATIO || velocityX > SWIPE_VELOCITY_THRESHOLD);
-          const shouldOpenRight =
-            value < -openDistance * SWIPE_OPEN_THRESHOLD_RATIO || velocityX < -SWIPE_VELOCITY_THRESHOLD;
-
-          if (shouldOpenLeft) {
-            translateX.value = withSpring(openDistance, SWIPE_SPRING);
-            runOnJS(markRowOpen)('left');
-            return;
-          }
-
-          if (shouldOpenRight) {
-            translateX.value = withSpring(-openDistance, SWIPE_SPRING);
-            runOnJS(markRowOpen)('right');
-            return;
-          }
-
-          translateX.value = withSpring(0, SWIPE_SPRING);
-          runOnJS(handleSwipeClose)();
-        }),
-    [
-      commitDistance,
-      dragStartX,
-      fullSwipeDistance,
-      handleCommitStart,
-      handleFullSwipeDelete,
-      handleLeftAction,
-      handleSwipeClose,
-      handleSwipeStart,
-      hasLeftAction,
-      maxSwipeDistance,
-      markRowOpen,
-      openDistance,
-      swipeHighlightActive,
-      translateX,
-    ]
-  );
-
-  const handleRowPress = () => {
-    if (openSideRef.current) {
-      closeRow();
-      return;
-    }
-
-    onPress();
+    ]);
   };
 
-  const showFallbackContextMenu = useCallback(() => {
-    closeRow();
+  const showActions = () => {
     void triggerMediumImpact();
-
     Alert.alert(
       item.name,
       undefined,
       [
         {
           text: 'Edit item',
-          onPress: handleEditAction,
+          onPress: onEdit,
         },
         ...(hasLeftAction
           ? [
               {
-                text: contextCartActionLabel,
-                onPress: handleLeftAction,
+                text: leftActionLabel,
+                onPress: onLeftAction,
               },
             ]
           : []),
         {
           text: 'Delete item',
           style: 'destructive',
-          onPress: handleDelete,
+          onPress: confirmDelete,
         },
       ],
-      {
-        cancelable: true,
-      }
+      { cancelable: true }
     );
-  }, [closeRow, contextCartActionLabel, handleDelete, handleEditAction, handleLeftAction, hasLeftAction, item.name]);
-
-  const rowContent = (
-    <Pressable
-      onPress={handleRowPress}
-      onLongPress={Platform.OS === 'ios' ? undefined : showFallbackContextMenu}
-      delayLongPress={280}
-      onLayout={({nativeEvent}) => {
-        setRowWidth(nativeEvent.layout.width);
-      }}
-      style={({pressed}) => [styles.row, pressed ? styles.rowPressed : null]}
-    >
-      <Animated.View pointerEvents="none" style={[styles.rowActiveBackground, rowActiveBackgroundStyle]} />
-      <View style={styles.leadingBadge}>
-        <Text style={styles.leadingBadgeText}>{item.name.charAt(0).toUpperCase()}</Text>
-      </View>
-      <View style={styles.copy}>
-        <Text style={styles.title}>{item.name}</Text>
-      </View>
-      <View style={styles.trailing}>
-        {showExpiration ? (
-          <Text style={styles.expiration}>{formatExpirationLabel(item.expirationDate)}</Text>
-        ) : null}
-        {showQuantity ? <Text style={styles.quantity}>{String(item.quantity)}</Text> : null}
-      </View>
-      {!isLast ? <Animated.View pointerEvents="none" style={[styles.divider, dividerAnimatedStyle]} /> : null}
-    </Pressable>
-  );
+  };
 
   return (
-    <GestureDetector gesture={panGesture}>
-      <View style={styles.swipeContainer}>
-        {hasLeftAction && leftActionLabel ? (
-          <View pointerEvents={isSwiping ? 'box-none' : 'none'} style={[styles.actionRail, styles.actionRailLeft]}>
-            <PantrySwipeAction
-              accessibilityLabel={leftActionLabel}
-              armed={leftFullSwipeArmed}
-              backgroundColor={SUCCESS_COLOR}
-              fullSwipeDistance={fullSwipeDistance}
-              icon={leftActionIcon}
-              translation={translateX}
-              side="left"
-              onArmedChange={handleLeftArmedChange}
-              onPress={handleLeftAction}
-            />
-          </View>
-        ) : null}
-        <View pointerEvents={isSwiping ? 'box-none' : 'none'} style={[styles.actionRail, styles.actionRailRight]}>
-          <PantrySwipeAction
-            accessibilityLabel="Delete"
-            armed={rightFullSwipeArmed}
-            backgroundColor={DESTRUCTIVE_COLOR}
-            fullSwipeDistance={fullSwipeDistance}
-            icon="trash-outline"
-            translation={translateX}
-            side="right"
-            onArmedChange={handleRightArmedChange}
-            onPress={handleDelete}
-          />
-        </View>
-        <Animated.View style={[styles.childrenContainer, rowAnimatedStyle]}>
-          {Platform.OS === 'ios' ? (
-            <Host matchContents={{vertical: true}} style={styles.contextMenuHost}>
-              <ContextMenu>
-                <ContextMenu.Trigger>
-                  <RNHostView>{rowContent}</RNHostView>
-                </ContextMenu.Trigger>
-                <ContextMenu.Items>
-                  <SwiftUIButton label="Edit item" systemImage="pencil" onPress={handleEditAction} />
-                  {hasLeftAction ? (
-                    <SwiftUIButton
-                      label={contextCartActionLabel}
-                      systemImage={item.isInCart ? 'cart.badge.minus' : 'cart.badge.plus'}
-                      onPress={handleLeftAction}
-                    />
-                  ) : null}
-                  <SwiftUIButton
-                    label="Delete item"
-                    role="destructive"
-                    systemImage="trash"
-                    onPress={handleDelete}
-                  />
-                </ContextMenu.Items>
-              </ContextMenu>
-            </Host>
-          ) : (
-            rowContent
-          )}
-        </Animated.View>
-      </View>
-    </GestureDetector>
+    <PantryItemRowContent
+      item={item}
+      displayMode={displayMode}
+      isLast={isLast}
+      onPress={onPress}
+      onLongPress={showActions}
+    />
   );
 }
 
-const styles = StyleSheet.create({
-  swipeContainer: {
-    backgroundColor: 'transparent',
-    overflow: 'hidden',
-    position: 'relative',
-  },
-  childrenContainer: {
-    backgroundColor: 'transparent',
-    zIndex: 1,
-  },
-  contextMenuHost: {
-    width: '100%',
-  },
-  actionRail: {
-    ...StyleSheet.absoluteFill,
-    justifyContent: 'center',
-    zIndex: 0,
-  },
-  actionRailLeft: {
-    alignItems: 'flex-start',
-  },
-  actionRailRight: {
-    alignItems: 'flex-end',
-  },
-  row: {
-    position: 'relative',
-    minHeight: 72,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    backgroundColor: 'transparent',
-    borderRadius: 18,
-    overflow: 'hidden',
-  },
-  rowActiveBackground: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: appColors.listRowEmphasized,
-  },
-  rowPressed: {
-    backgroundColor: appColors.rowPressed,
-  },
-  divider: {
-    position: 'absolute',
-    left: 70,
-    right: 0,
-    bottom: 0,
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: appColors.border,
-  },
-  leadingBadge: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: appColors.tintSoft,
-  },
-  leadingBadgeText: {
-    color: appColors.tint,
-    fontSize: 17,
-    fontWeight: '800',
-  },
-  copy: {
-    flex: 1,
-    gap: 4,
-  },
-  title: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: appColors.text,
-  },
-  trailing: {
-    alignItems: 'flex-end',
-    gap: 6,
-    maxWidth: 108,
-  },
-  expiration: {
-    fontSize: 12,
-    lineHeight: 16,
-    textAlign: 'right',
-    color: appColors.muted,
-  },
-  quantity: {
-    fontSize: 16,
-    lineHeight: 19,
-    fontWeight: '800',
-    color: appColors.accent,
-  },
-});
+export function PantryItemNativeListRow(props: PantryItemRowProps) {
+  return <PantryItemRow {...props} />;
+}

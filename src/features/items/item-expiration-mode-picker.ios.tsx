@@ -2,7 +2,7 @@ import { Host, Picker, Text } from '@expo/ui/swift-ui';
 import { pickerStyle, tag } from '@expo/ui/swift-ui/modifiers';
 import { StyleSheet } from 'react-native';
 
-type ExpirationMode = 'manual' | 'relative' | 'scan';
+type ExpirationMode = 'manual' | 'relative';
 
 type ItemExpirationModePickerProps = {
   mode: ExpirationMode;
@@ -19,7 +19,6 @@ export function ItemExpirationModePicker({ mode, onChange }: ItemExpirationModeP
       >
         <Text modifiers={[tag('manual')]}>Manual</Text>
         <Text modifiers={[tag('relative')]}>Relative</Text>
-        <Text modifiers={[tag('scan')]}>Scan</Text>
       </Picker>
     </Host>
   );

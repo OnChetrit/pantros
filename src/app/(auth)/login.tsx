@@ -96,17 +96,7 @@ export default function LoginScreen() {
   const emailRef = useRef<TextInput | null>(null);
   const passwordRef = useRef<TextInput | null>(null);
   const confirmPasswordRef = useRef<TextInput | null>(null);
-  const modeAnimation = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      setMode('signin');
-      setPassword('');
-      setConfirmPassword('');
-      setFullName('');
-      setFormError(null);
-    }
-  }, [isAuthenticated]);
+  const [modeAnimation] = useState(() => new Animated.Value(0));
 
   useEffect(() => {
     Animated.timing(modeAnimation, {
@@ -118,7 +108,7 @@ export default function LoginScreen() {
   }, [mode, modeAnimation]);
 
   if (isAuthenticated) {
-    return <Redirect href="/(tabs)/pantry" />;
+    return <Redirect href="/pantry" />;
   }
 
   const disabled = authBusy || !isEnvReady;

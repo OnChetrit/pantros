@@ -2,26 +2,22 @@ import { Ionicons } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
 import { useMemo, useRef, useState } from 'react';
 import type { TextInput } from 'react-native';
-import { Alert, FlatList, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
-import type { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
-import type { SearchBarCommands } from 'react-native-screens';
+import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { AvatarSidebarButton } from '@/components/navigation/avatar-sidebar';
 import { PantryItemRow } from '@/components/pantry/pantry-item-row';
-import { AppTextInput, EmptyNotice, appColors } from '@/components/ui/primitives';
+import { AppTextInput, EmptyNotice } from '@/components/ui/primitives';
 import { matchPantryItems } from '@/lib/pantry-insights';
-import { useThemedStyles } from '@/lib/theme';
+import { useAppTheme, useThemedStyles } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
-
-const isIOS = Platform.OS === 'ios';
 
 export default function SearchScreen() {
   const {deleteItem, moveItemToCart, moveItemToPantry, pantryCarts, pantryItems, selectedPantry} = useAppContext();
+  const {colors} = useAppTheme();
   const styles = useThemedStyles(createStyles);
   const router = useRouter();
   const [query, setQuery] = useState('');
   const searchInputRef = useRef<TextInput>(null);
-  const searchBarRef = useRef<SearchBarCommands | null>(null);
-  const openSwipeableRef = useRef<SwipeableMethods | null>(null);
 
   const trimmedQuery = query.trim();
   const results = useMemo(() => matchPantryItems(pantryItems, query), [pantryItems, query]);
@@ -35,14 +31,6 @@ export default function SearchScreen() {
     }
 
     await moveItemToCart(itemId, primaryCart.id);
-  };
-
-  const handleWillOpen = (row: SwipeableMethods | null) => {
-    if (openSwipeableRef.current && openSwipeableRef.current !== row) {
-      openSwipeableRef.current.close();
-    }
-
-    openSwipeableRef.current = row;
   };
 
   const handlePrimaryAction = () => {
@@ -61,18 +49,6 @@ export default function SearchScreen() {
   const handleScanBarcode = () => {
     router.push('/items/scan');
   };
-
-  const renderScanIconButton = () => (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel="Scan barcode"
-      accessibilityHint="Open the barcode scanner to find or create an item"
-      onPress={handleScanBarcode}
-      style={({pressed}) => [styles.scanIconButton, pressed ? styles.scanIconButtonPressed : null]}
-    >
-      <Ionicons name="barcode-outline" size={18} color={appColors.text} />
-    </Pressable>
-  );
 
   if (!selectedPantry) {
     return (
@@ -97,23 +73,22 @@ export default function SearchScreen() {
       <Stack.Screen
         options={{
           title: 'Explore',
+          headerRight: () => (
+            <View style={styles.headerActions}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Scan barcode"
+                accessibilityHint="Open the barcode scanner to find or create an item"
+                onPress={handleScanBarcode}
+                style={({pressed}) => [styles.headerIconButton, pressed ? styles.headerIconButtonPressed : null]}
+              >
+                <Ionicons name="barcode-outline" size={22} color={colors.tint} />
+              </Pressable>
+              <AvatarSidebarButton />
+            </View>
+          ),
         }}
       />
-      {isIOS ? (
-        <Stack.SearchBar
-          ref={searchBarRef}
-          autoCapitalize="none"
-          barTintColor={appColors.card}
-          placeholder="Search by name or barcode"
-          placement="automatic"
-          textColor={appColors.text}
-          tintColor={appColors.tint}
-          hideWhenScrolling={false}
-          allowToolbarIntegration={false}
-          onCancelButtonPress={() => setQuery('')}
-          onChangeText={event => setQuery(event.nativeEvent.text)}
-        />
-      ) : null}
       <FlatList
         style={styles.screen}
         data={visibleItems}
@@ -121,32 +96,18 @@ export default function SearchScreen() {
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
-        keyboardDismissMode={isIOS ? 'interactive' : 'on-drag'}
+        keyboardDismissMode="on-drag"
         ListHeaderComponent={
           <View style={styles.searchSection}>
             <Text style={styles.eyebrow}>{trimmedQuery ? 'Search Results' : 'All Items'}</Text>
-            {isIOS ? (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Scan barcode"
-                accessibilityHint="Open the barcode scanner to find or create an item"
-                onPress={handleScanBarcode}
-                style={({pressed}) => [styles.scanAction, pressed ? styles.scanActionPressed : null]}
-              >
-                <Ionicons name="barcode-outline" size={18} color={appColors.text} />
-                <Text style={styles.scanActionText}>Scan barcode</Text>
-              </Pressable>
-            ) : (
-              <AppTextInput
-                value={query}
-                onChangeText={setQuery}
-                placeholder="Search by name or barcode"
-                autoCapitalize="none"
-                autoFocus
-                inputRef={searchInputRef}
-                rightSlot={renderScanIconButton()}
-              />
-            )}
+            <AppTextInput
+              value={query}
+              onChangeText={setQuery}
+              placeholder="Search by name or barcode"
+              autoCapitalize="none"
+              autoFocus
+              inputRef={searchInputRef}
+            />
             <Text style={styles.searchMeta}>
               {trimmedQuery
                 ? `${visibleItems.length} ${visibleItems.length === 1 ? 'match' : 'matches'} in ${selectedPantry.name}`
@@ -183,15 +144,12 @@ export default function SearchScreen() {
             <PantryItemRow
               item={item}
               displayMode="pantry"
-              isFirst={index === 0}
               isLast={index === visibleItems.length - 1}
               onPress={() => router.push(`/items/${item.id}`)}
               onEdit={() => router.push(`/items/${item.id}`)}
               leftActionLabel={item.isInCart ? 'Move to Pantry' : 'Add to Cart'}
-              leftActionIcon={item.isInCart ? 'return-up-back-outline' : 'cart-outline'}
               onLeftAction={item.isInCart ? () => void moveItemToPantry(item.id) : () => void handleAddToCart(item.id)}
               onDelete={() => void deleteItem(item.id)}
-              onWillOpen={handleWillOpen}
             />
           );
         }}
@@ -214,6 +172,20 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
       backgroundColor: colors.background,
       padding: 20,
       justifyContent: 'center',
+    },
+    headerActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+    },
+    headerIconButton: {
+      minWidth: 36,
+      minHeight: 36,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    headerIconButtonPressed: {
+      opacity: 0.76,
     },
     searchSection: {
       paddingHorizontal: 16,
@@ -250,39 +222,11 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
       color: colors.textInverse,
       textAlign: 'center',
     },
-    scanIconButton: {
-      width: 34,
-      height: 34,
-      borderRadius: 12,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: colors.tintSoft,
-    },
-    scanIconButtonPressed: {
-      opacity: 0.75,
-    },
-    scanAction: {
-      minHeight: 46,
-      borderRadius: 16,
-      backgroundColor: colors.tintSoft,
-      borderWidth: 1,
-      borderColor: colors.border,
-      paddingHorizontal: 16,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 8,
-    },
-    scanActionPressed: {
-      opacity: 0.75,
-    },
-    scanActionText: {
-      fontSize: 15,
-      fontWeight: '700',
-      color: colors.text,
-    },
     listEmpty: {
       paddingHorizontal: 16,
       paddingTop: 6,
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
     },
   });

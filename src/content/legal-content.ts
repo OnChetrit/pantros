@@ -59,7 +59,7 @@ export function getLegalDocuments(): LegalDocument[] {
             },
             {
               type: 'bullet',
-              text: 'To process barcode and expiration scans when you choose to use those tools.',
+              text: 'To process live barcode scans when you choose to use the in-app scanner.',
             },
           ],
         },
@@ -72,28 +72,7 @@ export function getLegalDocuments(): LegalDocument[] {
             },
             {
               type: 'bullet',
-              text: 'OpenAI processes images submitted through the in-app barcode and expiration scanning features so the app can extract barcode digits or expiration dates from those images.',
-            },
-            {
-              type: 'bullet',
               text: 'Pantry members can see shared pantry, cart, and item data for any pantry they belong to.',
-            },
-          ],
-        },
-        {
-          title: 'AI-assisted image scanning',
-          content: [
-            {
-              type: 'paragraph',
-              text: 'If you use the camera or photo-library scanning flows, the selected image may be transmitted to OpenAI for barcode or expiration-date extraction. We do not need that image to use the rest of the app, and manual entry remains available.',
-            },
-            {
-              type: 'paragraph',
-              text: 'In the current app version, these AI requests are made only when you intentionally start a scan and first accept the in-app disclosure for the current consent version.',
-            },
-            {
-              type: 'paragraph',
-              text: 'The disclosure identifies OpenAI as the processor, explains that the selected image is uploaded solely to extract barcode digits or expiration dates, and can be withdrawn later from Settings.',
             },
           ],
         },
@@ -120,10 +99,6 @@ export function getLegalDocuments(): LegalDocument[] {
               type: 'bullet',
               text: 'This project does not currently rely on Supabase Storage for item image uploads in production, but the account-deletion flow is prepared to remove matching storage objects if they are added later.',
             },
-            {
-              type: 'bullet',
-              text: 'AI scan consent records are stored on your profile with the accepted disclosure version and grant or withdrawal timestamps.',
-            },
           ],
         },
         {
@@ -140,10 +115,6 @@ export function getLegalDocuments(): LegalDocument[] {
             {
               type: 'bullet',
               text: 'You can delete your account from the in-app Delete Account screen.',
-            },
-            {
-              type: 'bullet',
-              text: 'You can withdraw AI scan consent from Settings at any time. After withdrawal, enter barcode or expiration details manually instead.',
             },
           ],
         },
@@ -208,15 +179,6 @@ export function getLegalDocuments(): LegalDocument[] {
           ],
         },
         {
-          title: 'AI features',
-          content: [
-            {
-              type: 'paragraph',
-              text: 'Barcode and expiration scanning are assistive tools. Extracted values can be wrong, incomplete, or unavailable, and you remain responsible for confirming important product details before saving or acting on them.',
-            },
-          ],
-        },
-        {
           title: 'Availability and changes',
           content: [
             {
@@ -225,7 +187,7 @@ export function getLegalDocuments(): LegalDocument[] {
             },
             {
               type: 'bullet',
-              text: 'Some features depend on third-party providers including Supabase, Expo, Apple, Google, and OpenAI.',
+              text: 'Some features depend on third-party providers including Supabase, Expo, Apple, and Google.',
             },
           ],
         },

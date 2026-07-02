@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useThemedStyles } from '@/lib/theme';
 
-type ExpirationMode = 'manual' | 'relative' | 'scan';
+type ExpirationMode = 'manual' | 'relative';
 
 type ItemExpirationModePickerProps = {
   mode: ExpirationMode;
@@ -34,7 +34,6 @@ export function ItemExpirationModePicker({ mode, onChange }: ItemExpirationModeP
     <View style={styles.modeRow}>
       <ModeChip active={mode === 'manual'} label="Manual" onPress={() => onChange('manual')} />
       <ModeChip active={mode === 'relative'} label="Relative" onPress={() => onChange('relative')} />
-      <ModeChip active={mode === 'scan'} label="Scan" onPress={() => onChange('scan')} />
     </View>
   );
 }

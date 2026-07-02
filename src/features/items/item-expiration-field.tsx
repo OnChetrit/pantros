@@ -1,16 +1,13 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker as NativePicker } from '@react-native-picker/picker';
-import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, Platform, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
+import { Platform, StyleSheet, Switch, Text, View } from 'react-native';
 
-import { useAiConsent } from '@/hooks/use-ai-consent';
 import { useAppTheme, useThemedStyles } from '@/lib/theme';
 
-import { extractExpirationDate } from './expiration-ai';
 import { ItemExpirationModePicker } from './item-expiration-mode-picker';
 
-type ExpirationMode = 'manual' | 'relative' | 'scan';
+type ExpirationMode = 'manual' | 'relative';
 
 const dayOptions = Array.from({length: 31}, (_, index) => index);
 const weekOptions = Array.from({length: 53}, (_, index) => index);
@@ -75,7 +72,6 @@ function initialRelativeState(value: string): {days: number; weeks: number; mont
 }
 
 export function ItemExpirationField({value, onChange}: {value: string; onChange: (value: string) => void}) {
-  const { ensureAiConsent } = useAiConsent();
   const styles = useThemedStyles(createStyles);
   const initialDate = parseIsoDate(value) ?? startOfDay(new Date());
   const initialRelative = initialRelativeState(value);
@@ -85,10 +81,6 @@ export function ItemExpirationField({value, onChange}: {value: string; onChange:
   const [relativeDays, setRelativeDays] = useState(initialRelative.days);
   const [relativeWeeks, setRelativeWeeks] = useState(initialRelative.weeks);
   const [relativeMonths, setRelativeMonths] = useState(initialRelative.months);
-  const [scanDetectedDate, setScanDetectedDate] = useState<string | null>(value || null);
-  const [scanOriginalText, setScanOriginalText] = useState<string | null>(null);
-  const [scanBusy, setScanBusy] = useState(false);
-  const [scanError, setScanError] = useState<string | null>(null);
   const {colors, isDark} = useAppTheme();
 
   const resolvedDate = useMemo(() => {
@@ -104,8 +96,8 @@ export function ItemExpirationField({value, onChange}: {value: string; onChange:
       return toIsoDate(addRelativeDate(relativeDays, relativeWeeks, relativeMonths));
     }
 
-    return scanDetectedDate ?? value;
-  }, [isEnabled, manualDate, mode, relativeDays, relativeWeeks, relativeMonths, scanDetectedDate, value]);
+    return value;
+  }, [isEnabled, manualDate, mode, relativeDays, relativeWeeks, relativeMonths, value]);
 
   useEffect(() => {
     onChange(resolvedDate);
@@ -116,106 +108,10 @@ export function ItemExpirationField({value, onChange}: {value: string; onChange:
   const enableMode = (nextMode: ExpirationMode) => {
     setIsEnabled(true);
     setMode(nextMode);
-
-    if (nextMode === 'scan' && !scanDetectedDate) {
-      setScanError(null);
-    }
   };
 
   const clearExpiration = () => {
     setIsEnabled(false);
-    setScanError(null);
-    setScanDetectedDate(null);
-    setScanOriginalText(null);
-  };
-
-  const pickImage = async (source: 'camera' | 'library') => {
-    setScanBusy(false);
-    setScanError(null);
-    setScanOriginalText(null);
-    setScanDetectedDate(null);
-
-    const permission =
-      source === 'camera'
-        ? await ImagePicker.requestCameraPermissionsAsync()
-        : await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    if (!permission.granted) {
-      Alert.alert(
-        'Permission required',
-        source === 'camera'
-          ? 'Camera access is required to photograph expiration labels.'
-          : 'Photo library access is required to choose an expiration label image.'
-      );
-      return;
-    }
-
-    const result =
-      source === 'camera'
-        ? await ImagePicker.launchCameraAsync({
-            mediaTypes: ['images'],
-            quality: 0.8,
-          })
-        : await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ['images'],
-            quality: 0.8,
-          });
-
-    if (result.canceled || !result.assets[0]?.uri) {
-      return;
-    }
-
-    const imageUri = result.assets[0].uri;
-    setIsEnabled(true);
-    setMode('scan');
-
-    const allowed = await ensureAiConsent();
-
-    if (!allowed) {
-      setScanError('AI scanning is off until you accept the disclosure. You can still set the date manually.');
-      setMode('manual');
-      return;
-    }
-
-    setScanBusy(true);
-    const scanned = await extractExpirationDate(imageUri);
-    setScanBusy(false);
-
-    if (scanned.success && scanned.date) {
-      setScanDetectedDate(scanned.date);
-      setScanOriginalText(scanned.originalText);
-      const parsedDate = parseIsoDate(scanned.date);
-
-      if (parsedDate) {
-        setManualDate(parsedDate);
-      }
-
-      setMode('manual');
-      return;
-    }
-
-    setScanError(scanned.error ?? 'No expiration date was detected in that image.');
-  };
-
-  const openScanSourcePicker = () => {
-    Alert.alert('Scan Expiration', 'Choose how to capture the expiration date.', [
-      {
-        text: 'Camera',
-        onPress: () => {
-          void pickImage('camera');
-        },
-      },
-      {
-        text: 'Camera Roll',
-        onPress: () => {
-          void pickImage('library');
-        },
-      },
-      {
-        text: 'Cancel',
-        style: 'cancel',
-      },
-    ]);
   };
 
   return (
@@ -228,7 +124,6 @@ export function ItemExpirationField({value, onChange}: {value: string; onChange:
             if (nextValue) {
               setIsEnabled(true);
               setMode('manual');
-              setScanError(null);
               return;
             }
 
@@ -322,34 +217,6 @@ export function ItemExpirationField({value, onChange}: {value: string; onChange:
         </View>
       ) : null}
 
-      {isEnabled && mode === 'scan' ? (
-        <View style={styles.controlBlock}>
-          <Pressable onPress={openScanSourcePicker} style={[styles.scanActionButton, styles.scanActionPrimary]}>
-            <Text style={styles.scanActionPrimaryText}>Scan Expiration</Text>
-          </Pressable>
-
-          {scanBusy ? (
-            <View style={styles.scanStatus}>
-              <ActivityIndicator color={colors.tint} />
-              <Text style={styles.scanStatusText}>Extracting expiration date from the image…</Text>
-            </View>
-          ) : null}
-
-          {scanDetectedDate && mode === 'scan' ? (
-            <View style={styles.scanResult}>
-              <Text style={styles.scanResultLabel}>Detected date</Text>
-              <Text style={styles.scanResultValue}>{formatDisplayDate(scanDetectedDate)}</Text>
-              {scanOriginalText ? <Text style={styles.scanResultMeta}>Matched text: {scanOriginalText}</Text> : null}
-            </View>
-          ) : null}
-
-          {scanError ? (
-            <View style={styles.inlineError}>
-              <Text style={styles.inlineErrorText}>{scanError}</Text>
-            </View>
-          ) : null}
-        </View>
-      ) : null}
     </View>
   );
 }
@@ -440,75 +307,5 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) => StyleShee
   pickerItem: {
     color: colors.text,
     fontSize: 18,
-  },
-  scanActionButton: {
-    minHeight: 46,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.tintSoft,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingHorizontal: 16,
-  },
-  scanActionPrimary: {
-    backgroundColor: colors.tint,
-    borderColor: colors.tint,
-  },
-  scanActionText: {
-    color: colors.text,
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  scanActionPrimaryText: {
-    color: colors.textInverse,
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  scanStatus: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  scanStatusText: {
-    color: colors.muted,
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  scanResult: {
-    borderRadius: 18,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    gap: 4,
-    backgroundColor: colors.accentSoft,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  scanResultLabel: {
-    color: colors.muted,
-    fontSize: 12,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  scanResultValue: {
-    color: colors.text,
-    fontSize: 17,
-    fontWeight: '800',
-  },
-  scanResultMeta: {
-    color: colors.muted,
-    fontSize: 12,
-    lineHeight: 17,
-  },
-  inlineError: {
-    borderRadius: 16,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    backgroundColor: colors.dangerSoft,
-  },
-  inlineErrorText: {
-    color: colors.text,
-    fontSize: 13,
-    lineHeight: 18,
   },
 });

@@ -57,9 +57,6 @@ export async function fetchUserProfile(userId: string): Promise<UserProfile | nu
     fullName: data.full_name,
     avatarUrl: data.avatar_url,
     createdAt: data.created_at,
-    aiConsentVersion: data.ai_consent_version ?? null,
-    aiConsentGrantedAt: data.ai_consent_granted_at ?? null,
-    aiConsentWithdrawnAt: data.ai_consent_withdrawn_at ?? null,
   };
 }
 
@@ -91,59 +88,6 @@ export async function ensureUserProfile(user: User): Promise<UserProfile | null>
     fullName: data.full_name,
     avatarUrl: data.avatar_url,
     createdAt: data.created_at,
-    aiConsentVersion: data.ai_consent_version ?? null,
-    aiConsentGrantedAt: data.ai_consent_granted_at ?? null,
-    aiConsentWithdrawnAt: data.ai_consent_withdrawn_at ?? null,
-  };
-}
-
-export async function updateAiConsent(
-  userId: string,
-  input:
-    | {
-        status: 'granted';
-        version: string;
-      }
-    | {
-        status: 'withdrawn';
-      }
-): Promise<UserProfile> {
-  const query = supabase.from('profiles');
-  const consentTimestamp = new Date().toISOString();
-  const { data, error } =
-    input.status === 'granted'
-      ? await query
-          .upsert({
-            id: userId,
-            ai_consent_version: input.version,
-            ai_consent_granted_at: consentTimestamp,
-            ai_consent_withdrawn_at: null,
-          })
-          .select('*')
-          .single()
-      : await query
-          .upsert({
-            id: userId,
-            ai_consent_version: null,
-            ai_consent_granted_at: null,
-            ai_consent_withdrawn_at: consentTimestamp,
-          })
-          .select('*')
-          .single();
-
-  if (error) {
-    throw error;
-  }
-
-  return {
-    id: data.id,
-    email: data.email,
-    fullName: data.full_name,
-    avatarUrl: data.avatar_url,
-    createdAt: data.created_at,
-    aiConsentVersion: data.ai_consent_version ?? null,
-    aiConsentGrantedAt: data.ai_consent_granted_at ?? null,
-    aiConsentWithdrawnAt: data.ai_consent_withdrawn_at ?? null,
   };
 }
 

@@ -1,7 +1,6 @@
 import { Stack, useRouter } from 'expo-router';
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Alert, FlatList, StyleSheet, Text, View } from 'react-native';
-import type { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
 
 import { PantryFilterMenu, type PantryListSortOption } from '@/components/pantry/pantry-filter-menu';
 import { PantryItemRow } from '@/components/pantry/pantry-item-row';
@@ -12,7 +11,6 @@ import { useAppContext } from '@/state/app-context';
 export default function PantryScreen() {
   const {deleteItem, moveItemToCart, moveItemToPantry, pantryCarts, pantryItems, selectedPantry} = useAppContext();
   const router = useRouter();
-  const openSwipeableRef = useRef<SwipeableMethods | null>(null);
   const [sortOption, setSortOption] = useState<PantryListSortOption>('expiration');
 
   const {cartItems, pantryListItems} = useMemo(() => {
@@ -62,14 +60,6 @@ export default function PantryScreen() {
     await moveItemToCart(itemId, primaryCart.id);
   };
 
-  const handleWillOpen = (row: SwipeableMethods | null) => {
-    if (openSwipeableRef.current && openSwipeableRef.current !== row) {
-      openSwipeableRef.current.close();
-    }
-
-    openSwipeableRef.current = row;
-  };
-
   if (!selectedPantry) {
     return (
       <View style={styles.emptyScreen}>
@@ -88,22 +78,18 @@ export default function PantryScreen() {
     displayMode: 'pantry' | 'cart'
   ) => {
     const leftActionLabel = item.isInCart ? 'Move to Pantry' : 'Add to Cart';
-    const leftActionIcon = item.isInCart ? 'return-up-back-outline' : 'cart-outline';
     const onLeftAction = item.isInCart ? () => void moveItemToPantry(item.id) : () => void handleAddToCart(item.id);
 
     return (
       <PantryItemRow
         item={item}
         displayMode={displayMode}
-        isFirst={index === 0}
         isLast={index === total - 1}
         onPress={() => router.push(`/items/${item.id}`)}
         onEdit={() => router.push(`/items/${item.id}`)}
         leftActionLabel={leftActionLabel}
-        leftActionIcon={leftActionIcon}
         onLeftAction={onLeftAction}
         onDelete={() => void deleteItem(item.id)}
-        onWillOpen={handleWillOpen}
       />
     );
   };

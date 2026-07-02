@@ -1,8 +1,7 @@
 import 'expo-dev-client';
 
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import * as Notifications from 'expo-notifications';
-import { Stack, useRouter } from 'expo-router';
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useMemo } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -10,10 +9,6 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useTabStackScreenOptions } from '@/components/navigation/tab-stack-layout';
 import { ThemePreferenceProvider, useAppTheme } from '@/lib/theme';
 import { AppProvider } from '@/state/app-context';
-
-export const unstable_settings = {
-  initialRouteName: '(tabs)',
-};
 
 export default function RootLayout() {
   return (
@@ -60,7 +55,7 @@ function RootLayoutContent() {
       const route = response.notification.request.content.data?.route;
 
       if (route === '/(tabs)/cart') {
-        router.push('/(tabs)/cart');
+        router.replace('/(tabs)/cart');
       }
     };
 
@@ -69,12 +64,12 @@ function RootLayoutContent() {
         handleNotificationResponse
       );
 
-    void Notifications.getLastNotificationResponseAsync().then((response) => {
-      if (response) {
-        handleNotificationResponse(response);
-        void Notifications.clearLastNotificationResponseAsync();
-      }
-    });
+    const lastResponse = Notifications.getLastNotificationResponse();
+
+    if (lastResponse) {
+      handleNotificationResponse(lastResponse);
+      Notifications.clearLastNotificationResponse();
+    }
 
     return () => {
       subscription.remove();

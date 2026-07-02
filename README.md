@@ -32,9 +32,6 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=
 
 This repo's `.gitignore` ignores `.env`, so keep real values there and commit only `.env.example`.
 
-For AI barcode and expiration scanning, set `OPENAI_API_KEY` as a Supabase Edge
-Function secret instead of exposing it in Expo public env.
-
 ## Run
 
 ```bash

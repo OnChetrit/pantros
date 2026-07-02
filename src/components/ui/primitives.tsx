@@ -252,204 +252,207 @@ export function ListRow({
   return <View style={[styles.listRow, emphasized ? styles.listRowEmphasized : null]}>{content}</View>;
 }
 
-const createStyles = (colors: AppThemeColors) => StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.background,
-    padding: 20,
-    gap: 16,
-  },
-  card: {
-    borderRadius: 24,
-    padding: 18,
-    backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-    gap: 14,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    gap: 12,
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-  },
-  cardCopy: {
-    flex: 1,
-    gap: 4,
-  },
-  cardTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  cardSubtitle: {
-    fontSize: 14,
-    lineHeight: 21,
-    color: colors.muted,
-  },
-  button: {
-    minHeight: 46,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 16,
-  },
-  primaryButton: {
-    backgroundColor: colors.tint,
-  },
-  secondaryButton: {
-    backgroundColor: colors.tintSoft,
-  },
-  primaryButtonText: {
-    color: colors.textInverse,
-    fontWeight: '700',
-    fontSize: 15,
-  },
-  secondaryButtonText: {
-    color: colors.text,
-    fontWeight: '700',
-    fontSize: 15,
-  },
-  buttonPressed: {
-    opacity: 0.75,
-  },
-  inputShell: {
-    minHeight: 50,
-    borderRadius: 16,
-    backgroundColor: colors.input,
-    borderWidth: 1,
-    borderColor: colors.border,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  input: {
-    minHeight: 50,
-    flex: 1,
-    paddingHorizontal: 16,
-    color: colors.text,
-    fontSize: 15,
-  },
-  inputWithRightSlot: {
-    paddingRight: 10,
-  },
-  inputRightSlot: {
-    paddingRight: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 16,
-  },
-  rowLabel: {
-    flex: 1,
-    color: colors.muted,
-    fontSize: 14,
-  },
-  rowValue: {
-    flex: 1,
-    color: colors.text,
-    fontSize: 14,
-    textAlign: 'right',
-  },
-  emptyState: {
-    borderRadius: 20,
-    padding: 16,
-    backgroundColor: colors.empty,
-    gap: 6,
-  },
-  emptyTitle: {
-    color: colors.text,
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  emptyBody: {
-    color: colors.muted,
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  metricGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-  },
-  metricPill: {
-    minWidth: 96,
-    flexGrow: 1,
-    borderRadius: 18,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    backgroundColor: colors.metric,
-    borderWidth: 1,
-    borderColor: colors.border,
-    gap: 2,
-  },
-  metricPillAccent: {
-    backgroundColor: colors.accentSoft,
-    borderColor: colors.border,
-  },
-  metricPillWarning: {
-    backgroundColor: colors.warningSoft,
-    borderColor: colors.border,
-  },
-  metricValue: {
-    color: colors.text,
-    fontSize: 20,
-    fontWeight: '800',
-  },
-  metricLabel: {
-    color: colors.muted,
-    fontSize: 12,
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
-  },
-  avatar: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.tint,
-    borderWidth: 1,
-    borderColor: colors.borderStrong,
-  },
-  avatarText: {
-    color: colors.text,
-    fontWeight: '800',
-  },
-  listRow: {
-    flexDirection: 'row',
-    gap: 14,
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderRadius: 18,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    backgroundColor: colors.listRow,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  listRowEmphasized: {
-    backgroundColor: colors.listRowEmphasized,
-  },
-  listRowPressed: {
-    opacity: 0.76,
-  },
-  listRowCopy: {
-    flex: 1,
-    gap: 4,
-  },
-  listRowTitle: {
-    color: colors.text,
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  listRowSubtitle: {
-    color: colors.muted,
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  listRowValue: {
-    color: colors.tint,
-    fontSize: 13,
-    fontWeight: '700',
-  },
-});
+const createStyles = (colors: AppThemeColors) =>
+  StyleSheet.create({
+    screen: {
+      flex: 1,
+      backgroundColor: colors.background,
+      padding: 20,
+      gap: 16,
+    },
+    card: {
+      borderRadius: 24,
+      padding: 18,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+      gap: 14,
+    },
+    cardHeader: {
+      flexDirection: 'row',
+      gap: 12,
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+    },
+    cardCopy: {
+      flex: 1,
+      gap: 4,
+    },
+    cardTitle: {
+      fontSize: 20,
+      fontWeight: '700',
+      color: colors.text,
+    },
+    cardSubtitle: {
+      fontSize: 14,
+      lineHeight: 21,
+      color: colors.muted,
+    },
+    button: {
+      minHeight: 46,
+      borderRadius: 16,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: 16,
+    },
+    primaryButton: {
+      backgroundColor: colors.tint,
+    },
+    secondaryButton: {
+      backgroundColor: colors.tintSoft,
+    },
+    primaryButtonText: {
+      color: colors.textInverse,
+      fontWeight: '700',
+      fontSize: 15,
+    },
+    secondaryButtonText: {
+      color: colors.text,
+      fontWeight: '700',
+      fontSize: 15,
+    },
+    buttonPressed: {
+      opacity: 0.75,
+    },
+    inputShell: {
+      minHeight: 50,
+      borderRadius: 16,
+      backgroundColor: colors.input,
+      borderWidth: 1,
+      borderColor: colors.border,
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    input: {
+      minHeight: 50,
+      flex: 1,
+      paddingHorizontal: 16,
+      color: colors.text,
+      fontSize: 15,
+    },
+    inputWithRightSlot: {
+      paddingRight: 10,
+    },
+    inputRightSlot: {
+      paddingRight: 8,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    row: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      gap: 16,
+    },
+    rowLabel: {
+      flex: 1,
+      color: colors.muted,
+      fontSize: 14,
+    },
+    rowValue: {
+      flex: 1,
+      color: colors.text,
+      fontSize: 14,
+      textAlign: 'right',
+    },
+    emptyState: {
+      borderRadius: 20,
+      padding: 16,
+      backgroundColor: colors.empty,
+      gap: 6,
+      display: 'flex',
+      justifyContent: 'center',
+    },
+    emptyTitle: {
+      color: colors.text,
+      fontSize: 16,
+      fontWeight: '700',
+    },
+    emptyBody: {
+      color: colors.muted,
+      fontSize: 14,
+      lineHeight: 20,
+    },
+    metricGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 10,
+    },
+    metricPill: {
+      minWidth: 96,
+      flexGrow: 1,
+      borderRadius: 18,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      backgroundColor: colors.metric,
+      borderWidth: 1,
+      borderColor: colors.border,
+      gap: 2,
+    },
+    metricPillAccent: {
+      backgroundColor: colors.accentSoft,
+      borderColor: colors.border,
+    },
+    metricPillWarning: {
+      backgroundColor: colors.warningSoft,
+      borderColor: colors.border,
+    },
+    metricValue: {
+      color: colors.text,
+      fontSize: 20,
+      fontWeight: '800',
+    },
+    metricLabel: {
+      color: colors.muted,
+      fontSize: 12,
+      textTransform: 'uppercase',
+      letterSpacing: 0.6,
+    },
+    avatar: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.tint,
+      borderWidth: 1,
+      borderColor: colors.borderStrong,
+    },
+    avatarText: {
+      color: colors.text,
+      fontWeight: '800',
+    },
+    listRow: {
+      flexDirection: 'row',
+      gap: 14,
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      borderRadius: 18,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      backgroundColor: colors.listRow,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    listRowEmphasized: {
+      backgroundColor: colors.listRowEmphasized,
+    },
+    listRowPressed: {
+      opacity: 0.76,
+    },
+    listRowCopy: {
+      flex: 1,
+      gap: 4,
+    },
+    listRowTitle: {
+      color: colors.text,
+      fontSize: 15,
+      fontWeight: '700',
+    },
+    listRowSubtitle: {
+      color: colors.muted,
+      fontSize: 13,
+      lineHeight: 18,
+    },
+    listRowValue: {
+      color: colors.tint,
+      fontSize: 13,
+      fontWeight: '700',
+    },
+  });

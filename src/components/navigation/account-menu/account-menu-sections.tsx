@@ -1,11 +1,7 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Platform, Pressable, StyleSheet, Switch, Text } from 'react-native';
 
-import type { NotificationPreferences, UserProfile } from '@/domain/models';
-import {
-  AI_CONSENT_VERSION,
-  formatAiConsentDate,
-} from '@/lib/ai-consent';
+import type { NotificationPreferences } from '@/domain/models';
 import type { ThemePreference } from '@/lib/theme';
 import { useThemedStyles } from '@/lib/theme';
 
@@ -143,45 +139,6 @@ export function RemindersSection({
   );
 }
 
-export function AiScanningSection({
-  profile,
-  aiConsentEnabled,
-  onWithdrawAiConsent,
-}: {
-  profile: UserProfile | null;
-  aiConsentEnabled: boolean;
-  onWithdrawAiConsent: () => void;
-}) {
-  const styles = useThemedStyles(createStyles);
-
-  return (
-    <MenuSection title="AI Scanning">
-      <MenuRow
-        icon="sparkles-outline"
-        label="Consent"
-        value={
-          aiConsentEnabled
-            ? `Accepted ${formatAiConsentDate(profile?.aiConsentGrantedAt ?? null)}`
-            : 'Not enabled'
-        }
-      />
-      <MenuRow icon="keypad-outline" label="Version" value={profile?.aiConsentVersion ?? AI_CONSENT_VERSION} hideDivider />
-      {aiConsentEnabled ? (
-        <Pressable
-          onPress={onWithdrawAiConsent}
-          style={({ pressed }) => [
-            styles.inlineActionButton,
-            styles.inlineDangerButton,
-            pressed ? styles.inlineActionButtonPressed : null,
-          ]}
-        >
-          <Text style={[styles.inlineActionButtonText, styles.inlineDangerButtonText]}>Withdraw AI Consent</Text>
-        </Pressable>
-      ) : null}
-    </MenuSection>
-  );
-}
-
 export function SupportSection({
   onNavigate,
 }: {
@@ -237,9 +194,6 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
       justifyContent: 'center',
       backgroundColor: colors.tintSoft,
     },
-    inlineDangerButton: {
-      backgroundColor: colors.dangerSoft,
-    },
     inlineActionButtonPressed: {
       opacity: 0.76,
     },
@@ -247,9 +201,6 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
       color: colors.text,
       fontSize: 15,
       fontWeight: '700',
-    },
-    inlineDangerButtonText: {
-      color: colors.danger,
     },
     notificationError: {
       marginTop: 10,

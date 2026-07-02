@@ -13,5 +13,5 @@ export default function NotificationsScreen() {
     return <Redirect href="/(auth)/login" />;
   }
 
-  return <Redirect href="/settings" />;
+  return <Redirect href="/account/menu" />;
 }

@@ -22,5 +22,5 @@ export default function EntryScreen() {
     );
   }
 
-  return <Redirect href={isAuthenticated ? '/(tabs)/pantry' : '/(auth)/login'} />;
+  return <Redirect href={isAuthenticated ? '/pantry' : '/login'} />;
 }

@@ -1,16 +1,19 @@
+import { Host, List, RNHostView } from '@expo/ui/swift-ui';
+import { listStyle } from '@expo/ui/swift-ui/modifiers';
 import { Stack, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { FlatList, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { PantryFilterMenu, type PantryListSortOption } from '@/components/pantry/pantry-filter-menu';
-import { PantryItemRow } from '@/components/pantry/pantry-item-row';
+import { PantryItemNativeListRow } from '@/components/pantry/pantry-item-row';
 import { EmptyNotice } from '@/components/ui/primitives';
 import { getCartItems } from '@/lib/pantry-insights';
-import { appColors } from '@/lib/theme';
+import { useAppTheme } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
 
 export default function CartScreen() {
-  const {deleteItem, moveItemToPantry, pantryItems, selectedPantry} = useAppContext();
+  const { deleteItem, moveItemToPantry, pantryItems, selectedPantry } = useAppContext();
+  const { colors, isDark } = useAppTheme();
   const router = useRouter();
   const [sortOption, setSortOption] = useState<PantryListSortOption>('expiration');
 
@@ -41,6 +44,7 @@ export default function CartScreen() {
       return new Date(left.expirationDate).getTime() - new Date(right.expirationDate).getTime();
     });
   }, [pantryItems, sortOption]);
+
   if (!selectedPantry) {
     return (
       <View style={styles.emptyScreen}>
@@ -59,60 +63,53 @@ export default function CartScreen() {
           headerLeft: () => <PantryFilterMenu sortOption={sortOption} onSelectSort={setSortOption} />,
         }}
       />
-      <FlatList
-        style={styles.screen}
-        data={itemsInCart}
-        keyExtractor={item => item.id}
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={[styles.content, itemsInCart.length > 0 ? styles.filledContent : null]}
-        ListEmptyComponent={
-          <View style={styles.listEmpty}>
-            <EmptyNotice
-              title="Nothing to buy right now"
-              body="Items moved into a shopping list will appear here with the same native list layout as Pantros."
-            />
-          </View>
-        }
-        renderItem={({item, index}) => (
-          <PantryItemRow
-            item={item}
-            displayMode="cart"
-            isLast={index === itemsInCart.length - 1}
-            onPress={() => router.push(`/items/${item.id}`)}
-            onEdit={() => router.push(`/items/${item.id}`)}
-            leftActionLabel="Move to Pantry"
-            onLeftAction={() => void moveItemToPantry(item.id)}
-            onDelete={() => void deleteItem(item.id)}
-          />
-        )}
-      />
+      <Host
+        colorScheme={isDark ? 'dark' : 'light'}
+        style={[styles.host, { backgroundColor: colors.background }]}
+        useViewportSizeMeasurement
+      >
+        <List modifiers={[listStyle('insetGrouped')]}>
+          {itemsInCart.length > 0 ? (
+            itemsInCart.map((item, index) => (
+              <PantryItemNativeListRow
+                key={item.id}
+                item={item}
+                displayMode="cart"
+                isLast={index === itemsInCart.length - 1}
+                onPress={() => router.push(`/items/${item.id}`)}
+                onEdit={() => router.push(`/items/${item.id}`)}
+                leftActionLabel="Move to Pantry"
+                onLeftAction={() => void moveItemToPantry(item.id)}
+                onDelete={() => void deleteItem(item.id)}
+              />
+            ))
+          ) : (
+            <RNHostView key="empty-cart" matchContents>
+              <View style={styles.noticeRow}>
+                <EmptyNotice
+                  title="Nothing to buy right now"
+                  body="Items moved into a shopping list will appear here with working native swipe actions."
+                />
+              </View>
+            </RNHostView>
+          )}
+        </List>
+      </Host>
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
+  host: {
     flex: 1,
-    backgroundColor: appColors.background,
-  },
-  content: {
-    paddingHorizontal: 12,
-  },
-  filledContent: {
-    marginHorizontal: 12,
-    paddingHorizontal: 0,
-    borderRadius: 26,
-    backgroundColor: appColors.card,
-    overflow: 'hidden',
   },
   emptyScreen: {
     flex: 1,
-    backgroundColor: appColors.background,
     padding: 20,
     justifyContent: 'center',
   },
-  listEmpty: {
-    paddingHorizontal: 16,
-    paddingTop: 6,
+  noticeRow: {
+    paddingHorizontal: 4,
+    paddingVertical: 6,
   },
 });

@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { Stack, useRouter } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -14,12 +14,10 @@ import {
 
 import { EmptyNotice, appColors } from '@/components/ui/primitives';
 import type { PantryItem, PantryItemInput } from '@/domain/models';
-import { useAiConsent } from '@/hooks/use-ai-consent';
 import { matchPantryItems } from '@/lib/pantry-insights';
 import { useThemedStyles } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
 
-import { extractBarcodeValue } from './barcode-ai';
 import { ItemBarcodeField } from './item-form/item-barcode-field';
 import { ItemCartSection } from './item-form/item-cart-section';
 import { ItemImagePicker } from './item-form/item-image-picker';
@@ -43,7 +41,6 @@ export function ItemFormScreen({
   const router = useRouter();
   const styles = useThemedStyles(createStyles);
   const {addItem, itemBusy, pantryCarts, pantryItems, selectedPantry, selectedPantryId, updateItem} = useAppContext();
-  const {ensureAiConsent} = useAiConsent();
 
   const primaryCartId = pantryCarts.find(cart => cart.isPrimary)?.id ?? pantryCarts[0]?.id ?? null;
 
@@ -54,22 +51,12 @@ export function ItemFormScreen({
   const [expirationDate, setExpirationDate] = useState(item?.expirationDate ?? '');
   const [isInCart, setIsInCart] = useState(item?.isInCart ?? false);
   const [formError, setFormError] = useState<string | null>(null);
-  const [barcodeBusy, setBarcodeBusy] = useState(false);
-  const [barcodeError, setBarcodeError] = useState<string | null>(null);
 
   const title = item ? 'Edit Item' : 'Add Item';
   const parsedQuantity = useMemo(() => {
     const value = Number.parseInt(quantity, 10);
     return Number.isFinite(value) && value > 0 ? value : null;
   }, [quantity]);
-
-  useEffect(() => {
-    if (!item) {
-      setBarcode(initialBarcode ?? '');
-      setName(initialName ?? '');
-      setQuantity('1');
-    }
-  }, [initialBarcode, initialName, item]);
 
   const nameMatches = useMemo(() => {
     if (item) {
@@ -134,21 +121,18 @@ export function ItemFormScreen({
     isValidIsoDate(expirationDate) &&
     (!isInCart || Boolean(parsedQuantity));
 
-  const openImageSourcePicker = (mode: 'image' | 'barcode') => {
-    const actionTitle = mode === 'image' ? 'Insert Image' : 'Scan Barcode';
-    const actionMessage = mode === 'image' ? 'Choose how to add the item image.' : 'Choose how to capture the barcode.';
-
-    Alert.alert(actionTitle, actionMessage, [
+  const openImageSourcePicker = () => {
+    Alert.alert('Insert Image', 'Choose how to add the item image.', [
       {
         text: 'Camera',
         onPress: () => {
-          void handlePickAsset('camera', mode);
+          void handlePickAsset('camera');
         },
       },
       {
         text: 'Camera Roll',
         onPress: () => {
-          void handlePickAsset('library', mode);
+          void handlePickAsset('library');
         },
       },
       {
@@ -158,7 +142,7 @@ export function ItemFormScreen({
     ]);
   };
 
-  const handlePickAsset = async (source: 'camera' | 'library', mode: 'image' | 'barcode') => {
+  const handlePickAsset = async (source: 'camera' | 'library') => {
     const permission =
       source === 'camera'
         ? await ImagePicker.requestCameraPermissionsAsync()
@@ -190,35 +174,7 @@ export function ItemFormScreen({
     }
 
     const imageUri = result.assets[0].uri;
-
-    if (mode === 'image') {
-      setImage(imageUri);
-      return;
-    }
-
-    const allowed = await ensureAiConsent();
-
-    if (!allowed) {
-      setBarcodeError('AI scanning is off until you accept the disclosure. You can enter the barcode manually.');
-      return;
-    }
-
-    setBarcodeBusy(true);
-    setBarcodeError(null);
-
-    if (!image) {
-      setImage(imageUri);
-    }
-
-    const scanned = await extractBarcodeValue(imageUri);
-    setBarcodeBusy(false);
-
-    if (scanned.success && scanned.barcode) {
-      setBarcode(scanned.barcode);
-      return;
-    }
-
-    setBarcodeError(scanned.error ?? 'No barcode digits were detected in that image.');
+    setImage(imageUri);
   };
 
   const handleSave = async () => {
@@ -302,7 +258,7 @@ export function ItemFormScreen({
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.heroRow}>
-          <ItemImagePicker image={image} onPress={() => openImageSourcePicker('image')} />
+          <ItemImagePicker image={image} onPress={openImageSourcePicker} />
         </View>
 
         {!selectedPantry ? (
@@ -322,10 +278,7 @@ export function ItemFormScreen({
           />
           <ItemBarcodeField
             barcode={barcode}
-            busy={barcodeBusy}
-            error={barcodeError}
             onChangeBarcode={setBarcode}
-            onScanPress={() => openImageSourcePicker('barcode')}
           />
           <ItemCartSection
             isInCart={isInCart}

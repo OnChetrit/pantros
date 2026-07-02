@@ -1,15 +1,14 @@
 import { useRouter } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 
-import { hasActiveAiConsent } from '@/lib/ai-consent';
 import { useAppTheme, useThemedStyles } from '@/lib/theme';
 import {
   getDeviceTimeZone,
   registerForPushNotifications,
 } from '@/services/supabase/notification-service';
 import { useAppContext } from '@/state/app-context';
-import { AccountActionsSection, AccountOverviewSection, AiScanningSection, AppearanceSection, RemindersSection, SupportSection } from './account-menu/account-menu-sections';
+import { AccountActionsSection, AccountOverviewSection, AppearanceSection, RemindersSection, SupportSection } from './account-menu/account-menu-sections';
 import { AccountProfileHeader } from './account-menu/account-profile-header';
 import type { AccountMenuDestination } from './account-menu/account-menu.types';
 import { formatReminderTime, parseReminderTime } from './account-menu/account-menu.utils';
@@ -39,11 +38,8 @@ export function AccountMenuContent({
     saveNotificationPreferences,
     selectedPantry,
     signOut,
-    withdrawAiConsent,
   } = useAppContext();
-  const [reminderTime, setReminderTime] = useState(() =>
-    parseReminderTime(notificationPreferences?.cartReminderTime ?? '18:00')
-  );
+  const [reminderTimeOverride, setReminderTimeOverride] = useState<Date | null>(null);
   const [notificationActionBusy, setNotificationActionBusy] = useState(false);
   const [notificationError, setNotificationError] = useState<string | null>(null);
   const [showAndroidTimePicker, setShowAndroidTimePicker] = useState(false);
@@ -52,14 +48,8 @@ export function AccountMenuContent({
     () => profile?.fullName ?? profile?.email ?? 'Pantros User',
     [profile?.email, profile?.fullName]
   );
-  const aiConsentEnabled = hasActiveAiConsent(profile);
   const notificationsBusy = notificationBusy || notificationActionBusy;
-
-  useEffect(() => {
-    if (notificationPreferences) {
-      setReminderTime(parseReminderTime(notificationPreferences.cartReminderTime));
-    }
-  }, [notificationPreferences]);
+  const reminderTime = reminderTimeOverride ?? parseReminderTime(notificationPreferences?.cartReminderTime ?? '18:00');
 
   const handleNavigate = (destination: AccountMenuDestination) => {
     if (onNavigate) {
@@ -155,18 +145,13 @@ export function AccountMenuContent({
         onOpenAndroidTimePicker={() => setShowAndroidTimePicker(true)}
         onReminderTimeChange={date => {
           setShowAndroidTimePicker(false);
-          setReminderTime(date);
+          setReminderTimeOverride(date);
         }}
         onSaveReminderTime={() => void saveReminderTime()}
         onToggleCartReminders={enabled => {
           void saveCartReminderSettings(enabled);
         }}
         notificationError={notificationError}
-      />
-      <AiScanningSection
-        profile={profile}
-        aiConsentEnabled={aiConsentEnabled}
-        onWithdrawAiConsent={() => void withdrawAiConsent()}
       />
       <SupportSection onNavigate={handleNavigate} />
       <AccountActionsSection onNavigate={handleNavigate} onSignOut={handleSignOut} />
