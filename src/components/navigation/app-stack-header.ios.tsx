@@ -26,13 +26,17 @@ export function AppStackHeader({
     <Stack.Screen
       options={{
         title,
-        headerLargeTitle: false,
-        headerTransparent: false,
+        headerLargeTitle: largeTitle,
+        headerTransparent: transparentBlur,
         headerShadowVisible: false,
-        headerBlurEffect: undefined,
-        headerBackground: undefined,
+        headerBlurEffect: transparentBlur
+          ? isDark
+            ? 'systemChromeMaterialDark'
+            : 'systemChromeMaterialLight'
+          : undefined,
+        headerBackground: transparentBlur ? () => <View style={StyleSheet.absoluteFill} /> : undefined,
         headerStyle: {
-          backgroundColor: colors.background,
+          backgroundColor: transparentBlur ? 'transparent' : colors.background,
         },
         headerTintColor: colors.tint,
         headerTitleStyle: {
@@ -42,7 +46,7 @@ export function AppStackHeader({
           color: colors.text,
         },
         headerBackVisible: minimalBackButton ? true : undefined,
-        headerBackButtonDisplayMode: undefined,
+        headerBackButtonDisplayMode: minimalBackButton ? 'minimal' : undefined,
         headerRight:
           showAccountMenu || leadingAction
             ? () => (

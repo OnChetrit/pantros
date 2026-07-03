@@ -10,12 +10,13 @@ export function ItemFormScreen(props: ItemFormScreenProps) {
   const controller = useItemFormController(props);
 
   return (
-    <KeyboardAvoidingView style={styles.screen}>
+    <KeyboardAvoidingView behavior="padding" style={styles.screen}>
       <Stack.Screen
         options={{
           title: controller.title,
           headerTitleAlign: 'center',
-          headerBackVisible: true,
+          headerBackVisible: Boolean(controller.item),
+          headerBackButtonDisplayMode: controller.item ? 'minimal' : undefined,
           headerRight: () => (
             <ItemFormSaveButton
               canSave={controller.canSave}
@@ -24,6 +25,18 @@ export function ItemFormScreen(props: ItemFormScreenProps) {
               onPress={controller.selectedPantry ? () => void controller.handleSave() : controller.handleMissingPantry}
             />
           ),
+          unstable_headerLeftItems:
+            !controller.item
+              ? () => [
+                  {
+                    type: 'button',
+                    label: 'Close',
+                    icon: {type: 'sfSymbol', name: 'xmark'},
+                    onPress: () => controller.router.back(),
+                    tintColor: '#0a84ff',
+                  },
+                ]
+              : undefined,
         }}
       />
       <ItemFormBody

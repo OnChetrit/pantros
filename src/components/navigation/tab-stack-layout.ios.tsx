@@ -20,11 +20,11 @@ export function useTabStackScreenOptions({
   return {
     title,
     headerLargeTitle: false,
-    headerTransparent: false,
+    headerTransparent: true,
     headerShadowVisible: false,
-    headerBackground: undefined,
+    headerBackground: () => <View style={[StyleSheet.absoluteFill, styles.transparentHeaderBackground]} />,
     headerStyle: {
-      backgroundColor: colors.background,
+      backgroundColor: 'transparent',
     },
     headerTintColor: colors.tint,
     headerTitleStyle: {
@@ -34,7 +34,7 @@ export function useTabStackScreenOptions({
       color: colors.text,
     },
     headerBackVisible: minimalBackButton ? true : undefined,
-    headerBackButtonDisplayMode: undefined,
+    headerBackButtonDisplayMode: minimalBackButton ? 'minimal' : undefined,
     headerRight: showAccountMenu
       ? () => (
           <View style={styles.headerActions}>
@@ -64,6 +64,9 @@ const styles = StyleSheet.create({
   headerActions: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: 'transparent',
+  },
+  transparentHeaderBackground: {
     backgroundColor: 'transparent',
   },
 });
