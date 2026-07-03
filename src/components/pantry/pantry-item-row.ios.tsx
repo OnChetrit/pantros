@@ -134,7 +134,7 @@ function PantryItemSwipeRow({
       ) : null}
       <SwipeActions.Actions edge="trailing" allowsFullSwipe={false}>
         <SwiftUIButton label="" role="destructive" systemImage="trash" onPress={confirmDelete} />
-        <SwiftUIButton label="" role="destructive" systemImage="0.square" onPress={confirmDelete} />
+        <SwiftUIButton label="" role="destructive" systemImage="clock" onPress={confirmDelete} />
       </SwipeActions.Actions>
     </SwipeActions>
   );
