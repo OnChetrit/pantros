@@ -88,37 +88,39 @@ export default function PantryScreen() {
         useViewportSizeMeasurement
       >
         <List modifiers={[listStyle('insetGrouped')]}>
-          {pantryListItems.length > 0 ? (
-            pantryListItems.map((item, index) => {
-              const leftActionLabel = item.isInCart ? 'Move to Pantry' : 'Add to Cart';
-              const onLeftAction = item.isInCart
-                ? () => void moveItemToPantry(item.id)
-                : () => void handleAddToCart(item.id);
+          <Section title="Pantry">
+            {pantryListItems.length > 0 ? (
+              pantryListItems.map((item, index) => {
+                const leftActionLabel = item.isInCart ? 'Move to Pantry' : 'Add to Cart';
+                const onLeftAction = item.isInCart
+                  ? () => void moveItemToPantry(item.id)
+                  : () => void handleAddToCart(item.id);
 
-              return (
-                <PantryItemNativeListRow
-                  key={item.id}
-                  item={item}
-                  displayMode="pantry"
-                  isLast={index === pantryListItems.length - 1}
-                  onPress={() => router.push(`/items/${item.id}`)}
-                  onEdit={() => router.push(`/items/${item.id}`)}
-                  leftActionLabel={leftActionLabel}
-                  onLeftAction={onLeftAction}
-                  onDelete={() => void deleteItem(item.id)}
-                />
-              );
-            })
-          ) : (
-            <RNHostView key="empty-pantry" matchContents>
-              <View style={styles.noticeRow}>
-                <EmptyNotice
-                  title="No pantry items yet"
-                  body="Add your first inventory item to start using the pantry as a real iOS-style list with quick actions."
-                />
-              </View>
-            </RNHostView>
-          )}
+                return (
+                  <PantryItemNativeListRow
+                    key={item.id}
+                    item={item}
+                    displayMode="pantry"
+                    isLast={index === pantryListItems.length - 1}
+                    onPress={() => router.push(`/items/${item.id}`)}
+                    onEdit={() => router.push(`/items/${item.id}`)}
+                    leftActionLabel={leftActionLabel}
+                    onLeftAction={onLeftAction}
+                    onDelete={() => void deleteItem(item.id)}
+                  />
+                );
+              })
+            ) : (
+              <RNHostView key="empty-pantry" matchContents>
+                <View style={styles.noticeRow}>
+                  <EmptyNotice
+                    title="No pantry items yet"
+                    body="Add your first inventory item to start using the pantry as a real iOS-style list with quick actions."
+                  />
+                </View>
+              </RNHostView>
+            )}
+          </Section>
           {cartItems.length > 0 ? (
             <Section title="Cart">
               {cartItems.map((item, index) => (

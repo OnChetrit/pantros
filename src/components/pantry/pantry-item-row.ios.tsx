@@ -1,13 +1,15 @@
+import { ListItem } from '@expo/ui';
 import type { MenuAction } from '@expo/ui/community/menu';
 import { MenuView } from '@expo/ui/community/menu';
-import { Button as SwiftUIButton, SwipeActions } from '@expo/ui/swift-ui';
+import { Button as SwiftUIButton, Text, SwipeActions, VStack } from '@expo/ui/swift-ui';
+import { background, font, foregroundStyle, frame, shapes } from '@expo/ui/swift-ui/modifiers';
 import { Alert } from 'react-native';
 
 import { triggerMediumImpact } from '@/lib/haptics';
+import { formatExpirationLabel } from '@/lib/pantry-insights';
 
 import {
   getCartActionSystemImage,
-  PantryItemRowContent,
   rowStyles,
   type PantryItemRowProps,
 } from './pantry-item-row.shared';
@@ -92,17 +94,46 @@ function PantryItemSwipeRow({
     }
   };
 
+  const selectionStatus =
+    displayMode === 'cart' && isSelectionMode ? (isSelected ? 'Selected' : 'Tap to select') : undefined;
+
   const menuTrigger = (
-    <PantryItemRowContent
-      item={item}
-      displayMode={displayMode}
-      isLast={isLast}
+    <ListItem
       onPress={isSelectionMode ? (onToggleSelection ?? onPress) : onPress}
-      onLongPress={onStartSelection ? () => onStartSelection() : undefined}
-      nativeListItem={nativeListItem}
-      isSelectionMode={isSelectionMode}
-      isSelected={isSelected}
-    />
+      leading={
+        <Text
+          modifiers={[
+            font({weight: 'bold', size: 15}),
+            foregroundStyle('#0A84FF'),
+            frame({width: 36, height: 36}),
+            background('#EAF2FF', shapes.circle()),
+          ]}
+        >
+          {item.name.charAt(0).toUpperCase()}
+        </Text>
+      }
+      trailing={
+        displayMode === 'cart' ? (
+          <VStack alignment="trailing" spacing={2}>
+            <Text modifiers={[font({weight: 'bold', size: 15}), foregroundStyle('#34C759')]}>
+              {String(item.quantity)}
+            </Text>
+            {isSelectionMode ? (
+              <Text modifiers={[font({size: 12}), foregroundStyle(isSelected ? '#0A84FF' : 'secondaryLabel')]}>
+                {isSelected ? 'Selected' : ''}
+              </Text>
+            ) : null}
+          </VStack>
+        ) : item.expirationDate ? (
+          <Text modifiers={[foregroundStyle('secondaryLabel'), font({size: 13})]}>
+            {formatExpirationLabel(item.expirationDate)}
+          </Text>
+        ) : undefined
+      }
+      supportingText={selectionStatus}
+    >
+      <Text modifiers={[font({weight: 'semibold', size: 17})]}>{item.name}</Text>
+    </ListItem>
   );
 
   if (nativeListItem && onStartSelection && isSelectionMode) {

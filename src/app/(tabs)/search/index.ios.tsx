@@ -1,4 +1,4 @@
-import { Host, List, RNHostView } from '@expo/ui/swift-ui';
+import { Host, List, RNHostView, Section } from '@expo/ui/swift-ui';
 import { listStyle } from '@expo/ui/swift-ui/modifiers';
 import { Ionicons } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
@@ -134,34 +134,36 @@ export default function SearchScreen() {
               ) : null}
             </View>
           </RNHostView>
-          {visibleItems.length > 0 ? (
-            visibleItems.map((item, index) => (
-              <PantryItemNativeListRow
-                key={item.id}
-                item={item}
-                displayMode="pantry"
-                isLast={index === visibleItems.length - 1}
-                onPress={() => router.push(`/items/${item.id}`)}
-                onEdit={() => router.push(`/items/${item.id}`)}
-                leftActionLabel={item.isInCart ? 'Move to Pantry' : 'Add to Cart'}
-                onLeftAction={item.isInCart ? () => void moveItemToPantry(item.id) : () => void handleAddToCart(item.id)}
-                onDelete={() => void deleteItem(item.id)}
-              />
-            ))
-          ) : (
-            <RNHostView key="empty-search" matchContents>
-              <View style={styles.listEmpty}>
-                <EmptyNotice
-                  title={trimmedQuery ? 'No matching items' : 'No search suggestions yet'}
-                  body={
-                    trimmedQuery
-                      ? 'Try a broader name fragment or a full barcode value.'
-                      : 'Add pantry items to search them here.'
-                  }
+          <Section title={trimmedQuery ? 'Results' : 'Items'}>
+            {visibleItems.length > 0 ? (
+              visibleItems.map((item, index) => (
+                <PantryItemNativeListRow
+                  key={item.id}
+                  item={item}
+                  displayMode="pantry"
+                  isLast={index === visibleItems.length - 1}
+                  onPress={() => router.push(`/items/${item.id}`)}
+                  onEdit={() => router.push(`/items/${item.id}`)}
+                  leftActionLabel={item.isInCart ? 'Move to Pantry' : 'Add to Cart'}
+                  onLeftAction={item.isInCart ? () => void moveItemToPantry(item.id) : () => void handleAddToCart(item.id)}
+                  onDelete={() => void deleteItem(item.id)}
                 />
-              </View>
-            </RNHostView>
-          )}
+              ))
+            ) : (
+              <RNHostView key="empty-search" matchContents>
+                <View style={styles.listEmpty}>
+                  <EmptyNotice
+                    title={trimmedQuery ? 'No matching items' : 'No search suggestions yet'}
+                    body={
+                      trimmedQuery
+                        ? 'Try a broader name fragment or a full barcode value.'
+                        : 'Add pantry items to search them here.'
+                    }
+                  />
+                </View>
+              </RNHostView>
+            )}
+          </Section>
         </List>
       </Host>
     </>

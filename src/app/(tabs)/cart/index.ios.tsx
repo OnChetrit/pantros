@@ -1,4 +1,4 @@
-import { Host, List, RNHostView } from '@expo/ui/swift-ui';
+import { Host, List, RNHostView, Section } from '@expo/ui/swift-ui';
 import { listStyle } from '@expo/ui/swift-ui/modifiers';
 import { Stack, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
@@ -122,34 +122,36 @@ export default function CartScreen() {
               </View>
             </RNHostView>
           ) : null}
-          {itemsInCart.length > 0 ? (
-            itemsInCart.map((item, index) => (
-              <PantryItemNativeListRow
-                key={item.id}
-                item={item}
-                displayMode="cart"
-                isLast={index === itemsInCart.length - 1}
-                onPress={() => (isSelectionMode ? toggleItemSelection(item.id) : router.push(`/items/${item.id}`))}
-                onEdit={() => router.push(`/items/${item.id}`)}
-                leftActionLabel={isSelectionMode ? undefined : 'Move to Pantry'}
-                onLeftAction={isSelectionMode ? undefined : () => void moveItemToPantry(item.id)}
-                onDelete={() => void deleteItem(item.id)}
-                isSelectionMode={isSelectionMode}
-                isSelected={selectedItemIds.includes(item.id)}
-                onToggleSelection={() => toggleItemSelection(item.id)}
-                onStartSelection={() => enterSelectionMode(item.id)}
-              />
-            ))
-          ) : (
-            <RNHostView key="empty-cart" matchContents>
-              <View style={styles.noticeRow}>
-                <EmptyNotice
-                  title="Nothing to buy right now"
-                  body="Items moved into a shopping list will appear here with working native swipe actions."
+          <Section title="Cart">
+            {itemsInCart.length > 0 ? (
+              itemsInCart.map((item, index) => (
+                <PantryItemNativeListRow
+                  key={item.id}
+                  item={item}
+                  displayMode="cart"
+                  isLast={index === itemsInCart.length - 1}
+                  onPress={() => (isSelectionMode ? toggleItemSelection(item.id) : router.push(`/items/${item.id}`))}
+                  onEdit={() => router.push(`/items/${item.id}`)}
+                  leftActionLabel={isSelectionMode ? undefined : 'Move to Pantry'}
+                  onLeftAction={isSelectionMode ? undefined : () => void moveItemToPantry(item.id)}
+                  onDelete={() => void deleteItem(item.id)}
+                  isSelectionMode={isSelectionMode}
+                  isSelected={selectedItemIds.includes(item.id)}
+                  onToggleSelection={() => toggleItemSelection(item.id)}
+                  onStartSelection={() => enterSelectionMode(item.id)}
                 />
-              </View>
-            </RNHostView>
-          )}
+              ))
+            ) : (
+              <RNHostView key="empty-cart" matchContents>
+                <View style={styles.noticeRow}>
+                  <EmptyNotice
+                    title="Nothing to buy right now"
+                    body="Items moved into a shopping list will appear here with working native swipe actions."
+                  />
+                </View>
+              </RNHostView>
+            )}
+          </Section>
         </List>
       </Host>
       <CartExpirationReviewModal
