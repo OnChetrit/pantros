@@ -14,6 +14,10 @@ export type PantryItemRowProps = {
   leftActionLabel?: string;
   onLeftAction?: () => void;
   onDelete: () => void;
+  isSelectionMode?: boolean;
+  isSelected?: boolean;
+  onToggleSelection?: () => void;
+  onStartSelection?: () => void;
 };
 
 type PantryItemRowContentProps = {
@@ -23,6 +27,8 @@ type PantryItemRowContentProps = {
   onPress: () => void;
   onLongPress?: (event: GestureResponderEvent) => void;
   nativeListItem?: boolean;
+  isSelectionMode?: boolean;
+  isSelected?: boolean;
 };
 
 export function getCartActionSystemImage(item: PantryItem) {
@@ -36,17 +42,36 @@ export function PantryItemRowContent({
   onPress,
   onLongPress,
   nativeListItem = false,
+  isSelectionMode = false,
+  isSelected = false,
 }: PantryItemRowContentProps) {
   const showExpiration = displayMode !== 'cart' && Boolean(item.expirationDate);
   const showQuantity = displayMode === 'cart';
+  const showSelectionState = displayMode === 'cart' && isSelectionMode;
 
   return (
     <Pressable
       onPress={onPress}
       onLongPress={onLongPress}
       delayLongPress={280}
-      style={[styles.row, nativeListItem ? styles.rowNativeList : null]}
+      style={[
+        styles.row,
+        nativeListItem ? styles.rowNativeList : null,
+        showSelectionState ? styles.rowSelectionMode : null,
+        isSelected ? styles.rowSelected : null,
+      ]}
     >
+      {showSelectionState ? (
+        <View
+          style={[
+            styles.selectionIndicator,
+            styles.selectionIndicatorVisible,
+            isSelected ? styles.selectionIndicatorSelected : null,
+          ]}
+        >
+          {isSelected ? <View style={styles.selectionIndicatorInner} /> : null}
+        </View>
+      ) : null}
       <View style={styles.leadingBadge}>
         <Text style={styles.leadingBadgeText}>{item.name.charAt(0).toUpperCase()}</Text>
       </View>
@@ -87,12 +112,43 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     backgroundColor: 'transparent',
+    minHeight: 60,
   },
   rowNativeList: {
     // minHeight: 60,
     // paddingHorizontal: 0,
     // paddingVertical: 8,
     // alignSelf: 'stretch',
+  },
+  rowSelectionMode: {
+    paddingLeft: 20,
+    paddingRight: 24,
+  },
+  rowSelected: {
+    backgroundColor: appColors.tintSoft,
+  },
+  selectionIndicator: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 1.5,
+    borderColor: appColors.borderStrong,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  selectionIndicatorVisible: {
+    opacity: 1,
+  },
+  selectionIndicatorSelected: {
+    borderColor: appColors.tint,
+    backgroundColor: appColors.tintSoft,
+  },
+  selectionIndicatorInner: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: appColors.tint,
   },
   divider: {
     position: 'absolute',
@@ -132,7 +188,7 @@ const styles = StyleSheet.create({
     flexShrink: 0,
     alignItems: 'flex-end',
     gap: 2,
-    maxWidth: 96,
+    maxWidth: 84,
     marginLeft: 8,
   },
   expiration: {
@@ -143,9 +199,11 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   quantity: {
-    fontSize: 16,
-    lineHeight: 20,
+    minWidth: 28,
+    fontSize: 15,
+    lineHeight: 18,
     fontWeight: '700',
     color: appColors.accent,
+    textAlign: 'right',
   },
 });

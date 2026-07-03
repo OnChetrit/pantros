@@ -16,6 +16,10 @@ export function PantryItemRow({
   leftActionLabel,
   onLeftAction,
   onDelete,
+  isSelectionMode = false,
+  isSelected = false,
+  onToggleSelection,
+  onStartSelection,
 }: PantryItemRowProps) {
   const hasLeftAction = Boolean(onLeftAction && leftActionLabel);
 
@@ -64,8 +68,10 @@ export function PantryItemRow({
       item={item}
       displayMode={displayMode}
       isLast={isLast}
-      onPress={onPress}
-      onLongPress={showActions}
+      onPress={isSelectionMode ? (onToggleSelection ?? onPress) : onPress}
+      onLongPress={onStartSelection ? () => onStartSelection() : showActions}
+      isSelectionMode={isSelectionMode}
+      isSelected={isSelected}
     />
   );
 }

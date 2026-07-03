@@ -58,6 +58,11 @@ type AppContextValue = {
   updateItem: (itemId: string, input: PantryItemInput) => Promise<PantryItem>;
   moveItemToCart: (itemId: string, cartId: string | null) => Promise<PantryItem>;
   moveItemToPantry: (itemId: string) => Promise<PantryItem>;
+  moveItemsToPantry: (itemIds: string[]) => Promise<PantryItem[]>;
+  completeCartItemWithExpiration: (
+    itemId: string,
+    expirationDate: string | null
+  ) => Promise<PantryItem>;
   deleteItem: (itemId: string) => Promise<void>;
   saveNotificationPreferences: (
     preferences: NotificationPreferences
@@ -71,6 +76,18 @@ type AppContextValue = {
 };
 
 const AppContext = createContext<AppContextValue | undefined>(undefined);
+
+export class PartialItemActionError extends Error {
+  completedItemIds: string[];
+  failedItemId: string | null;
+
+  constructor(message: string, options?: { completedItemIds?: string[]; failedItemId?: string | null }) {
+    super(message);
+    this.name = 'PartialItemActionError';
+    this.completedItemIds = options?.completedItemIds ?? [];
+    this.failedItemId = options?.failedItemId ?? null;
+  }
+}
 
 export function AppProvider({ children }: PropsWithChildren) {
   const [status, setStatus] = useState<BootstrapStatus>('loading');
@@ -356,6 +373,113 @@ export function AppProvider({ children }: PropsWithChildren) {
     }
   }, [items]);
 
+  const moveItemsToPantry = useCallback(async (itemIds: string[]) => {
+    if (itemIds.length === 0) {
+      return [];
+    }
+
+    setItemBusy(true);
+    setErrorMessage(null);
+
+    const previousItems = new Map(
+      itemIds
+        .map((itemId) => {
+          const item = items.find((candidate) => candidate.id === itemId);
+          return item ? [itemId, item] : null;
+        })
+        .filter(Boolean) as [string, PantryItem][]
+    );
+
+    setItems((currentItems) =>
+      currentItems.map((item) =>
+        previousItems.has(item.id)
+          ? {
+              ...item,
+              isInCart: false,
+              cartId: null,
+            }
+          : item
+      )
+    );
+
+    const completedItems: PantryItem[] = [];
+
+    try {
+      for (const itemId of itemIds) {
+        const savedItem = await movePantryItemToPantry(itemId);
+        completedItems.push(savedItem);
+        setItems((currentItems) => currentItems.map((item) => (item.id === itemId ? savedItem : item)));
+      }
+
+      return completedItems;
+    } catch (error) {
+      const failedItemId = itemIds.find((itemId) => !completedItems.some((item) => item.id === itemId)) ?? null;
+
+      if (failedItemId) {
+        const previousItem = previousItems.get(failedItemId);
+
+        if (previousItem) {
+          setItems((currentItems) =>
+            currentItems.map((item) => (item.id === failedItemId ? previousItem : item))
+          );
+        }
+      }
+
+      const message = error instanceof Error ? error.message : 'Unable to move selected items back to pantry.';
+      setErrorMessage(message);
+      throw new PartialItemActionError(message, {
+        completedItemIds: completedItems.map((item) => item.id),
+        failedItemId,
+      });
+    } finally {
+      setItemBusy(false);
+    }
+  }, [items]);
+
+  const completeCartItemWithExpiration = useCallback(async (itemId: string, expirationDate: string | null) => {
+    setItemBusy(true);
+    setErrorMessage(null);
+    const previousItem = items.find((item) => item.id === itemId) ?? null;
+
+    if (!previousItem) {
+      setItemBusy(false);
+      throw new Error('Item no longer exists.');
+    }
+
+    const optimisticItem: PantryItem = {
+      ...previousItem,
+      expirationDate,
+      isInCart: false,
+      cartId: null,
+    };
+
+    setItems((currentItems) => currentItems.map((item) => (item.id === itemId ? optimisticItem : item)));
+
+    try {
+      const savedItem = await updatePantryItem(itemId, {
+        pantryId: previousItem.pantryId,
+        name: previousItem.name,
+        barcode: previousItem.barcode,
+        image: previousItem.image,
+        expirationDate,
+        isInCart: false,
+        cartId: null,
+        quantity: previousItem.quantity,
+      });
+      setItems((currentItems) => currentItems.map((item) => (item.id === itemId ? savedItem : item)));
+      return savedItem;
+    } catch (error) {
+      setItems((currentItems) => currentItems.map((item) => (item.id === itemId ? previousItem : item)));
+
+      const message =
+        error instanceof Error ? error.message : 'Unable to save expiration and move item back to pantry.';
+      setErrorMessage(message);
+      throw error;
+    } finally {
+      setItemBusy(false);
+    }
+  }, [items]);
+
   const signIn = useCallback(async (email: string, password: string) => {
     setAuthBusy(true);
     setErrorMessage(null);
@@ -437,6 +561,8 @@ export function AppProvider({ children }: PropsWithChildren) {
     updateItem,
     moveItemToCart,
     moveItemToPantry,
+    moveItemsToPantry,
+    completeCartItemWithExpiration,
     deleteItem,
     saveNotificationPreferences,
     signIn,
@@ -462,6 +588,8 @@ export function AppProvider({ children }: PropsWithChildren) {
     deleteAccount,
     moveItemToCart,
     moveItemToPantry,
+    moveItemsToPantry,
+    completeCartItemWithExpiration,
     pantries,
     pantryCarts,
     pantryItems,

@@ -33,6 +33,10 @@ function PantryItemSwipeRow({
   leftActionLabel,
   onLeftAction,
   onDelete,
+  isSelectionMode = false,
+  isSelected = false,
+  onToggleSelection,
+  onStartSelection,
   nativeListItem = false,
 }: PantryItemSwipeRowProps) {
   const hasLeftAction = Boolean(onLeftAction && leftActionLabel);
@@ -89,43 +93,57 @@ function PantryItemSwipeRow({
   };
 
   const menuTrigger = (
-    <>
-      <PantryItemRowContent
-        item={item}
-        displayMode={displayMode}
-        isLast={isLast}
-        onPress={onPress}
-        nativeListItem={nativeListItem}
-      />
-    </>
+    <PantryItemRowContent
+      item={item}
+      displayMode={displayMode}
+      isLast={isLast}
+      onPress={isSelectionMode ? (onToggleSelection ?? onPress) : onPress}
+      onLongPress={onStartSelection ? () => onStartSelection() : undefined}
+      nativeListItem={nativeListItem}
+      isSelectionMode={isSelectionMode}
+      isSelected={isSelected}
+    />
   );
+
+  if (nativeListItem && onStartSelection && isSelectionMode) {
+    return <SwipeActions>{menuTrigger}</SwipeActions>;
+  }
+
+  if (onStartSelection && isSelectionMode) {
+    return menuTrigger;
+  }
 
   const swipeActions = (
     <SwipeActions>
-      <MenuView
-        actions={menuActions}
-        onPressAction={handleMenuAction}
-        shouldOpenOnLongPress
-        style={rowStyles.nativeListHost}
-      >
-        {menuTrigger}
-      </MenuView>
+      {onStartSelection ? (
+        menuTrigger
+      ) : (
+        <MenuView
+          actions={menuActions}
+          onPressAction={handleMenuAction}
+          shouldOpenOnLongPress
+          style={rowStyles.nativeListHost}
+        >
+          {menuTrigger}
+        </MenuView>
+      )}
       {hasLeftAction ? (
-        <SwipeActions.Actions edge="leading" allowsFullSwipe={false}>
-          <SwiftUIButton
-            label={leftActionLabel}
-            systemImage={getCartActionSystemImage(item)}
-            onPress={handleLeftAction}
-          />
+        <SwipeActions.Actions edge="leading" allowsFullSwipe>
+          <SwiftUIButton label="" systemImage={getCartActionSystemImage(item)} onPress={handleLeftAction} />
         </SwipeActions.Actions>
       ) : null}
-      <SwipeActions.Actions edge="trailing" allowsFullSwipe>
-        <SwiftUIButton label="Delete" role="destructive" systemImage="trash" onPress={confirmDelete} />
+      <SwipeActions.Actions edge="trailing" allowsFullSwipe={false}>
+        <SwiftUIButton label="" role="destructive" systemImage="trash" onPress={confirmDelete} />
+        <SwiftUIButton label="" role="destructive" systemImage="0.square" onPress={confirmDelete} />
       </SwipeActions.Actions>
     </SwipeActions>
   );
 
   if (nativeListItem) {
+    return swipeActions;
+  }
+
+  if (onStartSelection) {
     return swipeActions;
   }
 
