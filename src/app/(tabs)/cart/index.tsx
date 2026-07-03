@@ -1,78 +1,20 @@
 import { Stack, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, StyleSheet, View } from 'react-native';
 
 import { AvatarSidebarButton } from '@/components/navigation/avatar-sidebar';
 import { PantryFilterMenu, type PantryListSortOption } from '@/components/pantry/pantry-filter-menu';
 import { PantryItemRow } from '@/components/pantry/pantry-item-row';
 import { EmptyNotice } from '@/components/ui/primitives';
 import { CartCheckoutFooter } from '@/features/cart/cart-checkout-bar';
+import { CartCheckoutNotice } from '@/features/cart/cart-checkout-notice';
 import { CartExpirationReviewModal } from '@/features/cart/cart-expiration-review-modal';
 import { useCartCheckout } from '@/features/cart/cart-checkout-context';
+import { CartHeaderAction } from '@/features/cart/cart-header-action';
 import { sortCartItems } from '@/features/cart/cart-items';
 import { getCartItems } from '@/lib/pantry-insights';
-import { appColors, useAppTheme } from '@/lib/theme';
+import { appColors } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
-
-function HeaderAction({
-  label,
-  onPress,
-  emphasized = false,
-  disabled = false,
-}: {
-  label: string;
-  onPress: () => void;
-  emphasized?: boolean;
-  disabled?: boolean;
-}) {
-  const { colors } = useAppTheme();
-
-  return (
-    <Pressable
-      disabled={disabled}
-      onPress={onPress}
-      style={({ pressed }) => [styles.headerButton, (pressed || disabled) ? styles.headerButtonPressed : null]}
-    >
-      <Text
-        style={[
-          styles.headerButtonText,
-          { color: disabled ? colors.muted : emphasized ? colors.tint : colors.text },
-        ]}
-      >
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
-
-function CheckoutNotice({
-  tone,
-  message,
-  onDismiss,
-}: {
-  tone: 'success' | 'error';
-  message: string;
-  onDismiss: () => void;
-}) {
-  const { colors } = useAppTheme();
-
-  return (
-    <View
-      style={[
-        styles.noticeBanner,
-        {
-          backgroundColor: tone === 'success' ? colors.tintSoft : colors.dangerSoft,
-          borderColor: tone === 'success' ? colors.borderStrong : colors.danger,
-        },
-      ]}
-    >
-      <Text style={[styles.noticeBannerText, { color: colors.text }]}>{message}</Text>
-      <Pressable onPress={onDismiss}>
-        <Text style={[styles.noticeBannerDismiss, { color: colors.tint }]}>Dismiss</Text>
-      </Pressable>
-    </View>
-  );
-}
 
 export default function CartScreen() {
   const { deleteItem, moveItemToPantry, pantryItems, selectedPantry } = useAppContext();
@@ -130,21 +72,21 @@ export default function CartScreen() {
         options={{
           headerLeft: () =>
             isSelectionMode ? (
-              <HeaderAction label="Cancel" onPress={exitSelectionMode} />
+              <CartHeaderAction label="Cancel" onPress={exitSelectionMode} />
             ) : (
               <PantryFilterMenu sortOption={sortOption} onSelectSort={setSortOption} />
             ),
           title: isSelectionMode ? `${selectedCount} selected` : 'Cart',
           headerRight: () =>
             isSelectionMode ? (
-              <HeaderAction
+              <CartHeaderAction
                 label={allSelected ? 'Clear' : 'Select All'}
                 emphasized
                 onPress={() => (allSelected ? clearSelection() : selectAll(itemsInCart.map((item) => item.id)))}
               />
             ) : (
               <View style={styles.headerActions}>
-                <HeaderAction
+                <CartHeaderAction
                   label="Select"
                   emphasized
                   disabled={itemsInCart.length === 0}
@@ -169,10 +111,10 @@ export default function CartScreen() {
           ListHeaderComponent={
             <>
               {checkoutProgress.errorMessage ? (
-                <CheckoutNotice tone="error" message={checkoutProgress.errorMessage} onDismiss={clearCheckoutError} />
+                <CartCheckoutNotice tone="error" message={checkoutProgress.errorMessage} onDismiss={clearCheckoutError} />
               ) : null}
               {checkoutProgress.completionMessage ? (
-                <CheckoutNotice
+                <CartCheckoutNotice
                   tone="success"
                   message={checkoutProgress.completionMessage}
                   onDismiss={dismissCompletionMessage}
@@ -268,38 +210,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-  },
-  headerButton: {
-    minHeight: 32,
-    justifyContent: 'center',
-  },
-  headerButtonPressed: {
-    opacity: 0.65,
-  },
-  headerButtonText: {
-    fontSize: 17,
-    lineHeight: 22,
-    fontWeight: '600',
-  },
-  noticeBanner: {
-    borderWidth: 1,
-    borderRadius: 18,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  noticeBannerText: {
-    flex: 1,
-    fontSize: 14,
-    lineHeight: 20,
-    fontWeight: '600',
-  },
-  noticeBannerDismiss: {
-    fontSize: 14,
-    lineHeight: 20,
-    fontWeight: '700',
   },
 });

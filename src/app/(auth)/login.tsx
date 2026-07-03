@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import { Redirect } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -17,59 +16,15 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppButton, AppScreen, EmptyNotice, appColors } from '@/components/ui/primitives';
+import { AuthModeChip } from '@/features/auth/auth-mode-chip';
+import { AuthProviderButton } from '@/features/auth/auth-provider-button';
 import { useThemedStyles } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
 
 type AuthMode = 'signin' | 'signup';
 
-type ModeChipProps = {
-  label: string;
-  active: boolean;
-  onPress: () => void;
-};
-
-type ProviderButtonProps = {
-  icon: keyof typeof Ionicons.glyphMap;
-  label: string;
-  onPress: () => void;
-  disabled: boolean;
-};
-
-function ModeChip({label, active, onPress}: ModeChipProps) {
-  const styles = useThemedStyles(createStyles);
-
-  return (
-    <Pressable
-      onPress={onPress}
-      style={({pressed}) => [
-        styles.modeChip,
-        active ? styles.modeChipActive : null,
-        pressed ? styles.modeChipPressed : null,
-      ]}
-    >
-      <Text style={[styles.modeChipText, active ? styles.modeChipTextActive : null]}>{label}</Text>
-    </Pressable>
-  );
-}
-
-function ProviderButton({icon, label, onPress, disabled}: ProviderButtonProps) {
-  const styles = useThemedStyles(createStyles);
-
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      disabled={disabled}
-      onPress={onPress}
-      style={({pressed}) => [styles.providerIconButton, (pressed || disabled) && styles.providerButtonPressed]}
-    >
-      <Ionicons name={icon} size={18} color={appColors.text} />
-    </Pressable>
-  );
-}
-
 function renderAppleButton(disabled: boolean, onPress: () => void) {
-  return <ProviderButton icon="logo-apple" label="Continue with Apple" onPress={onPress} disabled={disabled} />;
+  return <AuthProviderButton icon="logo-apple" label="Continue with Apple" onPress={onPress} disabled={disabled} />;
 }
 
 export default function LoginScreen() {
@@ -180,14 +135,14 @@ export default function LoginScreen() {
                       ]}
                     />
                   ) : null}
-                  <ModeChip label="Sign in" active={mode === 'signin'} onPress={() => switchMode('signin')} />
-                  <ModeChip label="Sign up" active={mode === 'signup'} onPress={() => switchMode('signup')} />
+                  <AuthModeChip label="Sign in" active={mode === 'signin'} onPress={() => switchMode('signin')} />
+                  <AuthModeChip label="Sign up" active={mode === 'signup'} onPress={() => switchMode('signup')} />
                 </View>
 
                 <View style={styles.providers}>
                   <Text style={styles.providersLabel}>Continue with</Text>
                   <View style={styles.providersActions}>
-                    <ProviderButton
+                    <AuthProviderButton
                       icon="logo-google"
                       label="Continue with Google"
                       onPress={() => void signInWithGoogle()}
@@ -384,32 +339,6 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) => StyleShee
     borderRadius: 16,
     backgroundColor: colors.tint,
   },
-  modeChip: {
-    position: 'relative',
-    flex: 1,
-    minHeight: 46,
-    borderRadius: 16,
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: 'transparent',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 14,
-  },
-  modeChipActive: {
-    borderColor: 'transparent',
-  },
-  modeChipPressed: {
-    opacity: 0.78,
-  },
-  modeChipText: {
-    color: colors.muted,
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  modeChipTextActive: {
-    color: colors.textInverse,
-  },
   providers: {
     alignItems: 'center',
     gap: 10,
@@ -425,19 +354,6 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) => StyleShee
     alignItems: 'center',
     justifyContent: 'center',
     gap: 12,
-  },
-  providerIconButton: {
-    width: 42,
-    height: 42,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.input,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  providerButtonPressed: {
-    opacity: 0.76,
   },
   dividerRow: {
     flexDirection: 'row',
