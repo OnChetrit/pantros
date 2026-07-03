@@ -1,5 +1,7 @@
 # Pantros Project Instructions
 
+Follow [docs/EXPO_IOS_GUIDELINES.md](docs/EXPO_IOS_GUIDELINES.md) as the detailed Expo and iOS implementation playbook for this repo.
+
 ## Native iOS First
 
 - Prefer native iOS surfaces before custom React Native recreations.
