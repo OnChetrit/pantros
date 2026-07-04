@@ -1,27 +1,22 @@
-import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert } from 'react-native';
 
-import { EmptyNotice, appColors } from '@/components/ui/primitives';
 import type { PantryItem, PantryItemInput } from '@/domain/models';
 import { matchPantryItems } from '@/lib/pantry-insights';
-import { useThemedStyles } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
 
-import { ItemBarcodeField } from './item-form/item-barcode-field';
-import { ItemCartSection } from './item-form/item-cart-section';
-import { ItemImagePicker } from './item-form/item-image-picker';
-import { ItemNameField } from './item-form/item-name-field';
 import { buildItemInput, hasItemInputChanges, isValidIsoDate } from './item-form/item-form.utils';
-import { ItemExpirationField } from './item-expiration-field';
 
 export type ItemFormScreenProps = {
   initialBarcode?: string | null;
   item?: PantryItem;
   initialName?: string | null;
 };
+
+export { ItemFormBody } from './item-form-body';
+export { ItemFormSaveButton } from './item-form-save-button';
 
 export function useItemFormController({initialBarcode, item, initialName}: ItemFormScreenProps) {
   const router = useRouter();
@@ -226,150 +221,3 @@ export function useItemFormController({initialBarcode, item, initialName}: ItemF
     openImageSourcePicker,
   };
 }
-
-export function ItemFormBody({
-  barcode,
-  duplicateCandidates,
-  exactDuplicate,
-  expirationDate,
-  formError,
-  image,
-  isInCart,
-  name,
-  onChangeBarcode,
-  onChangeExpirationDate,
-  onChangeIsInCart,
-  onChangeName,
-  onDecrementQuantity,
-  onIncrementQuantity,
-  onOpenImageSourcePicker,
-  onSelectDuplicate,
-  parsedQuantity,
-  selectedPantry,
-}: {
-  barcode: string;
-  duplicateCandidates: PantryItem[];
-  exactDuplicate: PantryItem | null;
-  expirationDate: string;
-  formError: string | null;
-  image: string;
-  isInCart: boolean;
-  name: string;
-  onChangeBarcode: (value: string) => void;
-  onChangeExpirationDate: (value: string) => void;
-  onChangeIsInCart: (value: boolean) => void;
-  onChangeName: (value: string) => void;
-  onDecrementQuantity: () => void;
-  onIncrementQuantity: () => void;
-  onOpenImageSourcePicker: () => void;
-  onSelectDuplicate: (candidateId: string) => void;
-  parsedQuantity: number | null;
-  selectedPantry: unknown;
-}) {
-  const styles = useThemedStyles(createStyles);
-
-  return (
-    <ScrollView
-      style={styles.scroll}
-      contentContainerStyle={styles.content}
-      contentInsetAdjustmentBehavior="automatic"
-      keyboardShouldPersistTaps="handled"
-    >
-      <View style={styles.heroRow}>
-        <ItemImagePicker image={image} onPress={onOpenImageSourcePicker} />
-      </View>
-
-      {!selectedPantry ? (
-        <EmptyNotice
-          title="No pantry selected"
-          body="Items belong to a pantry workspace. Select or create a pantry before adding inventory."
-        />
-      ) : null}
-
-      <View style={styles.card}>
-        <ItemNameField
-          name={name}
-          duplicateCandidates={duplicateCandidates}
-          exactDuplicateId={exactDuplicate?.id}
-          onChangeName={onChangeName}
-          onSelectDuplicate={onSelectDuplicate}
-        />
-        <ItemBarcodeField barcode={barcode} onChangeBarcode={onChangeBarcode} />
-        <ItemCartSection
-          isInCart={isInCart}
-          quantity={parsedQuantity ?? 1}
-          onToggle={onChangeIsInCart}
-          onDecrement={onDecrementQuantity}
-          onIncrement={onIncrementQuantity}
-        />
-      </View>
-
-      <ItemExpirationField value={expirationDate} onChange={onChangeExpirationDate} />
-
-      {formError ? <EmptyNotice title="Could not save item" body={formError} /> : null}
-    </ScrollView>
-  );
-}
-
-export function ItemFormSaveButton({
-  canSave,
-  itemBusy,
-  onPress,
-  label,
-}: {
-  canSave: boolean;
-  itemBusy: boolean;
-  onPress: () => void;
-  label: string;
-}) {
-  const styles = useThemedStyles(createStyles);
-
-  return (
-    <Pressable
-      onPress={onPress}
-      disabled={itemBusy || !canSave}
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      style={({pressed}) => [
-        styles.headerActionButton,
-        pressed || itemBusy || !canSave ? styles.headerActionButtonPressed : null,
-      ]}
-    >
-      <Ionicons name="checkmark" size={24} color={itemBusy || !canSave ? appColors.muted : appColors.tint} />
-    </Pressable>
-  );
-}
-
-const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
-  StyleSheet.create({
-    scroll: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
-    content: {
-      paddingHorizontal: 16,
-      paddingBottom: 18,
-      gap: 10,
-    },
-    heroRow: {
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    headerActionButton: {
-      width: 32,
-      height: 32,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    headerActionButtonPressed: {
-      opacity: 0.5,
-    },
-    card: {
-      borderRadius: 20,
-      padding: 12,
-      gap: 12,
-      backgroundColor: colors.card,
-      borderWidth: 1,
-      borderColor: colors.border,
-    },
-  });

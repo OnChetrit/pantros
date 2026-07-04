@@ -2,10 +2,9 @@ import { Alert } from 'react-native';
 
 import { triggerMediumImpact } from '@/lib/haptics';
 
-import {
-  PantryItemRowContent,
-  type PantryItemRowProps,
-} from './pantry-item-row.shared';
+import { PantryItemRowContent, type PantryItemRowProps } from './pantry-item-row.shared';
+
+export { PantryItemNativeListRow } from './pantry-item-native-list-row';
 
 export function PantryItemRow({
   item,
@@ -26,7 +25,7 @@ export function PantryItemRow({
   const confirmDelete = () => {
     void triggerMediumImpact();
     Alert.alert('Delete Item', `Delete "${item.name}"?`, [
-      { text: 'Cancel', style: 'cancel' },
+      {text: 'Cancel', style: 'cancel'},
       {
         text: 'Delete',
         style: 'destructive',
@@ -59,7 +58,7 @@ export function PantryItemRow({
           onPress: confirmDelete,
         },
       ],
-      { cancelable: true }
+      {cancelable: true}
     );
   };
 
@@ -74,8 +73,4 @@ export function PantryItemRow({
       isSelected={isSelected}
     />
   );
-}
-
-export function PantryItemNativeListRow(props: PantryItemRowProps) {
-  return <PantryItemRow {...props} />;
 }
