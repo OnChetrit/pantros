@@ -4,17 +4,17 @@ import { Stack, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { AvatarSidebarButton } from '@/components/navigation/avatar-sidebar';
+import { createIconHeaderButton, createTextHeaderButton } from '@/components/navigation/native-header-items';
 import { PantryFilterMenu, type PantryListSortOption } from '@/components/pantry/pantry-filter-menu';
 import { PantryItemNativeListRow } from '@/components/pantry/pantry-item-row';
 import { EmptyNotice } from '@/components/ui/primitives';
+import { CartCheckoutSheet } from '@/features/cart/cart-checkout-bar';
 import { CartCheckoutNotice } from '@/features/cart/cart-checkout-notice';
 import { getCartItems } from '@/lib/pantry-insights';
 import { useAppTheme } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
 import { CartExpirationReviewModal } from '@/features/cart/cart-expiration-review-modal';
 import { useCartCheckout } from '@/features/cart/cart-checkout-context';
-import { CartHeaderAction } from '@/features/cart/cart-header-action';
 import { sortCartItems } from '@/features/cart/cart-items';
 
 export default function CartScreen() {
@@ -36,12 +36,14 @@ export default function CartScreen() {
     selectedItemIds,
     setReviewDate,
     skipCurrentReview,
+    startCheckout,
     toggleItemSelection,
     cancelReview,
   } = useCartCheckout();
   const { colors, isDark } = useAppTheme();
   const router = useRouter();
   const [sortOption, setSortOption] = useState<PantryListSortOption>('expiration');
+  const [isSortMenuVisible, setIsSortMenuVisible] = useState(false);
 
   const itemsInCart = useMemo(() => {
     return sortCartItems(getCartItems(pantryItems), sortOption);
@@ -71,32 +73,55 @@ export default function CartScreen() {
     <>
       <Stack.Screen
         options={{
-          headerLeft: () =>
-            isSelectionMode ? (
-              <CartHeaderAction label="Cancel" onPress={exitSelectionMode} />
-            ) : (
-              <PantryFilterMenu sortOption={sortOption} onSelectSort={setSortOption} />
-            ),
+          unstable_headerLeftItems: () =>
+            isSelectionMode
+              ? [
+                  createTextHeaderButton({
+                    label: 'Cancel',
+                    onPress: exitSelectionMode,
+                    tintColor: colors.text,
+                  }),
+                ]
+              : [
+                  createIconHeaderButton({
+                    label: 'Open sort menu',
+                    icon: 'arrow.up.arrow.down',
+                    onPress: () => setIsSortMenuVisible(true),
+                    tintColor: colors.tint,
+                  }),
+                ],
           title: isSelectionMode ? `${selectedCount} selected` : 'Cart',
-          headerRight: () =>
-            isSelectionMode ? (
-              <CartHeaderAction
-                label={allSelected ? 'Clear' : 'Select All'}
-                emphasized
-                onPress={() => (allSelected ? clearSelection() : selectAll(itemsInCart.map((item) => item.id)))}
-              />
-            ) : (
-              <View style={styles.headerActions}>
-                <CartHeaderAction
-                  label="Select"
-                  emphasized
-                  disabled={itemsInCart.length === 0}
-                  onPress={() => enterSelectionMode()}
-                />
-                <AvatarSidebarButton />
-              </View>
-            ),
+          unstable_headerRightItems: () =>
+            isSelectionMode
+              ? [
+                  createTextHeaderButton({
+                    label: allSelected ? 'Clear' : 'Select All',
+                    onPress: () => (allSelected ? clearSelection() : selectAll(itemsInCart.map((item) => item.id))),
+                    tintColor: colors.tint,
+                  }),
+                ]
+              : [
+                  createTextHeaderButton({
+                    label: 'Select',
+                    onPress: () => enterSelectionMode(),
+                    disabled: itemsInCart.length === 0,
+                    tintColor: colors.tint,
+                  }),
+                  createIconHeaderButton({
+                    label: 'Open account menu',
+                    icon: 'person.crop.circle',
+                    onPress: () => router.push('/account/menu'),
+                    tintColor: colors.tint,
+                  }),
+                ],
         }}
+      />
+      <PantryFilterMenu
+        hideTrigger
+        sortOption={sortOption}
+        onSelectSort={setSortOption}
+        visible={isSortMenuVisible}
+        onVisibilityChange={setIsSortMenuVisible}
       />
       <Host
         colorScheme={isDark ? 'dark' : 'light'}
@@ -154,6 +179,15 @@ export default function CartScreen() {
           </Section>
         </List>
       </Host>
+      <CartCheckoutSheet
+        isPresented={isSelectionMode}
+        onDismiss={exitSelectionMode}
+        selectedCount={selectedCount}
+        totalCount={itemsInCart.length}
+        processing={checkoutProgress.processing}
+        onSubmit={() => void startCheckout()}
+        onSecondaryAction={() => (allSelected ? clearSelection() : selectAll(itemsInCart.map((item) => item.id)))}
+      />
       <CartExpirationReviewModal
         visible={checkoutQueue.length > 0 && currentReviewItem !== null}
         item={currentReviewItem}
@@ -183,10 +217,5 @@ const styles = StyleSheet.create({
   noticeRow: {
     paddingHorizontal: 4,
     paddingVertical: 6,
-  },
-  headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
   },
 });

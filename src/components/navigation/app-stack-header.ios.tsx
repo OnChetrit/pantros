@@ -1,8 +1,8 @@
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import type { ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { AvatarSidebarButton } from '@/components/navigation/avatar-sidebar';
+import { createIconHeaderButton } from '@/components/navigation/native-header-items';
 import { useAppTheme } from '@/lib/theme';
 
 export function AppStackHeader({
@@ -21,6 +21,8 @@ export function AppStackHeader({
   minimalBackButton?: boolean;
 }) {
   const {colors, isDark} = useAppTheme();
+  const router = useRouter();
+  const canUseNativeRightItems = !leadingAction;
 
   return (
     <Stack.Screen
@@ -47,12 +49,22 @@ export function AppStackHeader({
         },
         headerBackVisible: minimalBackButton ? true : undefined,
         headerBackButtonDisplayMode: minimalBackButton ? 'minimal' : undefined,
+        unstable_headerRightItems:
+          canUseNativeRightItems && showAccountMenu
+            ? () => [
+                createIconHeaderButton({
+                  label: 'Open account menu',
+                  icon: 'person.crop.circle',
+                  onPress: () => router.push('/account/menu'),
+                  tintColor: colors.tint,
+                }),
+              ]
+            : undefined,
         headerRight:
-          showAccountMenu || leadingAction
+          !canUseNativeRightItems && (showAccountMenu || leadingAction)
             ? () => (
                 <View style={styles.headerActions}>
                   {leadingAction}
-                  {showAccountMenu ? <AvatarSidebarButton /> : null}
                 </View>
               )
             : undefined,

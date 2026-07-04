@@ -47,7 +47,6 @@ export function PantryItemRowContent({
 }: PantryItemRowContentProps) {
   const showExpiration = displayMode !== 'cart' && Boolean(item.expirationDate);
   const showQuantity = displayMode === 'cart';
-  const showSelectionState = displayMode === 'cart' && isSelectionMode;
 
   return (
     <Pressable
@@ -57,21 +56,9 @@ export function PantryItemRowContent({
       style={[
         styles.row,
         nativeListItem ? styles.rowNativeList : null,
-        showSelectionState ? styles.rowSelectionMode : null,
         isSelected ? styles.rowSelected : null,
       ]}
     >
-      {showSelectionState ? (
-        <View
-          style={[
-            styles.selectionIndicator,
-            styles.selectionIndicatorVisible,
-            isSelected ? styles.selectionIndicatorSelected : null,
-          ]}
-        >
-          {isSelected ? <View style={styles.selectionIndicatorInner} /> : null}
-        </View>
-      ) : null}
       <View style={styles.leadingBadge}>
         <Text style={styles.leadingBadgeText}>{item.name.charAt(0).toUpperCase()}</Text>
       </View>
@@ -91,12 +78,17 @@ export function PantryItemRowContent({
 
 export const rowStyles = StyleSheet.create({
   contextMenuHost: {
-    // width: '100%',
+    alignSelf: 'stretch',
+    width: '100%',
+    minWidth: 0,
+    flex: 1,
   },
   nativeListHost: {
-    // alignSelf: 'stretch',
-    // width: '100%',
-    // maxWidth: '100%',
+    alignSelf: 'stretch',
+    width: '100%',
+    maxWidth: '100%',
+    minWidth: 0,
+    flex: 1,
   },
 });
 
@@ -120,35 +112,8 @@ const styles = StyleSheet.create({
     // paddingVertical: 8,
     // alignSelf: 'stretch',
   },
-  rowSelectionMode: {
-    paddingLeft: 20,
-    paddingRight: 24,
-  },
   rowSelected: {
     backgroundColor: appColors.tintSoft,
-  },
-  selectionIndicator: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 1.5,
-    borderColor: appColors.borderStrong,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-  selectionIndicatorVisible: {
-    opacity: 1,
-  },
-  selectionIndicatorSelected: {
-    borderColor: appColors.tint,
-    backgroundColor: appColors.tintSoft,
-  },
-  selectionIndicatorInner: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: appColors.tint,
   },
   divider: {
     position: 'absolute',

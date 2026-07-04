@@ -1,18 +1,12 @@
 import { ListItem } from '@expo/ui';
-import type { MenuAction } from '@expo/ui/community/menu';
-import { MenuView } from '@expo/ui/community/menu';
-import { Button as SwiftUIButton, Text, SwipeActions, VStack } from '@expo/ui/swift-ui';
+import { Button as SwiftUIButton, ContextMenu, SwipeActions, Text, VStack } from '@expo/ui/swift-ui';
 import { background, font, foregroundStyle, frame, shapes } from '@expo/ui/swift-ui/modifiers';
 import { Alert } from 'react-native';
 
 import { triggerMediumImpact } from '@/lib/haptics';
 import { formatExpirationLabel } from '@/lib/pantry-insights';
 
-import {
-  getCartActionSystemImage,
-  rowStyles,
-  type PantryItemRowProps,
-} from './pantry-item-row.shared';
+import { getCartActionSystemImage, rowStyles, type PantryItemRowProps } from './pantry-item-row.shared';
 
 export function PantryItemRow({...props}: PantryItemRowProps) {
   return <PantryItemSwipeRow {...props} />;
@@ -65,38 +59,6 @@ function PantryItemSwipeRow({
     onLeftAction?.();
   };
 
-  const menuActions: MenuAction[] = [
-    {id: 'edit', title: 'Edit item', image: 'pencil' as const},
-    ...(hasLeftAction
-      ? [{id: 'left-action', title: leftActionLabel!, image: getCartActionSystemImage(item) as MenuAction['image']}]
-      : []),
-    {
-      id: 'delete',
-      title: 'Delete item',
-      image: 'trash' as const,
-      attributes: {destructive: true},
-    },
-  ];
-
-  const handleMenuAction = ({nativeEvent: {event}}: {nativeEvent: {event: string}}) => {
-    if (event === 'edit') {
-      handleEditAction();
-      return;
-    }
-
-    if (event === 'left-action') {
-      handleLeftAction();
-      return;
-    }
-
-    if (event === 'delete') {
-      confirmDelete();
-    }
-  };
-
-  const selectionStatus =
-    displayMode === 'cart' && isSelectionMode ? (isSelected ? 'Selected' : 'Tap to select') : undefined;
-
   const menuTrigger = (
     <ListItem
       onPress={isSelectionMode ? (onToggleSelection ?? onPress) : onPress}
@@ -118,22 +80,40 @@ function PantryItemSwipeRow({
             <Text modifiers={[font({weight: 'bold', size: 15}), foregroundStyle('#34C759')]}>
               {String(item.quantity)}
             </Text>
-            {isSelectionMode ? (
-              <Text modifiers={[font({size: 12}), foregroundStyle(isSelected ? '#0A84FF' : 'secondaryLabel')]}>
-                {isSelected ? 'Selected' : ''}
-              </Text>
-            ) : null}
           </VStack>
         ) : item.expirationDate ? (
-          <Text modifiers={[foregroundStyle('secondaryLabel'), font({size: 13})]}>
-            {formatExpirationLabel(item.expirationDate)}
-          </Text>
+          <VStack alignment="trailing" spacing={2}>
+            <Text modifiers={[foregroundStyle('secondaryLabel'), font({size: 13})]}>
+              {formatExpirationLabel(item.expirationDate)}
+            </Text>
+          </VStack>
         ) : undefined
       }
-      supportingText={selectionStatus}
     >
       <Text modifiers={[font({weight: 'semibold', size: 17})]}>{item.name}</Text>
     </ListItem>
+  );
+
+  const contextMenu = (
+    <ContextMenu>
+      <ContextMenu.Trigger>{menuTrigger}</ContextMenu.Trigger>
+      <ContextMenu.Items>
+        <SwiftUIButton label="Edit item" systemImage="pencil" onPress={handleEditAction} />
+        {hasLeftAction ? (
+          <SwiftUIButton
+            label={leftActionLabel}
+            systemImage={getCartActionSystemImage(item)}
+            onPress={handleLeftAction}
+          />
+        ) : null}
+        <SwiftUIButton
+          label="Delete item"
+          role="destructive"
+          systemImage="trash"
+          onPress={confirmDelete}
+        />
+      </ContextMenu.Items>
+    </ContextMenu>
   );
 
   if (nativeListItem && onStartSelection && isSelectionMode) {
@@ -146,18 +126,7 @@ function PantryItemSwipeRow({
 
   const swipeActions = (
     <SwipeActions>
-      {onStartSelection ? (
-        menuTrigger
-      ) : (
-        <MenuView
-          actions={menuActions}
-          onPressAction={handleMenuAction}
-          shouldOpenOnLongPress
-          style={rowStyles.nativeListHost}
-        >
-          {menuTrigger}
-        </MenuView>
-      )}
+      {onStartSelection ? menuTrigger : contextMenu}
       {hasLeftAction ? (
         <SwipeActions.Actions edge="leading" allowsFullSwipe>
           <SwiftUIButton label="" systemImage={getCartActionSystemImage(item)} onPress={handleLeftAction} />
@@ -178,14 +147,5 @@ function PantryItemSwipeRow({
     return swipeActions;
   }
 
-  return (
-    <MenuView
-      actions={menuActions}
-      onPressAction={handleMenuAction}
-      shouldOpenOnLongPress
-      style={rowStyles.contextMenuHost}
-    >
-      {menuTrigger}
-    </MenuView>
-  );
+  return contextMenu;
 }

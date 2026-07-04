@@ -1,11 +1,10 @@
 import { Host, List, RNHostView, Section } from '@expo/ui/swift-ui';
 import { listStyle } from '@expo/ui/swift-ui/modifiers';
-import { Ionicons } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { AvatarSidebarButton } from '@/components/navigation/avatar-sidebar';
+import { createIconHeaderButton } from '@/components/navigation/native-header-items';
 import { PantryItemNativeListRow } from '@/components/pantry/pantry-item-row';
 import { EmptyNotice } from '@/components/ui/primitives';
 import { matchPantryItems } from '@/lib/pantry-insights';
@@ -72,20 +71,21 @@ export default function SearchScreen() {
       <Stack.Screen
         options={{
           title: 'Explore',
-          headerRight: () => (
-            <View style={styles.headerActions}>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Scan barcode"
-                accessibilityHint="Open the barcode scanner to find or create an item"
-                onPress={handleScanBarcode}
-                style={({ pressed }) => [styles.headerIconButton, pressed ? styles.headerIconButtonPressed : null]}
-              >
-                <Ionicons name="barcode-outline" size={22} color={colors.tint} />
-              </Pressable>
-              <AvatarSidebarButton />
-            </View>
-          ),
+          unstable_headerRightItems: () => [
+            createIconHeaderButton({
+              label: 'Scan barcode',
+              icon: 'barcode.viewfinder',
+              onPress: handleScanBarcode,
+              tintColor: colors.tint,
+              accessibilityHint: 'Open the barcode scanner to find or create an item',
+            }),
+            createIconHeaderButton({
+              label: 'Open account menu',
+              icon: 'person.crop.circle',
+              onPress: () => router.push('/account/menu'),
+              tintColor: colors.tint,
+            }),
+          ],
         }}
       />
       <Stack.SearchBar
@@ -178,20 +178,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     justifyContent: 'center',
-  },
-  headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  headerIconButton: {
-    minWidth: 36,
-    minHeight: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerIconButtonPressed: {
-    opacity: 0.76,
   },
   searchSection: {
     paddingHorizontal: 4,

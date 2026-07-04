@@ -15,6 +15,7 @@ import {
 import { DeleteAccountContent } from '@/components/account/delete-account-content';
 import { LegalDocumentScreen } from '@/components/legal/legal-document-screen';
 import { AccountMenuContent, type AccountMenuDestination } from '@/components/navigation/account-menu-content';
+import { createIconHeaderButton } from '@/components/navigation/native-header-items';
 import { getLegalDocument } from '@/content/legal-content';
 import { contactSupport } from '@/lib/support';
 import { appColors, useAppTheme } from '@/lib/theme';
@@ -198,7 +199,19 @@ export function AccountMenuScreen({ios}: {ios: boolean}) {
           headerStyle: {
             backgroundColor: ios ? 'transparent' : colors.background,
           },
+          unstable_headerLeftItems:
+            ios && !isRootPage
+              ? () => [
+                  createIconHeaderButton({
+                    label: 'Go back in account menu',
+                    icon: 'chevron.backward',
+                    onPress: handleGoBack,
+                    tintColor: colors.tint,
+                  }),
+                ]
+              : undefined,
           headerLeft: isRootPage
+            || ios
             ? undefined
             : () => (
                 <Pressable
@@ -213,19 +226,31 @@ export function AccountMenuScreen({ios}: {ios: boolean}) {
                   />
                 </Pressable>
               ),
-          headerRight: () => (
-            <Pressable
-              accessibilityLabel="Close account menu"
-              onPress={handleClose}
-              style={({pressed}) => [styles.headerButton, pressed ? styles.closeButtonPressed : null]}
-            >
-              <Ionicons
-                name="close"
-                size={ios ? 30 : 22}
-                color={ios ? appColors.muted : colors.text}
-              />
-            </Pressable>
-          ),
+          unstable_headerRightItems: ios
+            ? () => [
+                createIconHeaderButton({
+                  label: 'Close account menu',
+                  icon: 'xmark',
+                  onPress: handleClose,
+                  tintColor: appColors.muted,
+                }),
+              ]
+            : undefined,
+          headerRight: ios
+            ? undefined
+            : () => (
+                <Pressable
+                  accessibilityLabel="Close account menu"
+                  onPress={handleClose}
+                  style={({pressed}) => [styles.headerButton, pressed ? styles.closeButtonPressed : null]}
+                >
+                  <Ionicons
+                    name="close"
+                    size={22}
+                    color={colors.text}
+                  />
+                </Pressable>
+              ),
         }}
       />
       <View style={styles.pageStack} onLayout={handleLayout}>

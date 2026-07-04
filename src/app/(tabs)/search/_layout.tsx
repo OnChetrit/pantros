@@ -1,23 +1,11 @@
 import { Stack } from 'expo-router';
 
-import { useAppTheme } from '@/lib/theme';
+import { useTabStackScreenOptions } from '@/components/navigation/tab-stack-layout';
 
 export default function SearchLayout() {
-  const {colors} = useAppTheme();
+  const screenOptions = useTabStackScreenOptions({
+    title: 'Search + Add',
+  });
 
-  return (
-    <Stack
-      screenOptions={{
-        title: 'Search + Add',
-        headerShadowVisible: false,
-        headerTintColor: colors.tint,
-        // headerStyle: {
-        //   backgroundColor: colors.card,
-        // },
-        headerTitleStyle: {
-          color: colors.text,
-        },
-      }}
-    />
-  );
+  return <Stack screenOptions={screenOptions} />;
 }

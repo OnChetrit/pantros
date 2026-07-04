@@ -4,6 +4,7 @@ import { Stack, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 
+import { createIconHeaderButton } from '@/components/navigation/native-header-items';
 import { PantryFilterMenu, type PantryListSortOption } from '@/components/pantry/pantry-filter-menu';
 import { PantryItemNativeListRow } from '@/components/pantry/pantry-item-row';
 import { EmptyNotice } from '@/components/ui/primitives';
@@ -16,6 +17,7 @@ export default function PantryScreen() {
   const { colors, isDark } = useAppTheme();
   const router = useRouter();
   const [sortOption, setSortOption] = useState<PantryListSortOption>('expiration');
+  const [isSortMenuVisible, setIsSortMenuVisible] = useState(false);
 
   const { cartItems, pantryListItems } = useMemo(() => {
     const compareBySort = (left: (typeof pantryItems)[number], right: (typeof pantryItems)[number]) => {
@@ -79,8 +81,22 @@ export default function PantryScreen() {
     <>
       <Stack.Screen
         options={{
-          headerLeft: () => <PantryFilterMenu sortOption={sortOption} onSelectSort={setSortOption} />,
+          unstable_headerLeftItems: () => [
+            createIconHeaderButton({
+              label: 'Open sort menu',
+              icon: 'arrow.up.arrow.down',
+              onPress: () => setIsSortMenuVisible(true),
+              tintColor: colors.tint,
+            }),
+          ],
         }}
+      />
+      <PantryFilterMenu
+        hideTrigger
+        sortOption={sortOption}
+        onSelectSort={setSortOption}
+        visible={isSortMenuVisible}
+        onVisibilityChange={setIsSortMenuVisible}
       />
       <Host
         colorScheme={isDark ? 'dark' : 'light'}

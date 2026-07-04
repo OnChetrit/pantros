@@ -1,9 +1,10 @@
 import { Stack } from 'expo-router';
 import { KeyboardAvoidingView, StyleSheet } from 'react-native';
 
+import { createIconHeaderButton, createTextHeaderButton } from '@/components/navigation/native-header-items';
 import { useThemedStyles } from '@/lib/theme';
 
-import { ItemFormBody, ItemFormSaveButton, type ItemFormScreenProps, useItemFormController } from './item-form-screen.shared';
+import { ItemFormBody, type ItemFormScreenProps, useItemFormController } from './item-form-screen.shared';
 
 export function ItemFormScreen(props: ItemFormScreenProps) {
   const styles = useThemedStyles(createStyles);
@@ -17,24 +18,24 @@ export function ItemFormScreen(props: ItemFormScreenProps) {
           headerTitleAlign: 'center',
           headerBackVisible: Boolean(controller.item),
           headerBackButtonDisplayMode: controller.item ? 'minimal' : undefined,
-          headerRight: () => (
-            <ItemFormSaveButton
-              canSave={controller.canSave}
-              itemBusy={controller.itemBusy}
-              label={controller.item ? 'Save item' : 'Add item'}
-              onPress={controller.selectedPantry ? () => void controller.handleSave() : controller.handleMissingPantry}
-            />
-          ),
+          unstable_headerRightItems: () => [
+            createTextHeaderButton({
+              label: controller.item ? 'Save' : 'Add',
+              onPress: controller.selectedPantry ? () => void controller.handleSave() : controller.handleMissingPantry,
+              disabled: controller.itemBusy || (Boolean(controller.selectedPantry) && !controller.canSave),
+              tintColor: '#0a84ff',
+              variant: 'done',
+            }),
+          ],
           unstable_headerLeftItems:
             !controller.item
               ? () => [
-                  {
-                    type: 'button',
+                  createIconHeaderButton({
                     label: 'Close',
-                    icon: {type: 'sfSymbol', name: 'xmark'},
+                    icon: 'xmark',
                     onPress: () => controller.router.back(),
                     tintColor: '#0a84ff',
-                  },
+                  }),
                 ]
               : undefined,
         }}

@@ -21,18 +21,36 @@ const SORT_OPTIONS: SortOption[] = [
 type PantryFilterMenuProps = {
   sortOption?: PantryListSortOption;
   onSelectSort?: (option: PantryListSortOption) => void;
+  visible?: boolean;
+  onVisibilityChange?: (visible: boolean) => void;
+  hideTrigger?: boolean;
 };
 
 export function PantryFilterMenu({
   sortOption,
   onSelectSort,
+  visible,
+  onVisibilityChange,
+  hideTrigger = false,
 }: PantryFilterMenuProps) {
   const styles = useThemedStyles(createStyles);
-  const [isMenuVisible, setIsMenuVisible] = useState(false);
+  const [uncontrolledVisible, setUncontrolledVisible] = useState(false);
   const [pendingSortOption, setPendingSortOption] = useState<PantryListSortOption | null>(null);
+  const isMenuVisible = visible ?? uncontrolledVisible;
+
+  const setMenuVisible = useCallback(
+    (nextVisible: boolean) => {
+      if (visible === undefined) {
+        setUncontrolledVisible(nextVisible);
+      }
+
+      onVisibilityChange?.(nextVisible);
+    },
+    [onVisibilityChange, visible]
+  );
 
   const closeMenu = () => {
-    setIsMenuVisible(false);
+    setMenuVisible(false);
   };
 
   const handleSelectSort = (option: PantryListSortOption) => {
@@ -50,17 +68,22 @@ export function PantryFilterMenu({
   }, [onSelectSort, pendingSortOption]);
 
   return (
-    <View style={styles.iconWrapper}>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Open sort menu"
-        disabled={!onSelectSort}
-        onPress={() => setIsMenuVisible(true)}
-        style={({ pressed }) => [styles.iconTrigger, pressed ? styles.triggerPressed : null, !onSelectSort ? styles.triggerDisabled : null]}
-      >
-        <Ionicons name="swap-vertical-outline" size={20} color={appColors.tint} />
-      </Pressable>
-
+    <View style={hideTrigger ? undefined : styles.iconWrapper}>
+      {hideTrigger ? null : (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Open sort menu"
+          disabled={!onSelectSort}
+          onPress={() => setMenuVisible(true)}
+          style={({ pressed }) => [
+            styles.iconTrigger,
+            pressed ? styles.triggerPressed : null,
+            !onSelectSort ? styles.triggerDisabled : null,
+          ]}
+        >
+          <Ionicons name="swap-vertical-outline" size={20} color={appColors.tint} />
+        </Pressable>
+      )}
       <BottomSheetModal visible={isMenuVisible} onClose={closeMenu} onDismiss={handleDismiss} sheetStyle={styles.sheet}>
         <View style={styles.sheetHeader}>
           <Text style={styles.sheetTitle}>Sort</Text>

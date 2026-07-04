@@ -6,7 +6,7 @@ import { AvatarSidebarButton } from '@/components/navigation/avatar-sidebar';
 import { PantryFilterMenu, type PantryListSortOption } from '@/components/pantry/pantry-filter-menu';
 import { PantryItemRow } from '@/components/pantry/pantry-item-row';
 import { EmptyNotice } from '@/components/ui/primitives';
-import { CartCheckoutFooter } from '@/features/cart/cart-checkout-bar';
+import { CartCheckoutSheet } from '@/features/cart/cart-checkout-bar';
 import { CartCheckoutNotice } from '@/features/cart/cart-checkout-notice';
 import { CartExpirationReviewModal } from '@/features/cart/cart-expiration-review-modal';
 import { useCartCheckout } from '@/features/cart/cart-checkout-context';
@@ -106,7 +106,6 @@ export default function CartScreen() {
           contentContainerStyle={[
             styles.content,
             itemsInCart.length > 0 ? styles.filledContent : null,
-            isSelectionMode ? styles.selectionContent : null,
           ]}
           ListHeaderComponent={
             <>
@@ -147,16 +146,16 @@ export default function CartScreen() {
             />
           )}
         />
-        {isSelectionMode ? (
-          <CartCheckoutFooter
-            selectedCount={selectedCount}
-            totalCount={itemsInCart.length}
-            processing={checkoutProgress.processing}
-            onSubmit={() => void startCheckout()}
-            onSecondaryAction={() => (allSelected ? clearSelection() : selectAll(itemsInCart.map((item) => item.id)))}
-          />
-        ) : null}
       </View>
+      <CartCheckoutSheet
+        isPresented={isSelectionMode}
+        onDismiss={exitSelectionMode}
+        selectedCount={selectedCount}
+        totalCount={itemsInCart.length}
+        processing={checkoutProgress.processing}
+        onSubmit={() => void startCheckout()}
+        onSecondaryAction={() => (allSelected ? clearSelection() : selectAll(itemsInCart.map((item) => item.id)))}
+      />
       <CartExpirationReviewModal
         visible={checkoutQueue.length > 0 && currentReviewItem !== null}
         item={currentReviewItem}
@@ -192,9 +191,6 @@ const styles = StyleSheet.create({
     borderRadius: 26,
     backgroundColor: appColors.card,
     overflow: 'hidden',
-  },
-  selectionContent: {
-    paddingBottom: 12,
   },
   emptyScreen: {
     flex: 1,
