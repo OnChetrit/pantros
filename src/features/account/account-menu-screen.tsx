@@ -1,16 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Stack, useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
-import {
-  Animated,
-  BackHandler,
-  Dimensions,
-  Easing,
-  LayoutChangeEvent,
-  Pressable,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { Animated, BackHandler, Dimensions, Easing, LayoutChangeEvent, StyleSheet, View, Pressable } from 'react-native';
 
 import { DeleteAccountContent } from '@/components/account/delete-account-content';
 import { LegalDocumentScreen } from '@/components/legal/legal-document-screen';

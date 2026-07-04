@@ -1,5 +1,5 @@
 import { Picker } from '@react-native-picker/picker';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, Pressable } from 'react-native';
 
 import { SectionCard } from '@/components/ui/primitives';
 import type { AccountDeletionPantry } from '@/domain/models';

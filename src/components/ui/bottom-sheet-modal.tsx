@@ -10,6 +10,7 @@ type BottomSheetModalProps = PropsWithChildren<{
   onClose: () => void;
   onDismiss?: () => void;
   sheetStyle?: StyleProp<ViewStyle>;
+  detentHeight?: number;
 }>;
 
 export function BottomSheetModal({visible, onClose, onDismiss, sheetStyle, children}: BottomSheetModalProps) {

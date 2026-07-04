@@ -1,6 +1,6 @@
 import { Stack, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { FlatList, StyleSheet, View } from 'react-native';
+import { FlatList, LayoutAnimation, Platform, StyleSheet, UIManager, View } from 'react-native';
 
 import { AvatarSidebarButton } from '@/components/navigation/avatar-sidebar';
 import { PantryFilterMenu, type PantryListSortOption } from '@/components/pantry/pantry-filter-menu';
@@ -15,6 +15,10 @@ import { sortCartItems } from '@/features/cart/cart-items';
 import { getCartItems } from '@/lib/pantry-insights';
 import { appColors } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 export default function CartScreen() {
   const { deleteItem, moveItemToPantry, pantryItems, selectedPantry } = useAppContext();
@@ -45,6 +49,14 @@ export default function CartScreen() {
   const itemsInCart = useMemo(() => {
     return sortCartItems(getCartItems(pantryItems), sortOption);
   }, [pantryItems, sortOption]);
+  const unselectedItems = useMemo(
+    () => itemsInCart.filter(item => !selectedItemIds.includes(item.id)),
+    [itemsInCart, selectedItemIds]
+  );
+  const selectedItems = useMemo(
+    () => itemsInCart.filter(item => selectedItemIds.includes(item.id)),
+    [itemsInCart, selectedItemIds]
+  );
 
   const selectedCount = selectedItemIds.length;
   const allSelected = itemsInCart.length > 0 && selectedCount === itemsInCart.length;
@@ -54,6 +66,10 @@ export default function CartScreen() {
   useEffect(() => {
     setVisibleItems(itemsInCart);
   }, [itemsInCart, setVisibleItems]);
+
+  const animateSelectionLayout = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+  };
 
   if (!selectedPantry) {
     return (
@@ -99,7 +115,7 @@ export default function CartScreen() {
       />
       <View style={styles.screen}>
         <FlatList
-          data={itemsInCart}
+          data={unselectedItems}
           keyExtractor={(item) => item.id}
           style={styles.list}
           contentInsetAdjustmentBehavior="automatic"
@@ -129,19 +145,63 @@ export default function CartScreen() {
               />
             </View>
           }
+          ItemSeparatorComponent={null}
+          ListFooterComponent={
+            selectedItems.length > 0 ? (
+              <View style={styles.selectedGroup}>
+                <View style={styles.selectedGroupHeader}>
+                  <View style={styles.selectedGroupDivider} />
+                </View>
+                {selectedItems.map((item, index) => (
+                  <PantryItemRow
+                    key={item.id}
+                    item={item}
+                    displayMode="cart"
+                    isLast={index === selectedItems.length - 1}
+                    onPress={() => {
+                      animateSelectionLayout();
+                      toggleItemSelection(item.id);
+                    }}
+                    onEdit={() => router.push(`/items/${item.id}`)}
+                    leftActionLabel={undefined}
+                    onLeftAction={undefined}
+                    onDelete={() => void deleteItem(item.id)}
+                    isSelectionMode={isSelectionMode}
+                    isSelected
+                    onToggleSelection={() => {
+                      animateSelectionLayout();
+                      toggleItemSelection(item.id);
+                    }}
+                    onStartSelection={() => enterSelectionMode(item.id)}
+                  />
+                ))}
+              </View>
+            ) : null
+          }
           renderItem={({ item, index }) => (
             <PantryItemRow
               item={item}
               displayMode="cart"
-              isLast={index === itemsInCart.length - 1}
-              onPress={() => (isSelectionMode ? toggleItemSelection(item.id) : router.push(`/items/${item.id}`))}
+              isLast={index === unselectedItems.length - 1 && selectedItems.length === 0}
+              onPress={() => {
+                if (isSelectionMode) {
+                  animateSelectionLayout();
+                  toggleItemSelection(item.id);
+                  return;
+                }
+
+                router.push(`/items/${item.id}`);
+              }}
               onEdit={() => router.push(`/items/${item.id}`)}
               leftActionLabel={isSelectionMode ? undefined : 'Move to Pantry'}
               onLeftAction={isSelectionMode ? undefined : () => void moveItemToPantry(item.id)}
               onDelete={() => void deleteItem(item.id)}
               isSelectionMode={isSelectionMode}
-              isSelected={selectedItemIds.includes(item.id)}
-              onToggleSelection={() => toggleItemSelection(item.id)}
+              isSelected={false}
+              onToggleSelection={() => {
+                animateSelectionLayout();
+                toggleItemSelection(item.id);
+              }}
               onStartSelection={() => enterSelectionMode(item.id)}
             />
           )}
@@ -206,5 +266,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+  },
+  selectedGroup: {
+    marginTop: 8,
+    paddingTop: 10,
+    opacity: 0.62,
+  },
+  selectedGroupHeader: {
+    paddingHorizontal: 16,
+    paddingBottom: 8,
+  },
+  selectedGroupDivider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: appColors.border,
   },
 });

@@ -1,4 +1,4 @@
-import { Pressable, Text, View } from 'react-native';
+import { Text, View, Pressable } from 'react-native';
 
 import { useThemedStyles } from '@/lib/theme';
 

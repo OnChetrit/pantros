@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, Pressable } from 'react-native';
 
 import { BottomSheetModal } from '@/components/ui/bottom-sheet-modal';
 import { appColors, useThemedStyles } from '@/lib/theme';
@@ -84,7 +84,13 @@ export function PantryFilterMenu({
           <Ionicons name="swap-vertical-outline" size={20} color={appColors.tint} />
         </Pressable>
       )}
-      <BottomSheetModal visible={isMenuVisible} onClose={closeMenu} onDismiss={handleDismiss} sheetStyle={styles.sheet}>
+      <BottomSheetModal
+        visible={isMenuVisible}
+        onClose={closeMenu}
+        onDismiss={handleDismiss}
+        sheetStyle={styles.sheet}
+        detentHeight={280}
+      >
         <View style={styles.sheetHeader}>
           <Text style={styles.sheetTitle}>Sort</Text>
         </View>

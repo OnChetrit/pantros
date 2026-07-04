@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
 import { useMemo, useRef, useState } from 'react';
 import type { TextInput } from 'react-native';
-import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, FlatList, StyleSheet, Text, View, Pressable } from 'react-native';
 
 import { AvatarSidebarButton } from '@/components/navigation/avatar-sidebar';
 import { PantryItemRow } from '@/components/pantry/pantry-item-row';

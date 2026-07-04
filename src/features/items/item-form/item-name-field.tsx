@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, Pressable } from 'react-native';
 
 import { AppTextInput } from '@/components/ui/primitives';
 import type { PantryItem } from '@/domain/models';

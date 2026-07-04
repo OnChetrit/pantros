@@ -48,6 +48,14 @@ export default function CartScreen() {
   const itemsInCart = useMemo(() => {
     return sortCartItems(getCartItems(pantryItems), sortOption);
   }, [pantryItems, sortOption]);
+  const unselectedItems = useMemo(
+    () => itemsInCart.filter(item => !selectedItemIds.includes(item.id)),
+    [itemsInCart, selectedItemIds]
+  );
+  const selectedItems = useMemo(
+    () => itemsInCart.filter(item => selectedItemIds.includes(item.id)),
+    [itemsInCart, selectedItemIds]
+  );
 
   const selectedCount = selectedItemIds.length;
   const allSelected = itemsInCart.length > 0 && selectedCount === itemsInCart.length;
@@ -149,12 +157,12 @@ export default function CartScreen() {
           ) : null}
           <Section title="Cart">
             {itemsInCart.length > 0 ? (
-              itemsInCart.map((item, index) => (
+              unselectedItems.map((item, index) => (
                 <PantryItemNativeListRow
                   key={item.id}
                   item={item}
                   displayMode="cart"
-                  isLast={index === itemsInCart.length - 1}
+                  isLast={index === unselectedItems.length - 1 && selectedItems.length === 0}
                   onPress={() => (isSelectionMode ? toggleItemSelection(item.id) : router.push(`/items/${item.id}`))}
                   onEdit={() => router.push(`/items/${item.id}`)}
                   leftActionLabel={isSelectionMode ? undefined : 'Move to Pantry'}
@@ -177,6 +185,27 @@ export default function CartScreen() {
               </RNHostView>
             )}
           </Section>
+          {selectedItems.length > 0 ? (
+            <Section title={`${selectedItems.length} Selected`}>
+              {selectedItems.map((item, index) => (
+                <PantryItemNativeListRow
+                  key={item.id}
+                  item={item}
+                  displayMode="cart"
+                  isLast={index === selectedItems.length - 1}
+                  onPress={() => toggleItemSelection(item.id)}
+                  onEdit={() => router.push(`/items/${item.id}`)}
+                  leftActionLabel={undefined}
+                  onLeftAction={undefined}
+                  onDelete={() => void deleteItem(item.id)}
+                  isSelectionMode={isSelectionMode}
+                  isSelected
+                  onToggleSelection={() => toggleItemSelection(item.id)}
+                  onStartSelection={() => enterSelectionMode(item.id)}
+                />
+              ))}
+            </Section>
+          ) : null}
         </List>
       </Host>
       <CartCheckoutSheet

@@ -1,4 +1,4 @@
-import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, TextInput, Pressable } from 'react-native';
 
 import { SectionCard, appColors } from '@/components/ui/primitives';
 import { useThemedStyles } from '@/lib/theme';

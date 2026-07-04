@@ -2,7 +2,7 @@ import { Host, List, RNHostView, Section } from '@expo/ui/swift-ui';
 import { listStyle } from '@expo/ui/swift-ui/modifiers';
 import { Stack, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, Text, View, Pressable } from 'react-native';
 
 import { createIconHeaderButton } from '@/components/navigation/native-header-items';
 import { PantryItemNativeListRow } from '@/components/pantry/pantry-item-row';

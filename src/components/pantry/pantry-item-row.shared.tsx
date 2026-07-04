@@ -1,5 +1,5 @@
 import type { GestureResponderEvent } from 'react-native';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, Pressable } from 'react-native';
 
 import type { PantryItem } from '@/domain/models';
 import { formatExpirationLabel } from '@/lib/pantry-insights';

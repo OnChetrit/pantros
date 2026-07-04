@@ -1,4 +1,4 @@
-import { Pressable, Text } from 'react-native';
+import { Text, Pressable } from 'react-native';
 
 import { useAppTheme } from '@/lib/theme';
 

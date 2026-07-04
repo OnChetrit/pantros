@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, Pressable } from 'react-native';
 
 import type { ThemePreference } from '@/lib/theme';
 import { useThemedStyles } from '@/lib/theme';

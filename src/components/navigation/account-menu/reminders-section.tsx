@@ -1,5 +1,5 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { Platform, Pressable, Switch, Text } from 'react-native';
+import { Platform, Switch, Text, Pressable } from 'react-native';
 
 import type { NotificationPreferences } from '@/domain/models';
 import { useThemedStyles } from '@/lib/theme';

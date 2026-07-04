@@ -21,10 +21,6 @@ export const styles = StyleSheet.create({
     paddingVertical: 0,
     gap: 14,
   },
-  shellSheet: {
-    minWidth: 320,
-    maxWidth: 520,
-  },
   summaryWrap: {
     flex: 1,
     minWidth: 0,

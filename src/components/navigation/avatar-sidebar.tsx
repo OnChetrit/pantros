@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
-import { Pressable, StyleSheet } from 'react-native';
+import { StyleSheet, Pressable } from 'react-native';
 
 import { AvatarBadge } from '@/components/ui/primitives';
 import { useThemedStyles } from '@/lib/theme';

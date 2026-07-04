@@ -17,7 +17,7 @@ export function useTabStackScreenOptions({
   showAccountMenu = true,
   minimalBackButton = false,
 }: TabHeaderOptionsArgs): NativeStackNavigationOptions {
-  const {colors} = useAppTheme();
+  const {colors, isDark} = useAppTheme();
   const router = useRouter();
 
   return useMemo(
@@ -26,6 +26,7 @@ export function useTabStackScreenOptions({
       headerLargeTitle: false,
       headerTransparent: true,
       headerShadowVisible: false,
+      headerBlurEffect: isDark ? 'systemChromeMaterialDark' : 'systemChromeMaterialLight',
       headerBackground: () => <View style={[StyleSheet.absoluteFill, styles.transparentHeaderBackground]} />,
       headerStyle: {
         backgroundColor: 'transparent',
@@ -50,7 +51,7 @@ export function useTabStackScreenOptions({
           ]
         : undefined,
     }),
-    [colors.text, colors.tint, minimalBackButton, router, showAccountMenu, title]
+    [colors.text, colors.tint, isDark, minimalBackButton, router, showAccountMenu, title]
   );
 }
 

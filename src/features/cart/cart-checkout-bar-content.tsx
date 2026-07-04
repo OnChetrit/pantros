@@ -1,4 +1,4 @@
-import { Pressable, Text, View } from 'react-native';
+import { Text, View, Pressable } from 'react-native';
 
 import { useAppTheme } from '@/lib/theme';
 
@@ -21,7 +21,6 @@ export function CartCheckoutBar({
     <View
       style={[
         styles.shell,
-        sheet ? styles.shellSheet : null,
         {
           borderColor: colors.borderStrong,
         },

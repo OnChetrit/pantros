@@ -1,5 +1,5 @@
 import { ListItem } from '@expo/ui';
-import { Button as SwiftUIButton, ContextMenu, SwipeActions, Text, VStack } from '@expo/ui/swift-ui';
+import { ContextMenu, Button as SwiftUIButton, SwipeActions, Text, VStack } from '@expo/ui/swift-ui';
 import { background, font, foregroundStyle, frame, shapes } from '@expo/ui/swift-ui/modifiers';
 import { Alert } from 'react-native';
 
@@ -21,6 +21,7 @@ export function PantryItemSwipeRow({
   onLeftAction,
   onDelete,
   isSelectionMode = false,
+  isSelected = false,
   onToggleSelection,
   onStartSelection,
   nativeListItem = false,
@@ -56,9 +57,9 @@ export function PantryItemSwipeRow({
         <Text
           modifiers={[
             font({weight: 'bold', size: 15}),
-            foregroundStyle('#0A84FF'),
+            foregroundStyle(isSelected && isSelectionMode ? 'secondaryLabel' : '#0A84FF'),
             frame({width: 36, height: 36}),
-            background('#EAF2FF', shapes.circle()),
+            background(isSelected && isSelectionMode ? '#F1F2F4' : '#EAF2FF', shapes.circle()),
           ]}
         >
           {item.name.charAt(0).toUpperCase()}
@@ -67,7 +68,12 @@ export function PantryItemSwipeRow({
       trailing={
         displayMode === 'cart' ? (
           <VStack alignment="trailing" spacing={2}>
-            <Text modifiers={[font({weight: 'bold', size: 15}), foregroundStyle('#34C759')]}>
+            <Text
+              modifiers={[
+                font({weight: 'bold', size: 15}),
+                foregroundStyle(isSelected && isSelectionMode ? 'secondaryLabel' : '#34C759'),
+              ]}
+            >
               {String(item.quantity)}
             </Text>
           </VStack>
@@ -80,7 +86,14 @@ export function PantryItemSwipeRow({
         ) : undefined
       }
     >
-      <Text modifiers={[font({weight: 'semibold', size: 17})]}>{item.name}</Text>
+      <Text
+        modifiers={[
+          font({weight: 'semibold', size: 17}),
+          foregroundStyle(isSelected && isSelectionMode ? 'secondaryLabel' : 'label'),
+        ]}
+      >
+        {item.name}
+      </Text>
     </ListItem>
   );
 

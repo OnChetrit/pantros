@@ -2,6 +2,7 @@ import * as Notifications from 'expo-notifications';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useMemo } from 'react';
+import { Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { useTabStackScreenOptions } from '@/components/navigation/tab-stack-layout';
@@ -91,11 +92,13 @@ export function RootLayoutContent() {
             <Stack.Screen
               name="items/new"
               options={{
-                presentation: 'modal',
+                presentation: Platform.OS === 'ios' ? 'formSheet' : 'modal',
                 headerShown: true,
                 title: '',
                 sheetGrabberVisible: true,
                 sheetCornerRadius: 24,
+                sheetAllowedDetents: Platform.OS === 'ios' ? [0.92] : undefined,
+                sheetInitialDetentIndex: Platform.OS === 'ios' ? 0 : undefined,
                 sheetExpandsWhenScrolledToEdge: true,
                 sheetElevation: 24,
                 animation: 'slide_from_bottom',
@@ -105,9 +108,14 @@ export function RootLayoutContent() {
             <Stack.Screen
               name="items/[id]"
               options={{
-                presentation: 'card',
+                presentation: Platform.OS === 'ios' ? 'formSheet' : 'modal',
                 headerShown: true,
                 title: '',
+                sheetGrabberVisible: Platform.OS === 'ios' ? true : undefined,
+                sheetCornerRadius: Platform.OS === 'ios' ? 24 : undefined,
+                sheetAllowedDetents: Platform.OS === 'ios' ? [0.92] : undefined,
+                sheetInitialDetentIndex: Platform.OS === 'ios' ? 0 : undefined,
+                sheetExpandsWhenScrolledToEdge: Platform.OS === 'ios' ? true : undefined,
               }}
             />
             <Stack.Screen

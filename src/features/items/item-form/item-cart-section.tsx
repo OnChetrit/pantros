@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
+import { StyleSheet, Switch, Text, View, Pressable } from 'react-native';
 
 import { appColors } from '@/components/ui/primitives';
 import { useThemedStyles } from '@/lib/theme';
