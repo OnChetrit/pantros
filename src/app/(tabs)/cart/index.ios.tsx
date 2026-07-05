@@ -8,17 +8,19 @@ import { createIconHeaderButton, createTextHeaderButton } from '@/components/nav
 import { PantryFilterMenu, type PantryListSortOption } from '@/components/pantry/pantry-filter-menu';
 import { PantryItemNativeListRow } from '@/components/pantry/pantry-item-row';
 import { EmptyNotice } from '@/components/ui/primitives';
+import type { PantryItem } from '@/domain/models';
 import { CartCheckoutSheet } from '@/features/cart/cart-checkout-bar';
 import { CartCheckoutNotice } from '@/features/cart/cart-checkout-notice';
 import { getCartItems } from '@/lib/pantry-insights';
 import { useAppTheme } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
 import { CartExpirationReviewModal } from '@/features/cart/cart-expiration-review-modal';
+import { CartQuantitySheet } from '@/features/cart/cart-quantity-sheet';
 import { useCartCheckout } from '@/features/cart/cart-checkout-context';
 import { sortCartItems } from '@/features/cart/cart-items';
 
 export default function CartScreen() {
-  const { deleteItem, moveItemToPantry, pantryItems, selectedPantry } = useAppContext();
+  const { deleteItem, itemBusy, moveItemToPantry, pantryItems, selectedPantry, updateItem } = useAppContext();
   const {
     checkoutProgress,
     checkoutQueue,
@@ -44,6 +46,8 @@ export default function CartScreen() {
   const router = useRouter();
   const [sortOption, setSortOption] = useState<PantryListSortOption>('expiration');
   const [isSortMenuVisible, setIsSortMenuVisible] = useState(false);
+  const [quantityItem, setQuantityItem] = useState<PantryItem | null>(null);
+  const [quantityErrorMessage, setQuantityErrorMessage] = useState<string | null>(null);
 
   const itemsInCart = useMemo(() => {
     return sortCartItems(getCartItems(pantryItems), sortOption);
@@ -65,6 +69,39 @@ export default function CartScreen() {
   useEffect(() => {
     setVisibleItems(itemsInCart);
   }, [itemsInCart, setVisibleItems]);
+
+  const openQuantitySheet = (item: PantryItem) => {
+    setQuantityItem(item);
+    setQuantityErrorMessage(null);
+  };
+
+  const closeQuantitySheet = () => {
+    setQuantityItem(null);
+    setQuantityErrorMessage(null);
+  };
+
+  const handleSaveQuantity = async (quantity: number) => {
+    if (!quantityItem) {
+      return;
+    }
+
+    try {
+      setQuantityErrorMessage(null);
+      await updateItem(quantityItem.id, {
+        pantryId: quantityItem.pantryId,
+        name: quantityItem.name,
+        barcode: quantityItem.barcode,
+        image: quantityItem.image,
+        expirationDate: quantityItem.expirationDate,
+        isInCart: quantityItem.isInCart,
+        cartId: quantityItem.cartId,
+        quantity,
+      });
+      closeQuantitySheet();
+    } catch (error) {
+      setQuantityErrorMessage(error instanceof Error ? error.message : 'Unable to update quantity.');
+    }
+  };
 
   if (!selectedPantry) {
     return (
@@ -165,6 +202,7 @@ export default function CartScreen() {
                   isLast={index === unselectedItems.length - 1 && selectedItems.length === 0}
                   onPress={() => (isSelectionMode ? toggleItemSelection(item.id) : router.push(`/items/${item.id}`))}
                   onEdit={() => router.push(`/items/${item.id}`)}
+                  onReviewQuantity={isSelectionMode ? undefined : () => openQuantitySheet(item)}
                   leftActionLabel={isSelectionMode ? undefined : 'Move to Pantry'}
                   onLeftAction={isSelectionMode ? undefined : () => void moveItemToPantry(item.id)}
                   onDelete={() => void deleteItem(item.id)}
@@ -195,6 +233,7 @@ export default function CartScreen() {
                   isLast={index === selectedItems.length - 1}
                   onPress={() => toggleItemSelection(item.id)}
                   onEdit={() => router.push(`/items/${item.id}`)}
+                  onReviewQuantity={undefined}
                   leftActionLabel={undefined}
                   onLeftAction={undefined}
                   onDelete={() => void deleteItem(item.id)}
@@ -229,6 +268,14 @@ export default function CartScreen() {
         onSave={() => void saveAndContinueReview()}
         onSkip={() => void skipCurrentReview()}
         onCancel={cancelReview}
+      />
+      <CartQuantitySheet
+        visible={quantityItem !== null}
+        item={quantityItem}
+        processing={itemBusy}
+        errorMessage={quantityErrorMessage}
+        onSave={(quantity) => void handleSaveQuantity(quantity)}
+        onCancel={closeQuantitySheet}
       />
     </>
   );

@@ -17,6 +17,8 @@ export function PantryItemSwipeRow({
   displayMode = 'pantry',
   onPress,
   onEdit,
+  onReviewExpiration,
+  onReviewQuantity,
   leftActionLabel,
   onLeftAction,
   onDelete,
@@ -48,6 +50,16 @@ export function PantryItemSwipeRow({
   const handleLeftAction = () => {
     void triggerMediumImpact();
     onLeftAction?.();
+  };
+
+  const handleReviewExpiration = () => {
+    void triggerMediumImpact();
+    onReviewExpiration?.();
+  };
+
+  const handleReviewQuantity = () => {
+    void triggerMediumImpact();
+    onReviewQuantity?.();
   };
 
   const menuTrigger = (
@@ -102,6 +114,11 @@ export function PantryItemSwipeRow({
       <ContextMenu.Trigger>{menuTrigger}</ContextMenu.Trigger>
       <ContextMenu.Items>
         <SwiftUIButton label="Edit item" systemImage="pencil" onPress={handleEditAction} />
+        {displayMode === 'cart' ? (
+          <SwiftUIButton label="Update quantity" systemImage="number.circle" onPress={handleReviewQuantity} />
+        ) : (
+          <SwiftUIButton label="Review expiration" systemImage="clock" onPress={handleReviewExpiration} />
+        )}
         {hasLeftAction ? (
           <SwiftUIButton
             label={leftActionLabel}
@@ -128,11 +145,15 @@ export function PantryItemSwipeRow({
       {hasLeftAction ? (
         <SwipeActions.Actions edge="leading" allowsFullSwipe>
           <SwiftUIButton label="" systemImage={getCartActionSystemImage(item)} onPress={handleLeftAction} />
+          {displayMode === 'cart' ? (
+            <SwiftUIButton label="" role="cancel" systemImage="number.circle" onPress={handleReviewQuantity} />
+          ) : (
+            <SwiftUIButton label="" role="cancel" systemImage="clock" onPress={handleReviewExpiration} />
+          )}
         </SwipeActions.Actions>
       ) : null}
       <SwipeActions.Actions edge="trailing" allowsFullSwipe={false}>
         <SwiftUIButton label="" role="destructive" systemImage="trash" onPress={confirmDelete} />
-        <SwiftUIButton label="" role="destructive" systemImage="clock" onPress={confirmDelete} />
       </SwipeActions.Actions>
     </SwipeActions>
   );

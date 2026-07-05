@@ -86,9 +86,6 @@ export function formatExpiration(value: string | null) {
 
 export const styles = StyleSheet.create({
   sheet: {
-    paddingHorizontal: 18,
-    paddingTop: 18,
-    paddingBottom: 24,
     gap: 16,
   },
   header: {
@@ -135,35 +132,50 @@ export const styles = StyleSheet.create({
     paddingVertical: 8,
     alignItems: 'center',
     overflow: 'hidden',
+    display: 'flex',
+    justifyContent: 'center',
   },
   datePicker: {
     alignSelf: 'stretch',
+    display: 'flex',
+    justifyContent: 'center',
   },
   relativeRow: {
     flexDirection: 'row',
     gap: 10,
   },
-  relativePicker: {
+  relativeInlineRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  relativeInlineInput: {
     flex: 1,
-    minHeight: 156,
+    minWidth: 0,
+    height: 88,
     borderRadius: 18,
-    overflow: 'hidden',
     borderWidth: 1,
+    overflow: 'hidden',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingRight: 14,
+  },
+  relativeInlinePicker: {
+    flex: 1,
+    height: 120,
+    marginTop: -16,
+    marginBottom: -16,
+    display: 'flex',
     justifyContent: 'center',
   },
-  relativeLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    paddingHorizontal: 14,
-    paddingTop: 12,
+  relativeInlinePickerItem: {
+    fontSize: 20,
   },
-  picker: {
-    flex: 1,
-  },
-  pickerItem: {
+  relativeInlineSuffix: {
     fontSize: 18,
+    lineHeight: 22,
+    fontWeight: '700',
   },
   error: {
     fontSize: 14,
@@ -171,8 +183,8 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
   },
   actions: {
-    gap: 10,
-    paddingTop: 4,
+    gap: 8,
+    paddingTop: 2,
   },
   button: {
     minHeight: 52,

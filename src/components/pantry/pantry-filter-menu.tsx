@@ -1,8 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
+import { BottomSheet } from '@expo/ui';
+import {
+  padding,
+  presentationBackground,
+  presentationDetents,
+  presentationDragIndicator,
+} from '@expo/ui/swift-ui/modifiers';
 import { useCallback, useState } from 'react';
 import { StyleSheet, Text, View, Pressable } from 'react-native';
 
-import { BottomSheetModal } from '@/components/ui/bottom-sheet-modal';
 import { appColors, useThemedStyles } from '@/lib/theme';
 
 export type PantryListSortOption = 'expiration' | 'name' | 'recent';
@@ -59,6 +65,8 @@ export function PantryFilterMenu({
   };
 
   const handleDismiss = useCallback(() => {
+    setMenuVisible(false);
+
     if (!pendingSortOption) {
       return;
     }
@@ -84,13 +92,18 @@ export function PantryFilterMenu({
           <Ionicons name="swap-vertical-outline" size={20} color={appColors.tint} />
         </Pressable>
       )}
-      <BottomSheetModal
-        visible={isMenuVisible}
-        onClose={closeMenu}
+      <BottomSheet
+        isPresented={isMenuVisible}
         onDismiss={handleDismiss}
-        sheetStyle={styles.sheet}
-        detentHeight={280}
+        snapPoints={[{height: 280}]}
+        modifiers={[
+          padding({top: 8, leading: 20, trailing: 20, bottom: 20}),
+          presentationDragIndicator('visible'),
+          presentationBackground(appColors.background as string),
+          presentationDetents([{height: 280}]),
+        ]}
       >
+        <View style={styles.sheet}>
         <View style={styles.sheetHeader}>
           <Text style={styles.sheetTitle}>Sort</Text>
         </View>
@@ -117,7 +130,8 @@ export function PantryFilterMenu({
             );
           })}
         </View>
-      </BottomSheetModal>
+        </View>
+      </BottomSheet>
     </View>
   );
 }

@@ -11,6 +11,8 @@ export type PantryItemRowProps = {
   isLast: boolean;
   onPress: () => void;
   onEdit: () => void;
+  onReviewExpiration?: () => void;
+  onReviewQuantity?: () => void;
   leftActionLabel?: string;
   onLeftAction?: () => void;
   onDelete: () => void;

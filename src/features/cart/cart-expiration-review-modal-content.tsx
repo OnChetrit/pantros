@@ -1,10 +1,16 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { BottomSheet } from '@expo/ui';
+import {
+  padding,
+  presentationBackground,
+  presentationDragIndicator,
+} from '@expo/ui/swift-ui/modifiers';
 import { useEffect, useMemo, useState } from 'react';
 import { Platform, Text, View } from 'react-native';
 
-import { BottomSheetModal } from '@/components/ui/bottom-sheet-modal';
 import type { PantryItem } from '@/domain/models';
 import { ItemExpirationModePicker } from '@/features/items/item-expiration-mode-picker';
+import { appColors } from '@/lib/theme';
 
 import { ActionButton } from './cart-expiration-review-modal-action-button';
 import { RelativePicker } from './cart-expiration-review-modal-relative-picker';
@@ -64,9 +70,18 @@ export function ReviewModalContent({
   }, [onChangeDate, resolvedDate, reviewDate]);
 
   const isLastStep = step >= totalSteps;
+  const sheetModifiers = useMemo(
+    () => [
+      padding({top: 8, leading: 20, trailing: 20, bottom: 20}),
+      presentationDragIndicator('visible'),
+      presentationBackground(appColors.background as string),
+    ],
+    []
+  );
 
   return (
-    <BottomSheetModal visible={visible} onClose={onCancel} sheetStyle={[styles.sheet, {backgroundColor: colors.card}]}>
+    <BottomSheet isPresented={visible} onDismiss={onCancel} modifiers={sheetModifiers}>
+      <View style={[styles.sheet, {backgroundColor: colors.background}]}>
       <View style={styles.header}>
         <Text style={[styles.eyebrow, {color: colors.muted}]}>
           Review {step} of {totalSteps}
@@ -102,10 +117,25 @@ export function ReviewModalContent({
           />
         </View>
       ) : (
-        <View style={styles.relativeRow}>
-          <RelativePicker label="Days" value={relativeDays} options={dayOptions} onChange={setRelativeDays} />
-          <RelativePicker label="Weeks" value={relativeWeeks} options={weekOptions} onChange={setRelativeWeeks} />
-          <RelativePicker label="Months" value={relativeMonths} options={monthOptions} onChange={setRelativeMonths} />
+        <View style={styles.relativeInlineRow}>
+          <RelativePicker
+            shortLabel="D"
+            value={relativeDays}
+            options={dayOptions}
+            onChange={setRelativeDays}
+          />
+          <RelativePicker
+            shortLabel="W"
+            value={relativeWeeks}
+            options={weekOptions}
+            onChange={setRelativeWeeks}
+          />
+          <RelativePicker
+            shortLabel="M"
+            value={relativeMonths}
+            options={monthOptions}
+            onChange={setRelativeMonths}
+          />
         </View>
       )}
 
@@ -116,6 +146,7 @@ export function ReviewModalContent({
         <ActionButton label={isLastStep ? 'Skip & Finish' : 'Skip'} disabled={processing} onPress={onSkip} />
         <ActionButton label="Cancel review" subtle disabled={processing} onPress={onCancel} />
       </View>
-    </BottomSheetModal>
+      </View>
+    </BottomSheet>
   );
 }

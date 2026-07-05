@@ -1,5 +1,10 @@
 import { BottomSheet, Group, Host } from '@expo/ui/swift-ui';
-import { frame, padding, presentationBackgroundInteraction, presentationDragIndicator } from '@expo/ui/swift-ui/modifiers';
+import {
+  frame,
+  padding,
+  presentationBackgroundInteraction,
+  presentationDragIndicator,
+} from '@expo/ui/swift-ui/modifiers';
 
 import { CartCheckoutBar } from './cart-checkout-bar-content';
 import type { CartCheckoutBarProps } from './cart-checkout-bar.shared';
