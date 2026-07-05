@@ -32,20 +32,15 @@ export function TabsLayoutContent() {
           },
         }}
       >
-        <NativeTabs.Trigger name="pantry" contentStyle={{backgroundColor: colors.background}} disableTransparentOnScrollEdge>
+        <NativeTabs.Trigger name="pantry">
           <NativeTabs.Trigger.Icon sf="house.fill" />
           <NativeTabs.Trigger.Label>Pantry</NativeTabs.Trigger.Label>
         </NativeTabs.Trigger>
-        <NativeTabs.Trigger name="cart" contentStyle={{backgroundColor: colors.background}} disableTransparentOnScrollEdge>
+        <NativeTabs.Trigger name="cart">
           <NativeTabs.Trigger.Icon sf="cart.fill" />
           <NativeTabs.Trigger.Label>Cart</NativeTabs.Trigger.Label>
         </NativeTabs.Trigger>
-        <NativeTabs.Trigger
-          name="search"
-          role="search"
-          contentStyle={{backgroundColor: colors.background}}
-          disableTransparentOnScrollEdge
-        >
+        <NativeTabs.Trigger name="search" role="search">
           <NativeTabs.Trigger.Icon
             sf={{
               default: 'plus.magnifyingglass',

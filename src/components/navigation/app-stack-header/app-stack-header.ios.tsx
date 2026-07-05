@@ -20,7 +20,7 @@ export function AppStackHeader({
   showAccountMenu?: boolean;
   minimalBackButton?: boolean;
 }) {
-  const {colors, isDark} = useAppTheme();
+  const {colors} = useAppTheme();
   const router = useRouter();
   const canUseNativeRightItems = !leadingAction;
 
@@ -31,11 +31,6 @@ export function AppStackHeader({
         headerLargeTitle: largeTitle,
         headerTransparent: transparentBlur,
         headerShadowVisible: false,
-        headerBlurEffect: transparentBlur
-          ? isDark
-            ? 'systemChromeMaterialDark'
-            : 'systemChromeMaterialLight'
-          : undefined,
         headerBackground: transparentBlur ? () => <View style={StyleSheet.absoluteFill} /> : undefined,
         headerStyle: {
           backgroundColor: transparentBlur ? 'transparent' : colors.background,

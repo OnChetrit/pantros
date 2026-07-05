@@ -22,7 +22,7 @@ export function CartCheckoutSheet({
   onDismiss: () => void;
 }) {
   return (
-    <Host style={{position: 'absolute'}} pointerEvents="none">
+    <Host>
       <BottomSheet
         isPresented={isPresented}
         onIsPresentedChange={presented => {

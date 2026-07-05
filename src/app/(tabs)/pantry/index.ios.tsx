@@ -16,9 +16,9 @@ import { useAppTheme } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
 
 export default function PantryScreen() {
-  const { deleteItem, itemBusy, moveItemToCart, moveItemToPantry, pantryCarts, pantryItems, selectedPantry, updateItem } =
+  const {deleteItem, itemBusy, moveItemToCart, moveItemToPantry, pantryCarts, pantryItems, selectedPantry, updateItem} =
     useAppContext();
-  const { colors, isDark } = useAppTheme();
+  const {colors, isDark} = useAppTheme();
   const router = useRouter();
   const [sortOption, setSortOption] = useState<PantryListSortOption>('expiration');
   const [isSortMenuVisible, setIsSortMenuVisible] = useState(false);
@@ -28,7 +28,7 @@ export default function PantryScreen() {
   const [quantityItem, setQuantityItem] = useState<PantryItem | null>(null);
   const [quantityErrorMessage, setQuantityErrorMessage] = useState<string | null>(null);
 
-  const { cartItems, pantryListItems } = useMemo(() => {
+  const {cartItems, pantryListItems} = useMemo(() => {
     const compareBySort = (left: (typeof pantryItems)[number], right: (typeof pantryItems)[number]) => {
       if (sortOption === 'name') {
         return left.name.localeCompare(right.name);
@@ -175,11 +175,7 @@ export default function PantryScreen() {
         visible={isSortMenuVisible}
         onVisibilityChange={setIsSortMenuVisible}
       />
-      <Host
-        colorScheme={isDark ? 'dark' : 'light'}
-        style={[styles.host, { backgroundColor: colors.background }]}
-        useViewportSizeMeasurement
-      >
+      <Host colorScheme={isDark ? 'dark' : 'light'} style={[styles.host, {backgroundColor: colors.background}]}>
         <List modifiers={[listStyle('insetGrouped')]}>
           <Section title="Pantry">
             {pantryListItems.length > 0 ? (
@@ -250,7 +246,7 @@ export default function PantryScreen() {
         item={quantityItem}
         processing={itemBusy}
         errorMessage={quantityErrorMessage}
-        onSave={(quantity) => void handleSaveQuantity(quantity)}
+        onSave={quantity => void handleSaveQuantity(quantity)}
         onCancel={closeQuantitySheet}
       />
     </>

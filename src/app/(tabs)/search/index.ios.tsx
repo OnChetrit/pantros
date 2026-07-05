@@ -1,9 +1,8 @@
-import { ListItem } from '@expo/ui';
 import { Host, List, Section } from '@expo/ui/swift-ui';
 import { listStyle } from '@expo/ui/swift-ui/modifiers';
 import { Stack, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Alert, StyleSheet, Text, View, Pressable } from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { createIconHeaderButton } from '@/components/navigation/native-header-items/native-header-items';
 import { PantryItemNativeListRow } from '@/components/pantry/pantry-item-row/pantry-item-row';
@@ -13,8 +12,8 @@ import { useAppTheme } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
 
 export default function SearchScreen() {
-  const { deleteItem, moveItemToCart, moveItemToPantry, pantryCarts, pantryItems, selectedPantry } = useAppContext();
-  const { colors, isDark } = useAppTheme();
+  const {deleteItem, moveItemToCart, moveItemToPantry, pantryCarts, pantryItems, selectedPantry} = useAppContext();
+  const {colors, isDark} = useAppTheme();
   const router = useRouter();
   const [query, setQuery] = useState('');
 
@@ -100,19 +99,13 @@ export default function SearchScreen() {
         allowToolbarIntegration={false}
         onCancelButtonPress={() => setQuery('')}
         onChangeText={event => setQuery(event.nativeEvent.text)}
+        autoFocus
       />
-      <Host
-        colorScheme={isDark ? 'dark' : 'light'}
-        style={[styles.host, { backgroundColor: colors.background }]}
-        useViewportSizeMeasurement
-      >
+      <Host colorScheme={isDark ? 'dark' : 'light'} style={[styles.host, {backgroundColor: colors.background}]}>
         <List modifiers={[listStyle('insetGrouped')]}>
-          <ListItem key="search-header">
+          <Section title={trimmedQuery ? 'Search Results' : 'All Items'}>
             <View style={styles.searchSection}>
-              <Text style={[styles.eyebrow, { color: colors.muted }]}>
-                {trimmedQuery ? 'Search Results' : 'All Items'}
-              </Text>
-              <Text style={[styles.searchMeta, { color: colors.muted }]}>
+              <Text style={[styles.searchMeta, {color: colors.muted}]}>
                 {trimmedQuery
                   ? `${visibleItems.length} ${visibleItems.length === 1 ? 'match' : 'matches'} in ${selectedPantry.name}`
                   : `${visibleItems.length} ${visibleItems.length === 1 ? 'item' : 'items'} in ${selectedPantry.name}`}
@@ -122,19 +115,19 @@ export default function SearchScreen() {
                   accessibilityRole="button"
                   accessibilityLabel={results.exactMatch ? 'Open existing item' : `Add ${trimmedQuery} as new item`}
                   onPress={handlePrimaryAction}
-                  style={({ pressed }) => [
+                  style={({pressed}) => [
                     styles.primaryAction,
-                    { backgroundColor: colors.tint },
+                    {backgroundColor: colors.tint},
                     pressed ? styles.primaryActionPressed : null,
                   ]}
                 >
-                  <Text style={[styles.primaryActionText, { color: colors.textInverse }]}>
+                  <Text style={[styles.primaryActionText, {color: colors.textInverse}]}>
                     {results.exactMatch ? 'Open existing item' : `Add "${trimmedQuery}" as new item`}
                   </Text>
                 </Pressable>
-                ) : null}
+              ) : null}
             </View>
-          </ListItem>
+          </Section>
           <Section title={trimmedQuery ? 'Results' : 'Items'}>
             {visibleItems.length > 0 ? (
               visibleItems.map((item, index) => (
@@ -146,23 +139,23 @@ export default function SearchScreen() {
                   onPress={() => router.push(`/items/${item.id}`)}
                   onEdit={() => router.push(`/items/${item.id}`)}
                   leftActionLabel={item.isInCart ? 'Move to Pantry' : 'Add to Cart'}
-                  onLeftAction={item.isInCart ? () => void moveItemToPantry(item.id) : () => void handleAddToCart(item.id)}
+                  onLeftAction={
+                    item.isInCart ? () => void moveItemToPantry(item.id) : () => void handleAddToCart(item.id)
+                  }
                   onDelete={() => void deleteItem(item.id)}
                 />
               ))
             ) : (
-              <ListItem key="empty-search">
-                <View style={styles.listEmpty}>
-                  <EmptyNotice
-                    title={trimmedQuery ? 'No matching items' : 'No search suggestions yet'}
-                    body={
-                      trimmedQuery
-                        ? 'Try a broader name fragment or a full barcode value.'
+              <View style={styles.listEmpty}>
+                <EmptyNotice
+                  title={trimmedQuery ? 'No matching items' : 'No search suggestions yet'}
+                  body={
+                    trimmedQuery
+                      ? 'Try a broader name fragment or a full barcode value.'
                       : 'Add pantry items to search them here.'
-                    }
-                  />
-                </View>
-              </ListItem>
+                  }
+                />
+              </View>
             )}
           </Section>
         </List>
@@ -181,20 +174,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   searchSection: {
-    paddingHorizontal: 4,
-    paddingTop: 4,
-    paddingBottom: 12,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 14,
     gap: 8,
-  },
-  eyebrow: {
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 0.4,
-    textTransform: 'uppercase',
   },
   searchMeta: {
     fontSize: 13,
-    paddingHorizontal: 2,
+    lineHeight: 18,
   },
   primaryAction: {
     minHeight: 46,

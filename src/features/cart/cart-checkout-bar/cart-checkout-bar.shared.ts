@@ -15,10 +15,6 @@ export const styles = StyleSheet.create({
     paddingTop: 10,
   },
   shell: {
-    borderWidth: 0,
-    borderRadius: 0,
-    paddingHorizontal: 0,
-    paddingVertical: 0,
     gap: 14,
   },
   summaryWrap: {

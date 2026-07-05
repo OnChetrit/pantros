@@ -63,7 +63,7 @@ export function RemindersSection({
               mode="time"
               display="compact"
               disabled={!notificationPreferences || notificationsBusy}
-              onChange={(_event, date) => {
+              onValueChange={(_event, date) => {
                 if (date) {
                   onReminderTimeChange(date);
                 }
@@ -78,7 +78,7 @@ export function RemindersSection({
           value={reminderTime}
           mode="time"
           display="default"
-          onChange={(_event, date) => {
+          onValueChange={(_event, date) => {
             if (date) {
               onReminderTimeChange(date);
             }

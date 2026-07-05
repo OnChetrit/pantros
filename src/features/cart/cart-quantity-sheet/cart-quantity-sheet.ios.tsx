@@ -1,11 +1,16 @@
-import { BottomSheet } from '@expo/ui';
+import { BottomSheet, Button, Host } from '@expo/ui';
 import { Picker as NativePicker } from '@react-native-picker/picker';
 import { useEffect, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
-import { SHEET_BOTTOM_PADDING, SHEET_HORIZONTAL_PADDING, SHEET_TOP_PADDING } from '@/components/sheets/sheet-presets/sheet-presets';
+import {
+  SHEET_BOTTOM_PADDING,
+  SHEET_HORIZONTAL_PADDING,
+  SHEET_TOP_PADDING,
+} from '@/components/sheets/sheet-presets/sheet-presets';
 import type { PantryItem } from '@/domain/models';
 import { useAppTheme } from '@/lib/theme';
+import { HStack } from '@expo/ui/swift-ui';
 
 type CartQuantitySheetProps = {
   visible: boolean;
@@ -30,70 +35,50 @@ export function CartQuantitySheet({visible, item, processing, errorMessage, onSa
   }
 
   return (
-    <BottomSheet isPresented={visible} onDismiss={onCancel} snapPoints={[{height: 240}]}>
-      <View style={[styles.sheet, {backgroundColor: colors.background}]}>
-        <View style={styles.header}>
+    <BottomSheet isPresented={visible} onDismiss={onCancel} snapPoints={[{height: 220}]}>
+      <Host style={{flex: 1}}>
+        <HStack alignment="firstTextBaseline">
           <Text style={[styles.title, {color: colors.text}]} numberOfLines={1}>
             {item.name}
           </Text>
-          <Text style={[styles.subtitle, {color: colors.muted}]}>Quantity</Text>
-        </View>
 
-        <View style={[styles.quantityInput, {backgroundColor: colors.card, borderColor: colors.border}]}>
-          <NativePicker
-            selectedValue={quantity}
-            enabled={!processing}
-            onValueChange={nextValue => {
-              if (typeof nextValue === 'number') {
-                setQuantity(nextValue);
-              }
+          <View style={[styles.quantityInput, {backgroundColor: colors.background, borderColor: colors.border}]}>
+            <View style={styles.quantityPickerContainer}>
+              <NativePicker
+                selectedValue={quantity}
+                enabled={!processing}
+                onValueChange={nextValue => {
+                  if (typeof nextValue === 'number') {
+                    setQuantity(nextValue);
+                  }
+                }}
+                itemStyle={[styles.quantityPickerItem, {color: colors.text}]}
+                style={[styles.quantityPicker, {color: colors.text}]}
+              >
+                {quantityOptions.map(option => (
+                  <NativePicker.Item key={option} label={String(option)} value={option} />
+                ))}
+              </NativePicker>
+            </View>
+          </View>
+        </HStack>
+      </Host>
+
+      {errorMessage ? <Text style={[styles.error, {color: colors.danger}]}>{errorMessage}</Text> : null}
+
+      <Host matchContents style={styles.actionsHost}>
+        <HStack spacing={12}>
+          <Button
+            label={processing ? 'Saving…' : 'Save'}
+            variant="filled"
+            disabled={processing}
+            onPress={() => {
+              onSave(quantity);
             }}
-            itemStyle={[styles.quantityPickerItem, {color: colors.text}]}
-            style={[styles.quantityPicker, {color: colors.text}]}
-          >
-            {quantityOptions.map(option => (
-              <NativePicker.Item key={option} label={String(option)} value={option} />
-            ))}
-          </NativePicker>
-          <Text style={[styles.quantitySuffix, {color: colors.text}]}>units</Text>
-        </View>
-
-        {errorMessage ? <Text style={[styles.error, {color: colors.danger}]}>{errorMessage}</Text> : null}
-
-        <View style={styles.actions}>
-          <Pressable
-            disabled={processing}
-            onPress={() => onSave(quantity)}
-            style={({pressed}) => [
-              styles.actionButton,
-              styles.primaryButton,
-              {
-                backgroundColor: colors.tint,
-                borderColor: colors.tint,
-                opacity: processing ? 0.45 : pressed ? 0.8 : 1,
-              },
-            ]}
-          >
-            <Text style={[styles.primaryButtonLabel, {color: colors.textInverse}]}>
-              {processing ? 'Saving…' : 'Save'}
-            </Text>
-          </Pressable>
-          <Pressable
-            disabled={processing}
-            onPress={onCancel}
-            style={({pressed}) => [
-              styles.actionButton,
-              {
-                backgroundColor: colors.background,
-                borderColor: colors.border,
-                opacity: processing ? 0.45 : pressed ? 0.8 : 1,
-              },
-            ]}
-          >
-            <Text style={[styles.secondaryButtonLabel, {color: colors.text}]}>Cancel</Text>
-          </Pressable>
-        </View>
-      </View>
+          />
+          <Button label="Cancel" variant="text" disabled={processing} onPress={onCancel} />
+        </HStack>
+      </Host>
     </BottomSheet>
   );
 }
@@ -119,25 +104,34 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   quantityInput: {
-    height: 72,
+    // minWidth: 0,
+    height: 88,
     borderRadius: 18,
     borderWidth: 1,
     overflow: 'hidden',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingRight: 16,
+    justifyContent: 'center',
+    paddingRight: 14,
   },
   quantityPicker: {
     flex: 1,
-    height: 120,
-    marginTop: -20,
-    marginBottom: -20,
+    height: 88,
+    display: 'flex',
+    justifyContent: 'center',
+  },
+  quantityPickerContainer: {
+    flex: 1,
+    height: 88,
+    minWidth: 0,
+    justifyContent: 'center',
+    overflow: 'hidden',
   },
   quantityPickerItem: {
-    fontSize: 22,
+    fontSize: 20,
   },
   quantitySuffix: {
-    fontSize: 17,
+    fontSize: 18,
     lineHeight: 22,
     fontWeight: '700',
   },
@@ -150,26 +144,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 10,
   },
+  actionsHost: {
+    flex: 1,
+  },
   actionButton: {
     flex: 1,
-    minHeight: 48,
-    borderRadius: 16,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 16,
-  },
-  primaryButton: {
     minWidth: 0,
-  },
-  primaryButtonLabel: {
-    fontSize: 15,
-    lineHeight: 20,
-    fontWeight: '800',
-  },
-  secondaryButtonLabel: {
-    fontSize: 15,
-    lineHeight: 20,
-    fontWeight: '700',
   },
 });

@@ -1,4 +1,4 @@
-import { Text, View, Pressable } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import { useAppTheme } from '@/lib/theme';
 
@@ -18,14 +18,7 @@ export function CartCheckoutBar({
   const countLabel = selectedCount === 1 ? '1 item selected' : `${selectedCount} items selected`;
 
   return (
-    <View
-      style={[
-        styles.shell,
-        {
-          borderColor: colors.borderStrong,
-        },
-      ]}
-    >
+    <View style={[styles.shell]}>
       <View style={styles.headerRow}>
         <View style={styles.summaryWrap}>
           <Text style={[styles.title, {color: colors.text}]} numberOfLines={1}>

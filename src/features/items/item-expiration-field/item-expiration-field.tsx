@@ -146,7 +146,7 @@ export function ItemExpirationField({value, onChange}: {value: string; onChange:
             value={manualDate}
             mode="date"
             display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-            onChange={(_, selectedDate) => {
+            onValueChange={(_, selectedDate) => {
               if (selectedDate) {
                 setManualDate(selectedDate);
               }
@@ -216,96 +216,96 @@ export function ItemExpirationField({value, onChange}: {value: string; onChange:
           </View>
         </View>
       ) : null}
-
     </View>
   );
 }
 
-const createStyles = (colors: import('@/lib/theme').AppThemeColors) => StyleSheet.create({
-  card: {
-    borderRadius: 20,
-    padding: 12,
-    gap: 12,
-    backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  toggleRow: {
-    minHeight: 32,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  toggleTitle: {
-    color: colors.text,
-    fontSize: 13,
-    fontWeight: '700',
-    letterSpacing: 0.4,
-  },
-  previewCard: {
-    borderRadius: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    backgroundColor: colors.metric,
-    borderWidth: 1,
-    borderColor: colors.border,
-    gap: 4,
-  },
-  previewLabel: {
-    color: colors.muted,
-    fontSize: 12,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  previewValue: {
-    color: colors.text,
-    fontSize: 16,
-    fontWeight: '800',
-  },
-  controlBlock: {
-    gap: 12,
-  },
-  datePickerCard: {
-    borderRadius: 18,
-    overflow: 'hidden',
-    backgroundColor: colors.input,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-  },
-  datePicker: {
-    alignSelf: 'stretch',
-  },
-  relativeRow: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  relativePicker: {
-    flex: 1,
-    minHeight: 156,
-    borderRadius: 18,
-    overflow: 'hidden',
-    backgroundColor: colors.input,
-    borderWidth: 1,
-    borderColor: colors.border,
-    justifyContent: 'center',
-  },
-  relativeLabel: {
-    color: colors.muted,
-    fontSize: 12,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    paddingHorizontal: 14,
-    paddingTop: 12,
-  },
-  picker: {
-    color: colors.text,
-  },
-  pickerItem: {
-    color: colors.text,
-    fontSize: 18,
-  },
-});
+const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
+  StyleSheet.create({
+    card: {
+      borderRadius: 20,
+      padding: 12,
+      gap: 12,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    toggleRow: {
+      minHeight: 32,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: 12,
+    },
+    toggleTitle: {
+      color: colors.text,
+      fontSize: 13,
+      fontWeight: '700',
+      letterSpacing: 0.4,
+    },
+    previewCard: {
+      borderRadius: 16,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      backgroundColor: colors.metric,
+      borderWidth: 1,
+      borderColor: colors.border,
+      gap: 4,
+    },
+    previewLabel: {
+      color: colors.muted,
+      fontSize: 12,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+    },
+    previewValue: {
+      color: colors.text,
+      fontSize: 16,
+      fontWeight: '800',
+    },
+    controlBlock: {
+      gap: 12,
+    },
+    datePickerCard: {
+      borderRadius: 18,
+      overflow: 'hidden',
+      backgroundColor: colors.input,
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+    },
+    datePicker: {
+      alignSelf: 'stretch',
+    },
+    relativeRow: {
+      flexDirection: 'row',
+      gap: 10,
+    },
+    relativePicker: {
+      flex: 1,
+      minHeight: 156,
+      borderRadius: 18,
+      overflow: 'hidden',
+      backgroundColor: colors.input,
+      borderWidth: 1,
+      borderColor: colors.border,
+      justifyContent: 'center',
+    },
+    relativeLabel: {
+      color: colors.muted,
+      fontSize: 12,
+      fontWeight: '700',
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+      paddingHorizontal: 14,
+      paddingTop: 12,
+    },
+    picker: {
+      color: colors.text,
+    },
+    pickerItem: {
+      color: colors.text,
+      fontSize: 18,
+    },
+  });

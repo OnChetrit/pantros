@@ -39,8 +39,6 @@ Build the best iOS experience Expo can provide before adding custom cross-platfo
 - Prefer dedicated `*.ios.tsx` wrappers that expose native SwiftUI views and keep the non-iOS file as the fallback.
 - Use `Host matchContents` only for controls with intrinsic size or explicit frame sizing.
 - Do not use `matchContents` for flexible-width controls that need the available width.
-- Use `Host useViewportSizeMeasurement` when the SwiftUI content should size against the available viewport, especially for full-height `Form` or similar layouts.
-- Use `RNHostView` when a SwiftUI surface needs to embed React Native content.
 - Use `RNHostView matchContents` only when the SwiftUI parent should size to the React Native child.
 - Omit `RNHostView matchContents` when the React Native child uses flex and should fill the available SwiftUI space.
 

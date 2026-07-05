@@ -5,23 +5,26 @@ import { Stack, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { createIconHeaderButton, createTextHeaderButton } from '@/components/navigation/native-header-items/native-header-items';
+import {
+  createIconHeaderButton,
+  createTextHeaderButton,
+} from '@/components/navigation/native-header-items/native-header-items';
 import { PantryFilterMenu, type PantryListSortOption } from '@/components/pantry/pantry-filter-menu/pantry-filter-menu';
 import { PantryItemNativeListRow } from '@/components/pantry/pantry-item-row/pantry-item-row';
 import { EmptyNotice } from '@/components/ui/primitives';
 import type { PantryItem } from '@/domain/models';
 import { CartCheckoutSheet } from '@/features/cart/cart-checkout-bar/cart-checkout-bar';
+import { useCartCheckout } from '@/features/cart/cart-checkout-context/cart-checkout-context';
 import { CartCheckoutNotice } from '@/features/cart/cart-checkout-notice/cart-checkout-notice';
+import { CartExpirationReviewModal } from '@/features/cart/cart-expiration-review-modal/cart-expiration-review-modal';
+import { sortCartItems } from '@/features/cart/cart-items/cart-items';
+import { CartQuantitySheet } from '@/features/cart/cart-quantity-sheet/cart-quantity-sheet';
 import { getCartItems } from '@/lib/pantry-insights';
 import { useAppTheme } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
-import { CartExpirationReviewModal } from '@/features/cart/cart-expiration-review-modal/cart-expiration-review-modal';
-import { CartQuantitySheet } from '@/features/cart/cart-quantity-sheet/cart-quantity-sheet';
-import { useCartCheckout } from '@/features/cart/cart-checkout-context/cart-checkout-context';
-import { sortCartItems } from '@/features/cart/cart-items/cart-items';
 
 export default function CartScreen() {
-  const { deleteItem, itemBusy, moveItemToPantry, pantryItems, selectedPantry, updateItem } = useAppContext();
+  const {deleteItem, itemBusy, moveItemToPantry, pantryItems, selectedPantry, updateItem} = useAppContext();
   const {
     checkoutProgress,
     checkoutQueue,
@@ -43,7 +46,7 @@ export default function CartScreen() {
     toggleItemSelection,
     cancelReview,
   } = useCartCheckout();
-  const { colors, isDark } = useAppTheme();
+  const {colors, isDark} = useAppTheme();
   const router = useRouter();
   const [sortOption, setSortOption] = useState<PantryListSortOption>('expiration');
   const [isSortMenuVisible, setIsSortMenuVisible] = useState(false);
@@ -64,8 +67,7 @@ export default function CartScreen() {
 
   const selectedCount = selectedItemIds.length;
   const allSelected = itemsInCart.length > 0 && selectedCount === itemsInCart.length;
-  const reviewStep =
-    currentReviewItem ? checkoutQueue.findIndex((item) => item.id === currentReviewItem.id) + 1 : 0;
+  const reviewStep = currentReviewItem ? checkoutQueue.findIndex(item => item.id === currentReviewItem.id) + 1 : 0;
 
   useEffect(() => {
     setVisibleItems(itemsInCart);
@@ -142,7 +144,7 @@ export default function CartScreen() {
               ? [
                   createTextHeaderButton({
                     label: allSelected ? 'Clear' : 'Select All',
-                    onPress: () => (allSelected ? clearSelection() : selectAll(itemsInCart.map((item) => item.id))),
+                    onPress: () => (allSelected ? clearSelection() : selectAll(itemsInCart.map(item => item.id))),
                     tintColor: colors.tint,
                   }),
                 ]
@@ -169,16 +171,16 @@ export default function CartScreen() {
         visible={isSortMenuVisible}
         onVisibilityChange={setIsSortMenuVisible}
       />
-      <Host
-        colorScheme={isDark ? 'dark' : 'light'}
-        style={[styles.host, { backgroundColor: colors.background }]}
-        useViewportSizeMeasurement
-      >
+      <Host colorScheme={isDark ? 'dark' : 'light'} style={[styles.host, {backgroundColor: colors.background}]}>
         <List modifiers={[listStyle('insetGrouped')]}>
           {checkoutProgress.errorMessage ? (
             <ListItem key="checkout-error">
               <View style={styles.noticeRow}>
-                <CartCheckoutNotice tone="error" message={checkoutProgress.errorMessage} onDismiss={clearCheckoutError} />
+                <CartCheckoutNotice
+                  tone="error"
+                  message={checkoutProgress.errorMessage}
+                  onDismiss={clearCheckoutError}
+                />
               </View>
             </ListItem>
           ) : null}
@@ -255,7 +257,7 @@ export default function CartScreen() {
         totalCount={itemsInCart.length}
         processing={checkoutProgress.processing}
         onSubmit={() => void startCheckout()}
-        onSecondaryAction={() => (allSelected ? clearSelection() : selectAll(itemsInCart.map((item) => item.id)))}
+        onSecondaryAction={() => (allSelected ? clearSelection() : selectAll(itemsInCart.map(item => item.id)))}
       />
       <CartExpirationReviewModal
         visible={checkoutQueue.length > 0 && currentReviewItem !== null}
@@ -275,7 +277,7 @@ export default function CartScreen() {
         item={quantityItem}
         processing={itemBusy}
         errorMessage={quantityErrorMessage}
-        onSave={(quantity) => void handleSaveQuantity(quantity)}
+        onSave={quantity => void handleSaveQuantity(quantity)}
         onCancel={closeQuantitySheet}
       />
     </>

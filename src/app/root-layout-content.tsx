@@ -2,10 +2,9 @@ import * as Notifications from 'expo-notifications';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useMemo } from 'react';
-import { Platform } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-import { useTabStackScreenOptions } from '@/components/navigation/tab-stack-layout/tab-stack-layout';
 import { FORM_SHEET_DETENT } from '@/components/sheets/sheet-presets/sheet-presets';
 import { useAppTheme } from '@/lib/theme';
 import { AppProvider } from '@/state/app-context';
@@ -13,16 +12,6 @@ import { AppProvider } from '@/state/app-context';
 export function RootLayoutContent() {
   const {colors, isDark} = useAppTheme();
   const router = useRouter();
-  const profileScreenOptions = useTabStackScreenOptions({
-    title: 'Profile',
-    showAccountMenu: false,
-    minimalBackButton: true,
-  });
-  const settingsScreenOptions = useTabStackScreenOptions({
-    title: 'Settings',
-    showAccountMenu: false,
-    minimalBackButton: true,
-  });
   const navigationTheme = useMemo(() => {
     const baseTheme = isDark ? DarkTheme : DefaultTheme;
 
@@ -80,8 +69,48 @@ export function RootLayoutContent() {
             <Stack.Screen name="index" options={{headerShown: false}} />
             <Stack.Screen name="(auth)" options={{headerShown: false}} />
             <Stack.Screen name="(tabs)" options={{headerShown: false}} />
-            <Stack.Screen name="profile" options={profileScreenOptions} />
-            <Stack.Screen name="settings" options={settingsScreenOptions} />
+            <Stack.Screen
+              name="profile"
+              options={{
+                title: 'Profile',
+                headerLargeTitle: false,
+                headerTransparent: Platform.OS === 'ios',
+                headerShadowVisible: false,
+                headerBackground:
+                  Platform.OS === 'ios'
+                    ? () => <View style={[StyleSheet.absoluteFill, styles.transparentHeaderBackground]} />
+                    : undefined,
+                headerStyle: {
+                  backgroundColor: Platform.OS === 'ios' ? 'transparent' : colors.background,
+                },
+                headerTintColor: colors.tint,
+                headerTitleStyle: {color: colors.text},
+                headerLargeTitleStyle: {color: colors.text},
+                headerBackVisible: true,
+                headerBackButtonDisplayMode: 'minimal',
+              }}
+            />
+            <Stack.Screen
+              name="settings"
+              options={{
+                title: 'Settings',
+                headerLargeTitle: false,
+                headerTransparent: Platform.OS === 'ios',
+                headerShadowVisible: false,
+                headerBackground:
+                  Platform.OS === 'ios'
+                    ? () => <View style={[StyleSheet.absoluteFill, styles.transparentHeaderBackground]} />
+                    : undefined,
+                headerStyle: {
+                  backgroundColor: Platform.OS === 'ios' ? 'transparent' : colors.background,
+                },
+                headerTintColor: colors.tint,
+                headerTitleStyle: {color: colors.text},
+                headerLargeTitleStyle: {color: colors.text},
+                headerBackVisible: true,
+                headerBackButtonDisplayMode: 'minimal',
+              }}
+            />
             <Stack.Screen
               name="items/scan"
               options={{
@@ -145,3 +174,9 @@ export function RootLayoutContent() {
 }
 
 export default RootLayoutContent;
+
+const styles = StyleSheet.create({
+  transparentHeaderBackground: {
+    backgroundColor: 'transparent',
+  },
+});

@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import type { ReactNode } from 'react';
-import { StyleSheet, Text, View, Pressable } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { appColors, useThemedStyles } from '@/lib/theme';
 
@@ -14,26 +14,13 @@ type MenuRowProps = {
   hideDivider?: boolean;
 };
 
-export function MenuRow({
-  icon,
-  label,
-  value,
-  onPress,
-  rightSlot,
-  danger = false,
-  hideDivider = false,
-}: MenuRowProps) {
+export function MenuRow({icon, label, value, onPress, rightSlot, danger = false, hideDivider = false}: MenuRowProps) {
   const styles = useThemedStyles(createStyles);
 
   const content = (
     <View style={[styles.menuRow, hideDivider ? null : styles.menuRowDivider]}>
       <View style={styles.menuRowLead}>
-        <Ionicons
-          name={icon}
-          size={20}
-          color={danger ? appColors.danger : appColors.text}
-          style={styles.menuRowIcon}
-        />
+        <Ionicons name={icon} size={20} color={danger ? appColors.danger : appColors.text} style={styles.menuRowIcon} />
         <Text style={[styles.menuRowLabel, danger ? styles.menuRowLabelDanger : null]}>{label}</Text>
       </View>
 
@@ -48,7 +35,7 @@ export function MenuRow({
 
   if (onPress) {
     return (
-      <Pressable onPress={onPress} style={({ pressed }) => [pressed ? styles.menuRowPressed : null]}>
+      <Pressable onPress={onPress} style={({pressed}) => [pressed ? styles.menuRowPressed : null]}>
         {content}
       </Pressable>
     );

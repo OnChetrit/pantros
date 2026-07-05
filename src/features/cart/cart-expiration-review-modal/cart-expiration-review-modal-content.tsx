@@ -87,7 +87,7 @@ export function ReviewModalContent({
               value={manualDate}
               mode="date"
               display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-              onChange={(_, selectedDate) => {
+              onValueChange={(_, selectedDate) => {
                 if (selectedDate) {
                   setManualDate(selectedDate);
                 }

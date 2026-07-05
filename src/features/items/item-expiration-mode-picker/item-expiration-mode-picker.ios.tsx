@@ -9,12 +9,12 @@ type ItemExpirationModePickerProps = {
   onChange: (mode: ExpirationMode) => void;
 };
 
-export function ItemExpirationModePicker({ mode, onChange }: ItemExpirationModePickerProps) {
+export function ItemExpirationModePicker({mode, onChange}: ItemExpirationModePickerProps) {
   return (
-    <Host matchContents useViewportSizeMeasurement style={styles.host}>
+    <Host matchContents>
       <Picker
         selection={mode}
-        onSelectionChange={(selection) => onChange(selection as ExpirationMode)}
+        onSelectionChange={selection => onChange(selection as ExpirationMode)}
         modifiers={[pickerStyle('segmented')]}
       >
         <Text modifiers={[tag('manual')]}>Manual</Text>
@@ -24,8 +24,4 @@ export function ItemExpirationModePicker({ mode, onChange }: ItemExpirationModeP
   );
 }
 
-const styles = StyleSheet.create({
-  host: {
-    alignSelf: 'stretch',
-  },
-});
+const styles = StyleSheet.create({});
