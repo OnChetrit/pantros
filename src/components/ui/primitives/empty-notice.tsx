@@ -2,7 +2,7 @@ import { Text, View } from 'react-native';
 
 import { useThemedStyles } from '@/lib/theme';
 
-import { createStyles } from '../primitives.shared';
+import { createStyles } from './shared/primitives.shared';
 
 export function EmptyNotice({title, body}: {title: string; body: string}) {
   const styles = useThemedStyles(createStyles);

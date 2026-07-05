@@ -3,7 +3,7 @@ import { Image, Text, View } from 'react-native';
 
 import { useAppTheme, useThemedStyles } from '@/lib/theme';
 
-import { createStyles } from '../primitives.shared';
+import { createStyles } from './shared/primitives.shared';
 
 export function AvatarBadge({
   name,

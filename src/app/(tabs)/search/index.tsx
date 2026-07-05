@@ -4,8 +4,8 @@ import { useMemo, useRef, useState } from 'react';
 import type { TextInput } from 'react-native';
 import { Alert, FlatList, StyleSheet, Text, View, Pressable } from 'react-native';
 
-import { AvatarSidebarButton } from '@/components/navigation/avatar-sidebar';
-import { PantryItemRow } from '@/components/pantry/pantry-item-row';
+import { AvatarSidebarButton } from '@/components/navigation/avatar-sidebar/avatar-sidebar';
+import { PantryItemRow } from '@/components/pantry/pantry-item-row/pantry-item-row';
 import { AppTextInput, EmptyNotice } from '@/components/ui/primitives';
 import { matchPantryItems } from '@/lib/pantry-insights';
 import { useAppTheme, useThemedStyles } from '@/lib/theme';

@@ -3,7 +3,7 @@ import { TextInput, View } from 'react-native';
 
 import { useAppTheme, useThemedStyles } from '@/lib/theme';
 
-import { createStyles } from '../primitives.shared';
+import { createStyles } from './shared/primitives.shared';
 
 type AppTextInputProps = {
   value: string;
@@ -40,7 +40,7 @@ export function AppTextInput({
         autoCapitalize={autoCapitalize}
         autoCorrect={autoCorrect}
         autoFocus={autoFocus}
-        style={[styles.input, rightSlot ? styles.inputWithRightSlot : null]}
+        style={styles.input}
       />
       {rightSlot ? <View style={styles.inputRightSlot}>{rightSlot}</View> : null}
     </View>

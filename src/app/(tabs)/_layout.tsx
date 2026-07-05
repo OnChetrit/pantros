@@ -1,6 +1,6 @@
 import { Redirect } from 'expo-router';
 
-import { CartCheckoutProvider } from '@/features/cart/cart-checkout-context';
+import { CartCheckoutProvider } from '@/features/cart/cart-checkout-context/cart-checkout-context';
 import { useAppContext } from '@/state/app-context';
 
 import { TabsLayoutContent } from './tabs-layout-content';

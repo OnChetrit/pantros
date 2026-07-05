@@ -1,4 +1,4 @@
-import { TabStackLayout } from '@/components/navigation/tab-stack-layout';
+import { TabStackLayout } from '@/components/navigation/tab-stack-layout/tab-stack-layout';
 
 export default function CartLayout() {
   return <TabStackLayout title="Cart" />;

@@ -4,8 +4,8 @@ import { Animated, Easing, KeyboardAvoidingView, LayoutChangeEvent, Platform, Sc
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppButton, AppScreen, EmptyNotice, appColors } from '@/components/ui/primitives';
-import { AuthModeChip } from '@/features/auth/auth-mode-chip';
-import { AuthProviderButton } from '@/features/auth/auth-provider-button';
+import { AuthModeChip } from '@/features/auth/auth-mode-chip/auth-mode-chip';
+import { AuthProviderButton } from '@/features/auth/auth-provider-button/auth-provider-button';
 import { useThemedStyles } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
 

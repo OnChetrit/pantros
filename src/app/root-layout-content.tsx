@@ -5,7 +5,8 @@ import { useEffect, useMemo } from 'react';
 import { Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-import { useTabStackScreenOptions } from '@/components/navigation/tab-stack-layout';
+import { useTabStackScreenOptions } from '@/components/navigation/tab-stack-layout/tab-stack-layout';
+import { FORM_SHEET_DETENT } from '@/components/sheets/sheet-presets/sheet-presets';
 import { useAppTheme } from '@/lib/theme';
 import { AppProvider } from '@/state/app-context';
 
@@ -97,7 +98,7 @@ export function RootLayoutContent() {
                 title: '',
                 sheetGrabberVisible: true,
                 sheetCornerRadius: 24,
-                sheetAllowedDetents: Platform.OS === 'ios' ? [0.92] : undefined,
+                sheetAllowedDetents: Platform.OS === 'ios' ? [FORM_SHEET_DETENT] : undefined,
                 sheetInitialDetentIndex: Platform.OS === 'ios' ? 0 : undefined,
                 sheetExpandsWhenScrolledToEdge: true,
                 sheetElevation: 24,
@@ -113,7 +114,7 @@ export function RootLayoutContent() {
                 title: '',
                 sheetGrabberVisible: Platform.OS === 'ios' ? true : undefined,
                 sheetCornerRadius: Platform.OS === 'ios' ? 24 : undefined,
-                sheetAllowedDetents: Platform.OS === 'ios' ? [0.92] : undefined,
+                sheetAllowedDetents: Platform.OS === 'ios' ? [FORM_SHEET_DETENT] : undefined,
                 sheetInitialDetentIndex: Platform.OS === 'ios' ? 0 : undefined,
                 sheetExpandsWhenScrolledToEdge: Platform.OS === 'ios' ? true : undefined,
               }}

@@ -7,8 +7,8 @@ import { ActivityIndicator, Alert, Linking, StyleSheet, Text, View, Pressable } 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { appColors } from '@/components/ui/primitives';
-import { ScanIconCircleButton } from '@/features/scan/scan-icon-circle-button';
-import { ScanPermissionState } from '@/features/scan/scan-permission-state';
+import { ScanIconCircleButton } from '@/features/scan/scan-icon-circle-button/scan-icon-circle-button';
+import { ScanPermissionState } from '@/features/scan/scan-permission-state/scan-permission-state';
 import { triggerMediumImpact } from '@/lib/haptics';
 import { matchPantryItems } from '@/lib/pantry-insights';
 import { useThemedStyles } from '@/lib/theme';

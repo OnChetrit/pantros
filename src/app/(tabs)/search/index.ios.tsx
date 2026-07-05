@@ -5,8 +5,8 @@ import { Stack, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Alert, StyleSheet, Text, View, Pressable } from 'react-native';
 
-import { createIconHeaderButton } from '@/components/navigation/native-header-items';
-import { PantryItemNativeListRow } from '@/components/pantry/pantry-item-row';
+import { createIconHeaderButton } from '@/components/navigation/native-header-items/native-header-items';
+import { PantryItemNativeListRow } from '@/components/pantry/pantry-item-row/pantry-item-row';
 import { EmptyNotice } from '@/components/ui/primitives';
 import { matchPantryItems } from '@/lib/pantry-insights';
 import { useAppTheme } from '@/lib/theme';

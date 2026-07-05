@@ -1,7 +1,7 @@
 import { Redirect } from 'expo-router';
 
-import { AppStackHeader } from '@/components/navigation/app-stack-header';
-import { DeleteAccountContent } from '@/components/account/delete-account-content';
+import { AppStackHeader } from '@/components/navigation/app-stack-header/app-stack-header';
+import { DeleteAccountContent } from '@/components/account/delete-account-content/delete-account-content';
 import { useAppContext } from '@/state/app-context';
 
 export default function DeleteAccountScreen() {

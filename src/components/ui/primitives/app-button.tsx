@@ -2,7 +2,7 @@ import { Text, Pressable } from 'react-native';
 
 import { useThemedStyles } from '@/lib/theme';
 
-import { createStyles, type ButtonProps } from '../primitives.shared';
+import { createStyles, type ButtonProps } from './shared/primitives.shared';
 
 export function AppButton({label, onPress, variant = 'primary', disabled}: ButtonProps) {
   const styles = useThemedStyles(createStyles);

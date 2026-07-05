@@ -1,7 +1,7 @@
 import { Redirect, useLocalSearchParams } from 'expo-router';
 
 import { EmptyNotice } from '@/components/ui/primitives';
-import { ItemFormScreen } from '@/features/items/item-form-screen';
+import { ItemFormScreen } from '@/features/items/item-form-screen/item-form-screen';
 import { useAppContext } from '@/state/app-context';
 
 export default function EditItemScreen() {

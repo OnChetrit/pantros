@@ -1,6 +1,6 @@
 import { Stack } from 'expo-router';
 
-import { useTabStackScreenOptions } from '@/components/navigation/tab-stack-layout';
+import { useTabStackScreenOptions } from '@/components/navigation/tab-stack-layout/tab-stack-layout';
 
 export default function SearchLayout() {
   const screenOptions = useTabStackScreenOptions({

@@ -2,8 +2,8 @@ import { Stack, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Alert, FlatList, StyleSheet, Text, View } from 'react-native';
 
-import { PantryFilterMenu, type PantryListSortOption } from '@/components/pantry/pantry-filter-menu';
-import { PantryItemRow } from '@/components/pantry/pantry-item-row';
+import { PantryFilterMenu, type PantryListSortOption } from '@/components/pantry/pantry-filter-menu/pantry-filter-menu';
+import { PantryItemRow } from '@/components/pantry/pantry-item-row/pantry-item-row';
 import { EmptyNotice } from '@/components/ui/primitives';
 import { appColors } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';

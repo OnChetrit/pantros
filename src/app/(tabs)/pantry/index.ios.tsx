@@ -5,13 +5,13 @@ import { Stack, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 
-import { createIconHeaderButton } from '@/components/navigation/native-header-items';
-import { PantryFilterMenu, type PantryListSortOption } from '@/components/pantry/pantry-filter-menu';
-import { PantryItemNativeListRow } from '@/components/pantry/pantry-item-row';
+import { createIconHeaderButton } from '@/components/navigation/native-header-items/native-header-items';
+import { PantryFilterMenu, type PantryListSortOption } from '@/components/pantry/pantry-filter-menu/pantry-filter-menu';
+import { PantryItemNativeListRow } from '@/components/pantry/pantry-item-row/pantry-item-row';
 import { EmptyNotice } from '@/components/ui/primitives';
 import type { PantryItem } from '@/domain/models';
-import { CartQuantitySheet } from '@/features/cart/cart-quantity-sheet';
-import { ItemExpirationReviewSheet } from '@/features/items/item-expiration-review-sheet';
+import { CartQuantitySheet } from '@/features/cart/cart-quantity-sheet/cart-quantity-sheet';
+import { ItemExpirationReviewSheet } from '@/features/items/item-expiration-review-sheet/item-expiration-review-sheet';
 import { useAppTheme } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
 
