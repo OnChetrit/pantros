@@ -91,21 +91,10 @@ export const styles = StyleSheet.create({
   header: {
     gap: 6,
   },
-  eyebrow: {
-    fontSize: 13,
-    lineHeight: 18,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
-  },
   title: {
     fontSize: 30,
     lineHeight: 34,
     fontWeight: '800',
-  },
-  subtitle: {
-    fontSize: 15,
-    lineHeight: 21,
   },
   previewCard: {
     borderWidth: 1,
@@ -127,15 +116,16 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
   },
   dateCard: {
+    width: '100%',
     borderWidth: 1,
     borderRadius: 20,
     paddingVertical: 8,
-    alignItems: 'center',
     overflow: 'hidden',
     display: 'flex',
     justifyContent: 'center',
   },
   datePicker: {
+    width: '100%',
     alignSelf: 'stretch',
     display: 'flex',
     justifyContent: 'center',
@@ -148,6 +138,7 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    width: '100%',
   },
   relativeInlineInput: {
     flex: 1,

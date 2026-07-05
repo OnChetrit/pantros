@@ -25,5 +25,6 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) => StyleShee
   modeRow: {
     flexDirection: 'row',
     gap: 8,
+    width: '100%',
   },
 });
