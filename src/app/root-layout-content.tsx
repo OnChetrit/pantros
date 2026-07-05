@@ -142,3 +142,5 @@ export function RootLayoutContent() {
     </GestureHandlerRootView>
   );
 }
+
+export default RootLayoutContent;

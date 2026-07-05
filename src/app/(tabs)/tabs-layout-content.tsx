@@ -18,7 +18,6 @@ export function TabsLayoutContent() {
     <View style={styles.root}>
       <NativeTabs
         backgroundColor={colors.card}
-        blurEffect="none"
         disableTransparentOnScrollEdge
         shadowColor={colors.border}
         tintColor={colors.tint}
@@ -59,3 +58,5 @@ export function TabsLayoutContent() {
     </View>
   );
 }
+
+export default TabsLayoutContent;
