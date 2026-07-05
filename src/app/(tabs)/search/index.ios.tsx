@@ -1,4 +1,5 @@
-import { Host, List, RNHostView, Section } from '@expo/ui/swift-ui';
+import { ListItem } from '@expo/ui';
+import { Host, List, Section } from '@expo/ui/swift-ui';
 import { listStyle } from '@expo/ui/swift-ui/modifiers';
 import { Stack, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
@@ -106,7 +107,7 @@ export default function SearchScreen() {
         useViewportSizeMeasurement
       >
         <List modifiers={[listStyle('insetGrouped')]}>
-          <RNHostView key="search-header" matchContents>
+          <ListItem key="search-header">
             <View style={styles.searchSection}>
               <Text style={[styles.eyebrow, { color: colors.muted }]}>
                 {trimmedQuery ? 'Search Results' : 'All Items'}
@@ -131,9 +132,9 @@ export default function SearchScreen() {
                     {results.exactMatch ? 'Open existing item' : `Add "${trimmedQuery}" as new item`}
                   </Text>
                 </Pressable>
-              ) : null}
+                ) : null}
             </View>
-          </RNHostView>
+          </ListItem>
           <Section title={trimmedQuery ? 'Results' : 'Items'}>
             {visibleItems.length > 0 ? (
               visibleItems.map((item, index) => (
@@ -150,18 +151,18 @@ export default function SearchScreen() {
                 />
               ))
             ) : (
-              <RNHostView key="empty-search" matchContents>
+              <ListItem key="empty-search">
                 <View style={styles.listEmpty}>
                   <EmptyNotice
                     title={trimmedQuery ? 'No matching items' : 'No search suggestions yet'}
                     body={
                       trimmedQuery
                         ? 'Try a broader name fragment or a full barcode value.'
-                        : 'Add pantry items to search them here.'
+                      : 'Add pantry items to search them here.'
                     }
                   />
                 </View>
-              </RNHostView>
+              </ListItem>
             )}
           </Section>
         </List>

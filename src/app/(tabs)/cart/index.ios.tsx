@@ -1,4 +1,5 @@
-import { Host, List, RNHostView, Section } from '@expo/ui/swift-ui';
+import { ListItem } from '@expo/ui';
+import { Host, List, Section } from '@expo/ui/swift-ui';
 import { listStyle } from '@expo/ui/swift-ui/modifiers';
 import { Stack, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
@@ -175,14 +176,14 @@ export default function CartScreen() {
       >
         <List modifiers={[listStyle('insetGrouped')]}>
           {checkoutProgress.errorMessage ? (
-            <RNHostView key="checkout-error" matchContents>
+            <ListItem key="checkout-error">
               <View style={styles.noticeRow}>
                 <CartCheckoutNotice tone="error" message={checkoutProgress.errorMessage} onDismiss={clearCheckoutError} />
               </View>
-            </RNHostView>
+            </ListItem>
           ) : null}
           {checkoutProgress.completionMessage ? (
-            <RNHostView key="checkout-success" matchContents>
+            <ListItem key="checkout-success">
               <View style={styles.noticeRow}>
                 <CartCheckoutNotice
                   tone="success"
@@ -190,7 +191,7 @@ export default function CartScreen() {
                   onDismiss={dismissCompletionMessage}
                 />
               </View>
-            </RNHostView>
+            </ListItem>
           ) : null}
           <Section title="Cart">
             {itemsInCart.length > 0 ? (
@@ -213,14 +214,14 @@ export default function CartScreen() {
                 />
               ))
             ) : (
-              <RNHostView key="empty-cart" matchContents>
+              <ListItem key="empty-cart">
                 <View style={styles.noticeRow}>
                   <EmptyNotice
                     title="Nothing to buy right now"
                     body="Items moved into a shopping list will appear here with working native swipe actions."
                   />
                 </View>
-              </RNHostView>
+              </ListItem>
             )}
           </Section>
           {selectedItems.length > 0 ? (

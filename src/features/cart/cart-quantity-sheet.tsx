@@ -1,17 +1,15 @@
-import { Ionicons } from '@expo/vector-icons';
 import { BottomSheet } from '@expo/ui';
 import {
   padding,
-  presentationBackground,
   presentationDetents,
-  presentationDragIndicator,
+  presentationDragIndicator
 } from '@expo/ui/swift-ui/modifiers';
-import { useMemo } from 'react';
-import { useEffect, useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { PantryItem } from '@/domain/models';
-import { appColors, useAppTheme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/theme';
 
 type CartQuantitySheetProps = {
   visible: boolean;
@@ -22,22 +20,14 @@ type CartQuantitySheetProps = {
   onCancel: () => void;
 };
 
-export function CartQuantitySheet({
-  visible,
-  item,
-  processing,
-  errorMessage,
-  onSave,
-  onCancel,
-}: CartQuantitySheetProps) {
-  const { colors } = useAppTheme();
+export function CartQuantitySheet({visible, item, processing, errorMessage, onSave, onCancel}: CartQuantitySheetProps) {
+  const {colors} = useAppTheme();
   const [quantity, setQuantity] = useState(1);
   const modifiers = useMemo(
     () => [
-      padding({ top: 8, leading: 20, trailing: 20, bottom: 20 }),
+      padding({top: 8, leading: 20, trailing: 20, bottom: 20}),
       presentationDragIndicator('visible'),
-      presentationBackground(appColors.background as string),
-      presentationDetents([{ height: 280 }]),
+      presentationDetents([{height: 280}]),
     ],
     []
   );
@@ -53,72 +43,72 @@ export function CartQuantitySheet({
   return (
     <BottomSheet isPresented={visible} onDismiss={onCancel} modifiers={modifiers}>
       <View style={styles.sheet}>
-      <Text style={[styles.title, { color: colors.text }]}>{item.name}</Text>
+        <Text style={[styles.title, {color: colors.text}]}>{item.name}</Text>
 
-      <View style={[styles.stepper, { backgroundColor: colors.card, borderColor: colors.border }]}>
-        <Pressable
-          disabled={processing || quantity <= 1}
-          onPress={() => setQuantity(current => Math.max(1, current - 1))}
-          style={({ pressed }) => [
-            styles.stepperButton,
-            {
-              backgroundColor: colors.background,
-              borderColor: colors.border,
-              opacity: processing || quantity <= 1 ? 0.4 : pressed ? 0.7 : 1,
-            },
-          ]}
-        >
-          <Ionicons name="remove" size={24} color={colors.text} />
-        </Pressable>
-        <Text style={[styles.value, { color: colors.text }]}>{quantity}</Text>
-        <Pressable
-          disabled={processing}
-          onPress={() => setQuantity(current => current + 1)}
-          style={({ pressed }) => [
-            styles.stepperButton,
-            {
-              backgroundColor: colors.background,
-              borderColor: colors.border,
-              opacity: processing ? 0.4 : pressed ? 0.7 : 1,
-            },
-          ]}
-        >
-          <Ionicons name="add" size={24} color={colors.text} />
-        </Pressable>
-      </View>
+        <View style={[styles.stepper, {backgroundColor: colors.card, borderColor: colors.border}]}>
+          <Pressable
+            disabled={processing || quantity <= 1}
+            onPress={() => setQuantity(current => Math.max(1, current - 1))}
+            style={({pressed}) => [
+              styles.stepperButton,
+              {
+                backgroundColor: colors.background,
+                borderColor: colors.border,
+                opacity: processing || quantity <= 1 ? 0.4 : pressed ? 0.7 : 1,
+              },
+            ]}
+          >
+            <Ionicons name="remove" size={24} color={colors.text} />
+          </Pressable>
+          <Text style={[styles.value, {color: colors.text}]}>{quantity}</Text>
+          <Pressable
+            disabled={processing}
+            onPress={() => setQuantity(current => current + 1)}
+            style={({pressed}) => [
+              styles.stepperButton,
+              {
+                backgroundColor: colors.background,
+                borderColor: colors.border,
+                opacity: processing ? 0.4 : pressed ? 0.7 : 1,
+              },
+            ]}
+          >
+            <Ionicons name="add" size={24} color={colors.text} />
+          </Pressable>
+        </View>
 
-      {errorMessage ? <Text style={[styles.error, { color: colors.danger }]}>{errorMessage}</Text> : null}
+        {errorMessage ? <Text style={[styles.error, {color: colors.danger}]}>{errorMessage}</Text> : null}
 
-      <View style={styles.actions}>
-        <Pressable
-          disabled={processing}
-          onPress={() => onSave(quantity)}
-          style={({ pressed }) => [
-            styles.actionButton,
-            {
-              backgroundColor: colors.tint,
-              borderColor: colors.tint,
-              opacity: processing ? 0.45 : pressed ? 0.8 : 1,
-            },
-          ]}
-        >
-          <Text style={[styles.actionButtonLabel, { color: colors.textInverse }]}>Save quantity</Text>
-        </Pressable>
-        <Pressable
-          disabled={processing}
-          onPress={onCancel}
-          style={({ pressed }) => [
-            styles.actionButton,
-            {
-              backgroundColor: colors.background,
-              borderColor: colors.border,
-              opacity: processing ? 0.45 : pressed ? 0.8 : 1,
-            },
-          ]}
-        >
-          <Text style={[styles.actionButtonLabel, { color: colors.text }]}>Cancel</Text>
-        </Pressable>
-      </View>
+        <View style={styles.actions}>
+          <Pressable
+            disabled={processing}
+            onPress={() => onSave(quantity)}
+            style={({pressed}) => [
+              styles.actionButton,
+              {
+                backgroundColor: colors.tint,
+                borderColor: colors.tint,
+                opacity: processing ? 0.45 : pressed ? 0.8 : 1,
+              },
+            ]}
+          >
+            <Text style={[styles.actionButtonLabel, {color: colors.textInverse}]}>Save quantity</Text>
+          </Pressable>
+          <Pressable
+            disabled={processing}
+            onPress={onCancel}
+            style={({pressed}) => [
+              styles.actionButton,
+              {
+                backgroundColor: colors.background,
+                borderColor: colors.border,
+                opacity: processing ? 0.45 : pressed ? 0.8 : 1,
+              },
+            ]}
+          >
+            <Text style={[styles.actionButtonLabel, {color: colors.text}]}>Cancel</Text>
+          </Pressable>
+        </View>
       </View>
     </BottomSheet>
   );

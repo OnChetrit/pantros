@@ -1,4 +1,5 @@
-import { Host, List, RNHostView, Section } from '@expo/ui/swift-ui';
+import { ListItem } from '@expo/ui';
+import { Host, List, Section } from '@expo/ui/swift-ui';
 import { listStyle } from '@expo/ui/swift-ui/modifiers';
 import { Stack, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
@@ -204,14 +205,14 @@ export default function PantryScreen() {
                 );
               })
             ) : (
-              <RNHostView key="empty-pantry" matchContents>
+              <ListItem key="empty-pantry">
                 <View style={styles.noticeRow}>
                   <EmptyNotice
                     title="No pantry items yet"
                     body="Add your first inventory item to start using the pantry as a real iOS-style list with quick actions."
                   />
                 </View>
-              </RNHostView>
+              </ListItem>
             )}
           </Section>
           {cartItems.length > 0 ? (
