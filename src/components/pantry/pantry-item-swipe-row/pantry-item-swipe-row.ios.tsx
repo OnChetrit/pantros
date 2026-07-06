@@ -79,16 +79,14 @@ export function PantryItemSwipeRow({
       }
       trailing={
         displayMode === 'cart' ? (
-          <VStack alignment="trailing" spacing={2}>
-            <Text
-              modifiers={[
-                font({weight: 'bold', size: 15}),
-                foregroundStyle(isSelected && isSelectionMode ? 'secondaryLabel' : '#34C759'),
-              ]}
-            >
-              {String(item.quantity)}
-            </Text>
-          </VStack>
+          <Text
+            modifiers={[
+              font({weight: 'bold', size: 15}),
+              foregroundStyle(isSelected && isSelectionMode ? 'secondaryLabel' : '#34C759'),
+            ]}
+          >
+            {String(item.quantity)}
+          </Text>
         ) : item.expirationDate ? (
           <VStack alignment="trailing" spacing={2}>
             <Text modifiers={[foregroundStyle('secondaryLabel'), font({size: 13})]}>

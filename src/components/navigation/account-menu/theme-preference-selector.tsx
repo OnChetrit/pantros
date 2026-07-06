@@ -1,5 +1,5 @@
 import { Host, RNHostView, Row } from '@expo/ui';
-import { StyleSheet, Text, Pressable } from 'react-native';
+import { Pressable, StyleSheet, Text } from 'react-native';
 
 import type { ThemePreference } from '@/lib/theme';
 import { useThemedStyles } from '@/lib/theme';
@@ -11,28 +11,28 @@ type ThemePreferenceSelectorProps = {
   onChange: (preference: ThemePreference) => void;
 };
 
-export function ThemePreferenceSelector({ value, onChange }: ThemePreferenceSelectorProps) {
+export function ThemePreferenceSelector({value, onChange}: ThemePreferenceSelectorProps) {
   const styles = useThemedStyles(createStyles);
 
   return (
     <Host style={styles.themeSwitch}>
       <Row spacing={8}>
-      {THEME_OPTIONS.map(option => (
-        <RNHostView key={option} matchContents>
-          <Pressable
-            onPress={() => onChange(option)}
-            style={({ pressed }) => [
-              styles.themeChip,
-              value === option ? styles.themeChipActive : null,
-              pressed ? styles.themeChipPressed : null,
-            ]}
-          >
-            <Text style={[styles.themeChipText, value === option ? styles.themeChipTextActive : null]}>
-              {option === 'device' ? 'Device' : option === 'light' ? 'Light' : 'Dark'}
-            </Text>
-          </Pressable>
-        </RNHostView>
-      ))}
+        {THEME_OPTIONS.map(option => (
+          <RNHostView key={option} matchContents>
+            <Pressable
+              onPress={() => onChange(option)}
+              style={({pressed}) => [
+                styles.themeChip,
+                value === option ? styles.themeChipActive : null,
+                pressed ? styles.themeChipPressed : null,
+              ]}
+            >
+              <Text style={[styles.themeChipText, value === option ? styles.themeChipTextActive : null]}>
+                {option === 'device' ? 'Device' : option === 'light' ? 'Light' : 'Dark'}
+              </Text>
+            </Pressable>
+          </RNHostView>
+        ))}
       </Row>
     </Host>
   );
