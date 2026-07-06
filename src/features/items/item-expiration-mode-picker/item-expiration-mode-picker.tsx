@@ -1,4 +1,5 @@
-import { StyleSheet, View } from 'react-native';
+import { Host, RNHostView, Row } from '@expo/ui';
+import { StyleSheet } from 'react-native';
 
 import { useThemedStyles } from '@/lib/theme';
 import { ItemExpirationModeChip } from '../item-expiration-mode-chip/item-expiration-mode-chip';
@@ -14,17 +15,21 @@ export function ItemExpirationModePicker({ mode, onChange }: ItemExpirationModeP
   const styles = useThemedStyles(createStyles);
 
   return (
-    <View style={styles.modeRow}>
-      <ItemExpirationModeChip active={mode === 'manual'} label="Manual" onPress={() => onChange('manual')} />
-      <ItemExpirationModeChip active={mode === 'relative'} label="Relative" onPress={() => onChange('relative')} />
-    </View>
+    <Host style={styles.modeRow}>
+      <Row spacing={8}>
+        <RNHostView matchContents>
+          <ItemExpirationModeChip active={mode === 'manual'} label="Manual" onPress={() => onChange('manual')} />
+        </RNHostView>
+        <RNHostView matchContents>
+          <ItemExpirationModeChip active={mode === 'relative'} label="Relative" onPress={() => onChange('relative')} />
+        </RNHostView>
+      </Row>
+    </Host>
   );
 }
 
 const createStyles = (colors: import('@/lib/theme').AppThemeColors) => StyleSheet.create({
   modeRow: {
-    flexDirection: 'row',
-    gap: 8,
     width: '100%',
   },
 });

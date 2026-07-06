@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View, Pressable } from 'react-native';
+import { Host, RNHostView, Row } from '@expo/ui';
+import { StyleSheet, Text, Pressable } from 'react-native';
 
 import type { ThemePreference } from '@/lib/theme';
 import { useThemedStyles } from '@/lib/theme';
@@ -14,31 +15,32 @@ export function ThemePreferenceSelector({ value, onChange }: ThemePreferenceSele
   const styles = useThemedStyles(createStyles);
 
   return (
-    <View style={styles.themeSwitch}>
+    <Host style={styles.themeSwitch}>
+      <Row spacing={8}>
       {THEME_OPTIONS.map(option => (
-        <Pressable
-          key={option}
-          onPress={() => onChange(option)}
-          style={({ pressed }) => [
-            styles.themeChip,
-            value === option ? styles.themeChipActive : null,
-            pressed ? styles.themeChipPressed : null,
-          ]}
-        >
-          <Text style={[styles.themeChipText, value === option ? styles.themeChipTextActive : null]}>
-            {option === 'device' ? 'Device' : option === 'light' ? 'Light' : 'Dark'}
-          </Text>
-        </Pressable>
+        <RNHostView key={option} matchContents>
+          <Pressable
+            onPress={() => onChange(option)}
+            style={({ pressed }) => [
+              styles.themeChip,
+              value === option ? styles.themeChipActive : null,
+              pressed ? styles.themeChipPressed : null,
+            ]}
+          >
+            <Text style={[styles.themeChipText, value === option ? styles.themeChipTextActive : null]}>
+              {option === 'device' ? 'Device' : option === 'light' ? 'Light' : 'Dark'}
+            </Text>
+          </Pressable>
+        </RNHostView>
       ))}
-    </View>
+      </Row>
+    </Host>
   );
 }
 
 const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
   StyleSheet.create({
     themeSwitch: {
-      flexDirection: 'row',
-      gap: 8,
       paddingVertical: 4,
     },
     themeChip: {

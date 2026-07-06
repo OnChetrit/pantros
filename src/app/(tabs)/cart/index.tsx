@@ -1,3 +1,4 @@
+import { Host, RNHostView, Row } from '@expo/ui';
 import { Stack, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { FlatList, LayoutAnimation, Platform, StyleSheet, UIManager, View } from 'react-native';
@@ -101,15 +102,21 @@ export default function CartScreen() {
                 onPress={() => (allSelected ? clearSelection() : selectAll(itemsInCart.map((item) => item.id)))}
               />
             ) : (
-              <View style={styles.headerActions}>
-                <CartHeaderAction
-                  label="Select"
-                  emphasized
-                  disabled={itemsInCart.length === 0}
-                  onPress={() => enterSelectionMode()}
-                />
-                <AvatarSidebarButton />
-              </View>
+              <Host style={styles.headerActions} matchContents>
+                <Row alignment="center" spacing={8}>
+                  <RNHostView matchContents>
+                    <CartHeaderAction
+                      label="Select"
+                      emphasized
+                      disabled={itemsInCart.length === 0}
+                      onPress={() => enterSelectionMode()}
+                    />
+                  </RNHostView>
+                  <RNHostView matchContents>
+                    <AvatarSidebarButton />
+                  </RNHostView>
+                </Row>
+              </Host>
             ),
         }}
       />
@@ -263,9 +270,6 @@ const styles = StyleSheet.create({
     paddingTop: 6,
   },
   headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
   },
   selectedGroup: {
     marginTop: 8,

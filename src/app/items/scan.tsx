@@ -1,3 +1,4 @@
+import { Host, RNHostView, Row, Spacer } from '@expo/ui';
 import { Ionicons } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import type { BarcodeScanningResult, BarcodeType } from 'expo-camera';
@@ -200,11 +201,21 @@ export default function ScanItemScreen() {
         onMountError={(error) => setCameraError(error.message)}
       />
       <View pointerEvents="box-none" style={[styles.overlay, { paddingTop: insets.top + 12 }]}>
-        <View style={styles.topBar}>
-          <ScanIconCircleButton icon="close" label="Close scanner" onPress={() => router.back()} />
-          <Text style={styles.title}>Scan a barcode</Text>
-          <View style={styles.topBarSpacer} />
-        </View>
+        <Host style={styles.topBar}>
+          <Row alignment="center" spacing={10}>
+            <RNHostView matchContents>
+              <ScanIconCircleButton icon="close" label="Close scanner" onPress={() => router.back()} />
+            </RNHostView>
+            <Spacer flexible />
+            <RNHostView matchContents>
+              <Text style={styles.title}>Scan a barcode</Text>
+            </RNHostView>
+            <Spacer flexible />
+            <RNHostView matchContents>
+              <View style={styles.topBarSpacer} />
+            </RNHostView>
+          </Row>
+        </Host>
 
         <View style={styles.scanFrameShell}>
           <View style={styles.scanFrame} />
@@ -212,16 +223,26 @@ export default function ScanItemScreen() {
         </View>
 
         {cameraError ? (
-          <View style={styles.statusPill}>
-            <Text style={styles.statusText}>{cameraError}</Text>
-          </View>
+          <Host style={styles.statusPill} matchContents>
+            <Row alignment="center" spacing={10}>
+              <RNHostView matchContents>
+                <Text style={styles.statusText}>{cameraError}</Text>
+              </RNHostView>
+            </Row>
+          </Host>
         ) : null}
 
         {isProcessingBarcode ? (
-          <View style={styles.statusPill}>
-            <ActivityIndicator size="small" color={appColors.textInverse} />
-            <Text style={styles.statusText}>Looking up barcode</Text>
-          </View>
+          <Host style={styles.statusPill} matchContents>
+            <Row alignment="center" spacing={10}>
+              <RNHostView matchContents>
+                <ActivityIndicator size="small" color={appColors.textInverse} />
+              </RNHostView>
+              <RNHostView matchContents>
+                <Text style={styles.statusText}>Looking up barcode</Text>
+              </RNHostView>
+            </Row>
+          </Host>
         ) : null}
 
         <View style={[styles.bottomActions, { paddingBottom: Math.max(insets.bottom, 18) }]}>
@@ -232,8 +253,16 @@ export default function ScanItemScreen() {
             onPress={openManualSearch}
             style={({ pressed }) => [styles.manualButton, pressed ? styles.buttonPressed : null]}
           >
-            <Ionicons name="search-outline" size={20} color={appColors.text} />
-            <Text style={styles.manualButtonText}>Search manually</Text>
+            <Host style={styles.manualButton} matchContents>
+              <Row alignment="center" spacing={10}>
+                <RNHostView matchContents>
+                  <Ionicons name="search-outline" size={20} color={appColors.text} />
+                </RNHostView>
+                <RNHostView matchContents>
+                  <Text style={styles.manualButtonText}>Search manually</Text>
+                </RNHostView>
+              </Row>
+            </Host>
           </Pressable>
         </View>
       </View>
@@ -266,9 +295,6 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) => StyleShee
   },
   topBar: {
     minHeight: 44,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
   },
   topBarSpacer: {
     width: 44,
@@ -309,9 +335,6 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) => StyleShee
     paddingHorizontal: 16,
     paddingVertical: 10,
     marginBottom: 18,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
     backgroundColor: 'rgba(10, 10, 10, 0.76)',
   },
   statusText: {
@@ -328,10 +351,6 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) => StyleShee
     backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
     paddingHorizontal: 18,
   },
   manualButtonText: {

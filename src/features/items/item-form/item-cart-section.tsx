@@ -1,3 +1,4 @@
+import { Host, RNHostView, Row, Spacer } from '@expo/ui';
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Switch, Text, View, Pressable } from 'react-native';
 
@@ -26,30 +27,47 @@ export function ItemCartSection({
   return (
     <>
       <View style={styles.fieldGroup}>
-        <View style={styles.fieldHeader}>
-          <ItemFormFieldLabel>Add To Cart</ItemFormFieldLabel>
-          <Switch value={isInCart} onValueChange={onToggle} />
-        </View>
+        <Host style={styles.fieldHeader}>
+          <Row alignment="center" spacing={12}>
+            <RNHostView matchContents>
+              <ItemFormFieldLabel>Add To Cart</ItemFormFieldLabel>
+            </RNHostView>
+            <Spacer flexible />
+            <RNHostView matchContents>
+              <Switch value={isInCart} onValueChange={onToggle} />
+            </RNHostView>
+          </Row>
+        </Host>
       </View>
 
       {isInCart ? (
         <View style={styles.fieldGroup}>
           <ItemFormFieldLabel>Quantity</ItemFormFieldLabel>
-          <View style={styles.stepper}>
-            <Pressable
-              onPress={onDecrement}
-              style={({ pressed }) => [styles.stepperButton, pressed ? styles.stepperButtonPressed : null]}
-            >
-              <Ionicons name="remove" size={18} color={appColors.text} />
-            </Pressable>
-            <Text style={styles.stepperValue}>{quantity}</Text>
-            <Pressable
-              onPress={onIncrement}
-              style={({ pressed }) => [styles.stepperButton, pressed ? styles.stepperButtonPressed : null]}
-            >
-              <Ionicons name="add" size={18} color={appColors.text} />
-            </Pressable>
-          </View>
+          <Host style={styles.stepper}>
+            <Row alignment="center" spacing={12}>
+              <RNHostView matchContents>
+                <Pressable
+                  onPress={onDecrement}
+                  style={({ pressed }) => [styles.stepperButton, pressed ? styles.stepperButtonPressed : null]}
+                >
+                  <Ionicons name="remove" size={18} color={appColors.text} />
+                </Pressable>
+              </RNHostView>
+              <Spacer flexible />
+              <RNHostView matchContents>
+                <Text style={styles.stepperValue}>{quantity}</Text>
+              </RNHostView>
+              <Spacer flexible />
+              <RNHostView matchContents>
+                <Pressable
+                  onPress={onIncrement}
+                  style={({ pressed }) => [styles.stepperButton, pressed ? styles.stepperButtonPressed : null]}
+                >
+                  <Ionicons name="add" size={18} color={appColors.text} />
+                </Pressable>
+              </RNHostView>
+            </Row>
+          </Host>
         </View>
       ) : null}
     </>
@@ -62,18 +80,11 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
       gap: 6,
     },
     fieldHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: 12,
     },
     stepper: {
       minHeight: 48,
       borderRadius: 16,
       paddingHorizontal: 8,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
       backgroundColor: colors.input,
       borderWidth: 1,
       borderColor: colors.border,

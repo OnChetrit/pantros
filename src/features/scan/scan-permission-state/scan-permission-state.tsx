@@ -1,3 +1,4 @@
+import { Host, RNHostView, Row } from '@expo/ui';
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -32,9 +33,13 @@ export function ScanPermissionState({
 
   return (
     <View style={[styles.permissionScreen, {paddingTop: insets.top + 12, paddingBottom: insets.bottom + 20}]}>
-      <View style={styles.permissionTopBar}>
-        {onClose ? <ScanIconCircleButton icon="close" label="Close scanner" onPress={onClose} /> : <View style={styles.topBarSpacer} />}
-      </View>
+      <Host style={styles.permissionTopBar} matchContents>
+        <Row alignment="center">
+          <RNHostView matchContents>
+            {onClose ? <ScanIconCircleButton icon="close" label="Close scanner" onPress={onClose} /> : <View style={styles.topBarSpacer} />}
+          </RNHostView>
+        </Row>
+      </Host>
 
       <View style={styles.permissionContent}>
         <View style={styles.permissionIconOuter}>
@@ -51,10 +56,16 @@ export function ScanPermissionState({
         {highlights.length > 0 ? (
           <View style={styles.highlightList}>
             {highlights.map(highlight => (
-              <View key={highlight} style={styles.highlightRow}>
-                <Ionicons name="checkmark-circle" size={18} color={styles.iconTint.color} />
-                <Text style={styles.highlightText}>{highlight}</Text>
-              </View>
+              <Host key={highlight} style={styles.highlightRow}>
+                <Row alignment="center" spacing={10}>
+                  <RNHostView matchContents>
+                    <Ionicons name="checkmark-circle" size={18} color={styles.iconTint.color} />
+                  </RNHostView>
+                  <RNHostView matchContents>
+                    <Text style={styles.highlightText}>{highlight}</Text>
+                  </RNHostView>
+                </Row>
+              </Host>
             ))}
           </View>
         ) : null}
@@ -71,8 +82,16 @@ export function ScanPermissionState({
               pressed ? styles.buttonPressed : null,
             ]}
           >
-            <Ionicons name="camera-outline" size={20} color={styles.primaryButtonText.color} />
-            <Text style={styles.primaryButtonText}>{actionLabel}</Text>
+            <Host style={styles.permissionActionButton} matchContents>
+              <Row alignment="center" spacing={10}>
+                <RNHostView matchContents>
+                  <Ionicons name="camera-outline" size={20} color={styles.primaryButtonText.color} />
+                </RNHostView>
+                <RNHostView matchContents>
+                  <Text style={styles.primaryButtonText}>{actionLabel}</Text>
+                </RNHostView>
+              </Row>
+            </Host>
           </Pressable>
         ) : null}
         {secondaryActionLabel && onSecondaryAction ? (
@@ -85,8 +104,16 @@ export function ScanPermissionState({
               pressed ? styles.buttonPressed : null,
             ]}
           >
-            <Ionicons name="search-outline" size={20} color={styles.secondaryButtonText.color} />
-            <Text style={styles.secondaryButtonText}>{secondaryActionLabel}</Text>
+            <Host style={styles.permissionActionButton} matchContents>
+              <Row alignment="center" spacing={10}>
+                <RNHostView matchContents>
+                  <Ionicons name="search-outline" size={20} color={styles.secondaryButtonText.color} />
+                </RNHostView>
+                <RNHostView matchContents>
+                  <Text style={styles.secondaryButtonText}>{secondaryActionLabel}</Text>
+                </RNHostView>
+              </Row>
+            </Host>
           </Pressable>
         ) : null}
       </View>
@@ -105,9 +132,6 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
     },
     permissionTopBar: {
       minHeight: 44,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'flex-start',
     },
     topBarSpacer: {
       width: 44,
@@ -166,9 +190,6 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
       gap: 12,
     },
     highlightRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 10,
       borderRadius: 18,
       paddingHorizontal: 14,
       paddingVertical: 12,
@@ -191,10 +212,6 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
     permissionActionButton: {
       minHeight: 52,
       borderRadius: 18,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 10,
       paddingHorizontal: 18,
     },
     permissionActionButtonPrimary: {

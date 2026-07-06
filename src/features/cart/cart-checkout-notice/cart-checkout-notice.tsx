@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View, Pressable } from 'react-native';
+import { Host, RNHostView, Row, Spacer } from '@expo/ui';
+import { StyleSheet, Text, Pressable, View } from 'react-native';
 
 import { useAppTheme } from '@/lib/theme';
 
@@ -14,7 +15,7 @@ export function CartCheckoutNotice({
   const {colors} = useAppTheme();
 
   return (
-    <View
+    <Host
       style={[
         styles.noticeBanner,
         {
@@ -23,11 +24,20 @@ export function CartCheckoutNotice({
         },
       ]}
     >
-      <Text style={[styles.noticeBannerText, {color: colors.text}]}>{message}</Text>
-      <Pressable onPress={onDismiss}>
-        <Text style={[styles.noticeBannerDismiss, {color: colors.tint}]}>Dismiss</Text>
-      </Pressable>
-    </View>
+      <Row alignment="center" spacing={12}>
+        <RNHostView matchContents>
+          <View style={styles.noticeBannerCopy}>
+            <Text style={[styles.noticeBannerText, {color: colors.text}]}>{message}</Text>
+          </View>
+        </RNHostView>
+        <Spacer flexible />
+        <RNHostView matchContents>
+          <Pressable onPress={onDismiss}>
+            <Text style={[styles.noticeBannerDismiss, {color: colors.tint}]}>Dismiss</Text>
+          </Pressable>
+        </RNHostView>
+      </Row>
+    </Host>
   );
 }
 
@@ -37,13 +47,11 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
+  },
+  noticeBannerCopy: {
+    flex: 1,
   },
   noticeBannerText: {
-    flex: 1,
     fontSize: 14,
     lineHeight: 20,
     fontWeight: '600',

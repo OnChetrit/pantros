@@ -1,3 +1,4 @@
+import { Host, RNHostView, Row } from '@expo/ui';
 import { Stack, useRouter } from 'expo-router';
 import { Platform, StyleSheet, View } from 'react-native';
 
@@ -45,9 +46,13 @@ export default function PantryLayout() {
             }
           : {
               headerRight: () => (
-                <View style={styles.headerActions}>
-                  <AvatarSidebarButton />
-                </View>
+                <Host style={styles.headerActions} matchContents>
+                  <Row alignment="center">
+                    <RNHostView matchContents>
+                      <AvatarSidebarButton />
+                    </RNHostView>
+                  </Row>
+                </Host>
               ),
             }),
       }}
@@ -64,8 +69,6 @@ export default function PantryLayout() {
 
 const styles = StyleSheet.create({
   headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
     backgroundColor: 'transparent',
   },
   transparentHeaderBackground: {

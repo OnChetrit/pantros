@@ -1,4 +1,4 @@
-import { BottomSheet } from '@expo/ui';
+import { BottomSheet, Host, RNHostView, Row } from '@expo/ui';
 import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -106,16 +106,20 @@ export function PantryFilterMenu({
                 <Pressable
                   key={option.key}
                   onPress={() => handleSelectSort(option.key)}
-                  style={({pressed}) => [
-                    styles.optionRow,
-                    isSelected ? styles.optionRowSelected : null,
-                    pressed ? styles.optionRowPressed : null,
-                  ]}
+                  style={({pressed}) => [pressed ? styles.optionRowPressed : null]}
                 >
-                  <View style={[styles.optionMarker, isSelected ? styles.optionMarkerSelected : null]}>
-                    {isSelected ? <Ionicons name="checkmark" size={16} color={appColors.textInverse} /> : null}
-                  </View>
-                  <Text style={styles.optionLabel}>{option.label}</Text>
+                  <Host style={[styles.optionRow, isSelected ? styles.optionRowSelected : null]}>
+                    <Row alignment="center" spacing={12}>
+                      <RNHostView matchContents>
+                        <View style={[styles.optionMarker, isSelected ? styles.optionMarkerSelected : null]}>
+                          {isSelected ? <Ionicons name="checkmark" size={16} color={appColors.textInverse} /> : null}
+                        </View>
+                      </RNHostView>
+                      <RNHostView matchContents>
+                        <Text style={styles.optionLabel}>{option.label}</Text>
+                      </RNHostView>
+                    </Row>
+                  </Host>
                 </Pressable>
               );
             })}
@@ -170,9 +174,6 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
       backgroundColor: colors.card,
       borderWidth: 1,
       borderColor: colors.border,
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 12,
     },
     optionRowSelected: {
       backgroundColor: colors.tintSoft,

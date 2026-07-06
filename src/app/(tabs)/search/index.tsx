@@ -1,3 +1,4 @@
+import { Host, RNHostView, Row } from '@expo/ui';
 import { Ionicons } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
 import { useMemo, useRef, useState } from 'react';
@@ -74,18 +75,24 @@ export default function SearchScreen() {
         options={{
           title: 'Explore',
           headerRight: () => (
-            <View style={styles.headerActions}>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Scan barcode"
-                accessibilityHint="Open the barcode scanner to find or create an item"
-                onPress={handleScanBarcode}
-                style={({pressed}) => [styles.headerIconButton, pressed ? styles.headerIconButtonPressed : null]}
-              >
-                <Ionicons name="barcode-outline" size={22} color={colors.tint} />
-              </Pressable>
-              <AvatarSidebarButton />
-            </View>
+            <Host style={styles.headerActions} matchContents>
+              <Row alignment="center" spacing={10}>
+                <RNHostView matchContents>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Scan barcode"
+                    accessibilityHint="Open the barcode scanner to find or create an item"
+                    onPress={handleScanBarcode}
+                    style={({pressed}) => [styles.headerIconButton, pressed ? styles.headerIconButtonPressed : null]}
+                  >
+                    <Ionicons name="barcode-outline" size={22} color={colors.tint} />
+                  </Pressable>
+                </RNHostView>
+                <RNHostView matchContents>
+                  <AvatarSidebarButton />
+                </RNHostView>
+              </Row>
+            </Host>
           ),
         }}
       />
@@ -174,9 +181,6 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
       justifyContent: 'center',
     },
     headerActions: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 10,
     },
     headerIconButton: {
       minWidth: 36,

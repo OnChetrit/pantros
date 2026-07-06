@@ -1,3 +1,4 @@
+import { Host, RNHostView, Row } from '@expo/ui';
 import { Stack } from 'expo-router';
 import type { ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -46,10 +47,20 @@ export function AppStackHeader({
         headerRight:
           showAccountMenu || leadingAction
             ? () => (
-                <View style={styles.headerActions}>
-                  {leadingAction}
-                  {showAccountMenu ? <AvatarSidebarButton /> : null}
-                </View>
+                <Host style={styles.headerActions} matchContents>
+                  <Row alignment="center" spacing={10}>
+                    {leadingAction ? (
+                      <RNHostView matchContents>
+                        <View>{leadingAction}</View>
+                      </RNHostView>
+                    ) : null}
+                    {showAccountMenu ? (
+                      <RNHostView matchContents>
+                        <AvatarSidebarButton />
+                      </RNHostView>
+                    ) : null}
+                  </Row>
+                </Host>
               )
             : undefined,
       }}
@@ -59,8 +70,5 @@ export function AppStackHeader({
 
 const styles = StyleSheet.create({
   headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
   },
 });

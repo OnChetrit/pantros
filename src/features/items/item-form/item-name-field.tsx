@@ -1,3 +1,4 @@
+import { Host, RNHostView, Row, Spacer } from '@expo/ui';
 import { StyleSheet, Text, View, Pressable } from 'react-native';
 
 import { AppTextInput } from '@/components/ui/primitives';
@@ -36,14 +37,19 @@ export function ItemNameField({
               <Pressable
                 key={candidate.id}
                 onPress={() => onSelectDuplicate(candidate.id)}
-                style={({ pressed }) => [
-                  styles.suggestionRow,
-                  isExact ? styles.suggestionRowExact : null,
-                  pressed ? styles.suggestionRowPressed : null,
-                ]}
+                style={({ pressed }) => [pressed ? styles.suggestionRowPressed : null]}
               >
-                <Text style={styles.suggestionName}>{candidate.name}</Text>
-                <Text style={styles.suggestionAction}>{isExact ? 'Open existing' : 'Use existing'}</Text>
+                <Host style={[styles.suggestionRow, isExact ? styles.suggestionRowExact : null]}>
+                  <Row alignment="center" spacing={12}>
+                    <RNHostView matchContents>
+                      <Text style={styles.suggestionName}>{candidate.name}</Text>
+                    </RNHostView>
+                    <Spacer flexible />
+                    <RNHostView matchContents>
+                      <Text style={styles.suggestionAction}>{isExact ? 'Open existing' : 'Use existing'}</Text>
+                    </RNHostView>
+                  </Row>
+                </Host>
               </Pressable>
             );
           })}
@@ -68,10 +74,6 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
     suggestionRow: {
       minHeight: 40,
       paddingHorizontal: 12,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: 12,
       borderBottomWidth: StyleSheet.hairlineWidth,
       borderBottomColor: colors.border,
     },
