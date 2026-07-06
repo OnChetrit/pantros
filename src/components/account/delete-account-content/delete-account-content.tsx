@@ -6,7 +6,8 @@ import { AppScreen } from '@/components/ui/primitives';
 import type { AccountDeletionPreview } from '@/domain/models';
 import { useThemedStyles } from '@/lib/theme';
 import { fetchAccountDeletionPreview } from '@/services/supabase/account-service';
-import { useAppContext } from '@/state/app-context';
+import { useAccountState } from '@/state/account-state';
+import { useAuthState } from '@/state/auth-state';
 import { DeleteAccountConfirmationCard } from '../delete-account/delete-account-confirmation-card';
 import { DeleteAccountIntroCard } from '../delete-account/delete-account-intro-card';
 import { DeleteAccountPantryCard } from '../delete-account/delete-account-pantry-card';
@@ -21,12 +22,8 @@ import {
 export function DeleteAccountContent() {
   const styles = useThemedStyles(createStyles);
   const router = useRouter();
-  const {
-    accountDeletionBusy,
-    deleteAccount,
-    isAuthenticated,
-    status,
-  } = useAppContext();
+  const {accountDeletionBusy, deleteAccount} = useAccountState();
+  const {isAuthenticated, status} = useAuthState();
   const [preview, setPreview] = useState<AccountDeletionPreview | null>(null);
   const [decisions, setDecisions] = useState<DecisionMap>({});
   const [confirmation, setConfirmation] = useState('');

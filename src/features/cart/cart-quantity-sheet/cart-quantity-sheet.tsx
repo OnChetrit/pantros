@@ -1,6 +1,6 @@
 import { BottomSheet } from '@expo/ui';
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { createBottomSheetModifiers } from '@/components/sheets/sheet-presets/sheet-presets';
@@ -17,17 +17,27 @@ type CartQuantitySheetProps = {
 };
 
 export function CartQuantitySheet({visible, item, processing, errorMessage, onSave, onCancel}: CartQuantitySheetProps) {
-  const {colors} = useAppTheme();
-  const [quantity, setQuantity] = useState(1);
-  const modifiers = useMemo(() => createBottomSheetModifiers(280), []);
-
-  useEffect(() => {
-    setQuantity(item?.quantity ?? 1);
-  }, [item]);
-
   if (!item) {
     return null;
   }
+
+  return (
+    <CartQuantitySheetContent
+      key={item.id}
+      visible={visible}
+      item={item}
+      processing={processing}
+      errorMessage={errorMessage}
+      onSave={onSave}
+      onCancel={onCancel}
+    />
+  );
+}
+
+function CartQuantitySheetContent({visible, item, processing, errorMessage, onSave, onCancel}: CartQuantitySheetProps & {item: PantryItem}) {
+  const {colors} = useAppTheme();
+  const [quantity, setQuantity] = useState(item.quantity);
+  const modifiers = useMemo(() => createBottomSheetModifiers(280), []);
 
   return (
     <BottomSheet isPresented={visible} onDismiss={onCancel} modifiers={modifiers}>

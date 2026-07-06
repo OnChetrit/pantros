@@ -4,11 +4,11 @@ import { StyleSheet, Pressable } from 'react-native';
 
 import { AvatarBadge } from '@/components/ui/primitives';
 import { useThemedStyles } from '@/lib/theme';
-import { useAppContext } from '@/state/app-context';
+import { useWorkspaceState } from '@/state/workspace-state';
 
 export function AvatarSidebarButton() {
   const router = useRouter();
-  const { profile } = useAppContext();
+  const {profile} = useWorkspaceState();
   const styles = useThemedStyles(createStyles);
 
   const expanderName = useMemo(

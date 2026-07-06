@@ -1,13 +1,14 @@
 import { Redirect } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, KeyboardAvoidingView, LayoutChangeEvent, Platform, ScrollView, StyleSheet, Text, TextInput, View, Pressable } from 'react-native';
+import { Animated, Easing, KeyboardAvoidingView, LayoutChangeEvent, Platform, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppButton, AppScreen, EmptyNotice, appColors } from '@/components/ui/primitives';
 import { AuthModeChip } from '@/features/auth/auth-mode-chip/auth-mode-chip';
 import { AuthProviderButton } from '@/features/auth/auth-provider-button/auth-provider-button';
 import { useThemedStyles } from '@/lib/theme';
-import { useAppContext } from '@/state/app-context';
+import { useAuthState } from '@/state/auth-state';
+import { useWorkspaceState } from '@/state/workspace-state';
 
 type AuthMode = 'signin' | 'signup';
 
@@ -22,12 +23,12 @@ export default function LoginScreen() {
     errorMessage,
     isAuthenticated,
     isEnvReady,
-    refreshAppState,
     signIn,
     signInWithApple,
     signInWithGoogle,
     signUp,
-  } = useAppContext();
+  } = useAuthState();
+  const {refreshWorkspace} = useWorkspaceState();
   const [mode, setMode] = useState<AuthMode>('signin');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -257,7 +258,7 @@ export default function LoginScreen() {
               <View style={styles.bootstrapCard}>
                 <Text style={styles.bootstrapTitle}>Bootstrap</Text>
                 <Text style={styles.bootstrapSubtitle}>Retry runtime config check.</Text>
-                <AppButton label="Retry Bootstrap" onPress={() => void refreshAppState()} variant="secondary" />
+                <AppButton label="Retry Bootstrap" onPress={() => void refreshWorkspace()} variant="secondary" />
               </View>
             ) : null}
           </AppScreen>

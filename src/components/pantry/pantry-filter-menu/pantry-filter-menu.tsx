@@ -68,7 +68,7 @@ export function PantryFilterMenu({
 
     onSelectSort?.(pendingSortOption);
     setPendingSortOption(null);
-  }, [onSelectSort, pendingSortOption]);
+  }, [onSelectSort, pendingSortOption, setMenuVisible]);
 
   return (
     <View style={hideTrigger ? undefined : styles.iconWrapper}>

@@ -2,7 +2,8 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import type { PropsWithChildren } from 'react';
 
 import type { PantryItem } from '@/domain/models';
-import { PartialItemActionError, useAppContext } from '@/state/app-context';
+import { PartialItemActionError, useItemState } from '@/state/item-state';
+import { useWorkspaceState } from '@/state/workspace-state';
 
 type CheckoutProgress = {
   totalCount: number;
@@ -77,7 +78,8 @@ function resolveReviewDate(item: PantryItem | null, defaultExpirationDays: numbe
 }
 
 export function CartCheckoutProvider({ children }: PropsWithChildren) {
-  const { completeCartItemWithExpiration, moveItemsToPantry, selectedPantry } = useAppContext();
+  const {completeCartItemWithExpiration, moveItemsToPantry} = useItemState();
+  const {selectedPantry} = useWorkspaceState();
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedItemIds, setSelectedItemIds] = useState<string[]>([]);
   const [visibleItems, setVisibleItems] = useState<PantryItem[]>([]);

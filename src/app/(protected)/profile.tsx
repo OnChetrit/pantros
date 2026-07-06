@@ -1,38 +1,22 @@
-import { Redirect, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { ScrollView, View } from 'react-native';
 
-import {
-  AppScreen,
-  ListRow,
-  SectionCard,
-  appColors,
-} from '@/components/ui/primitives';
-import { useAppContext } from '@/state/app-context';
+import { AppScreen, ListRow, SectionCard, appColors } from '@/components/ui/primitives';
+import { useWorkspaceState } from '@/state/workspace-state';
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { isAuthenticated, pantries, profile, selectedPantry, status } = useAppContext();
-
-  if (status === 'idle' || status === 'loading') {
-    return null;
-  }
-
-  if (!isAuthenticated) {
-    return <Redirect href="/(auth)/login" />;
-  }
+  const {pantries, profile, selectedPantry} = useWorkspaceState();
 
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: appColors.background }}
-      contentContainerStyle={{ paddingBottom: 40 }}
+      style={{flex: 1, backgroundColor: appColors.background}}
+      contentContainerStyle={{paddingBottom: 40}}
       contentInsetAdjustmentBehavior="automatic"
     >
       <AppScreen>
-        <SectionCard
-          title="Account"
-          subtitle="Current account details."
-        >
-          <View style={{ gap: 10 }}>
+        <SectionCard title="Account" subtitle="Current account details.">
+          <View style={{gap: 10}}>
             <ListRow title="Name" subtitle={profile?.fullName ?? 'Pantros User'} />
             <ListRow title="Email" subtitle={profile?.email ?? 'No email available'} />
             <ListRow title="Pantries" subtitle={String(pantries.length)} />
@@ -40,11 +24,8 @@ export default function ProfileScreen() {
           </View>
         </SectionCard>
 
-        <SectionCard
-          title="Privacy and Support"
-          subtitle="Helpful links and account policy details."
-        >
-          <View style={{ gap: 10 }}>
+        <SectionCard title="Privacy and Support" subtitle="Helpful links and account policy details.">
+          <View style={{gap: 10}}>
             <ListRow
               title="Privacy Policy"
               subtitle="Data collection and retention."

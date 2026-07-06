@@ -9,7 +9,7 @@ import {
   listRowBackground,
   shapes,
 } from '@expo/ui/swift-ui/modifiers';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Pressable, Text as RNText, StyleSheet, View } from 'react-native';
 
 import { SHEET_HORIZONTAL_PADDING, createBottomSheetModifiers } from '@/components/sheets/sheet-presets/sheet-presets';
@@ -48,12 +48,6 @@ export function PantryFilterMenu({
   const [draftSortOption, setDraftSortOption] = useState<PantryListSortOption>(sortOption ?? 'expiration');
   const isMenuVisible = visible ?? uncontrolledVisible;
 
-  useEffect(() => {
-    if (!isMenuVisible) {
-      setDraftSortOption(sortOption ?? 'expiration');
-    }
-  }, [isMenuVisible, sortOption]);
-
   const setMenuVisible = useCallback(
     (nextVisible: boolean) => {
       if (visible === undefined) {
@@ -86,7 +80,10 @@ export function PantryFilterMenu({
           accessibilityRole="button"
           accessibilityLabel="Open sort menu"
           disabled={!onSelectSort}
-          onPress={() => setMenuVisible(true)}
+          onPress={() => {
+            setDraftSortOption(sortOption ?? 'expiration');
+            setMenuVisible(true);
+          }}
           style={({pressed}) => [
             styles.iconTrigger,
             pressed ? styles.triggerPressed : null,

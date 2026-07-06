@@ -2,12 +2,14 @@ import { Redirect } from 'expo-router';
 import { ActivityIndicator, View } from 'react-native';
 
 import { appColors } from '@/components/ui/primitives';
-import { useAppContext } from '@/state/app-context';
+import { useAuthState } from '@/state/auth-state';
+import { useWorkspaceState } from '@/state/workspace-state';
 
 export default function EntryScreen() {
-  const { status, isAuthenticated } = useAppContext();
+  const auth = useAuthState();
+  const workspace = useWorkspaceState();
 
-  if (status === 'idle' || status === 'loading') {
+  if (auth.status === 'loading' || workspace.status === 'loading') {
     return (
       <View
         style={{
@@ -22,5 +24,5 @@ export default function EntryScreen() {
     );
   }
 
-  return <Redirect href={isAuthenticated ? '/pantry' : '/login'} />;
+  return <Redirect href={auth.isAuthenticated ? '/pantry' : '/login'} />;
 }

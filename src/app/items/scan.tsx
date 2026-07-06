@@ -13,7 +13,8 @@ import { ScanPermissionState } from '@/features/scan/scan-permission-state/scan-
 import { triggerMediumImpact } from '@/lib/haptics';
 import { matchPantryItems } from '@/lib/pantry-insights';
 import { useThemedStyles } from '@/lib/theme';
-import { useAppContext } from '@/state/app-context';
+import { useAuthState } from '@/state/auth-state';
+import { useWorkspaceState } from '@/state/workspace-state';
 
 const BARCODE_TYPES: BarcodeType[] = ['ean13', 'ean8', 'upc_a', 'upc_e', 'code128', 'code39', 'code93', 'itf14'];
 
@@ -36,7 +37,8 @@ export default function ScanItemScreen() {
   const openingItemRef = useRef(false);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [permission, requestPermission] = useCameraPermissions();
-  const { isAuthenticated, pantryItems, selectedPantry, status } = useAppContext();
+  const {isAuthenticated, status} = useAuthState();
+  const {pantryItems, selectedPantry} = useWorkspaceState();
 
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [isCameraReady, setIsCameraReady] = useState(false);

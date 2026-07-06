@@ -1,21 +1,12 @@
-import { Redirect, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 
 import { EmptyNotice } from '@/components/ui/primitives';
 import { ItemFormScreen } from '@/features/items/item-form-screen/item-form-screen';
-import { useAppContext } from '@/state/app-context';
+import { useWorkspaceState } from '@/state/workspace-state';
 
 export default function EditItemScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const { isAuthenticated, items, status } = useAppContext();
-
-  if (status === 'idle' || status === 'loading') {
-    return null;
-  }
-
-  if (!isAuthenticated) {
-    return <Redirect href="/(auth)/login" />;
-  }
-
+  const {id} = useLocalSearchParams<{id: string}>();
+  const {items} = useWorkspaceState();
   const item = items.find((entry) => entry.id === id);
 
   if (!item) {

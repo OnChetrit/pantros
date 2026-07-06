@@ -1,18 +1,20 @@
 import { Redirect } from 'expo-router';
 
 import { CartCheckoutProvider } from '@/features/cart/cart-checkout-context/cart-checkout-context';
-import { useAppContext } from '@/state/app-context';
+import { useAuthState } from '@/state/auth-state';
+import { useWorkspaceState } from '@/state/workspace-state';
 
 import { TabsLayoutContent } from './tabs-layout-content';
 
 export default function TabsLayout() {
-  const {isAuthenticated, status} = useAppContext();
+  const auth = useAuthState();
+  const workspace = useWorkspaceState();
 
-  if (status === 'idle' || status === 'loading') {
+  if (auth.status === 'loading' || workspace.status === 'loading') {
     return null;
   }
 
-  if (!isAuthenticated) {
+  if (!auth.isAuthenticated) {
     return <Redirect href="/(auth)/login" />;
   }
 

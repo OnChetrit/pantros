@@ -1,62 +1,18 @@
-import { Host, RNHostView, Row } from '@expo/ui';
 import { Stack, useRouter } from 'expo-router';
-import { Platform, StyleSheet, View } from 'react-native';
 
-import { AvatarSidebarButton } from '@/components/navigation/avatar-sidebar/avatar-sidebar';
-import { createIconHeaderButton } from '@/components/navigation/native-header-items/native-header-items';
-import { useAppTheme } from '@/lib/theme';
-import { useAppContext } from '@/state/app-context';
+import { useTopLevelStackOptions } from '@/app/stack-options';
+import { useWorkspaceState } from '@/state/workspace-state';
 
 export default function PantryLayout() {
-  const {selectedPantry} = useAppContext();
-  const {colors} = useAppTheme();
+  const {selectedPantry} = useWorkspaceState();
   const router = useRouter();
+  const screenOptions = useTopLevelStackOptions({
+    title: selectedPantry?.name ?? 'Pantry',
+    onAccountPress: () => router.push('/account/menu'),
+  });
 
   return (
-    <Stack
-      screenOptions={{
-        title: selectedPantry?.name ?? 'Pantry',
-        headerLargeTitle: false,
-        headerTransparent: Platform.OS === 'ios',
-        headerShadowVisible: false,
-        headerBackground:
-          Platform.OS === 'ios'
-            ? () => <View style={[StyleSheet.absoluteFill, styles.transparentHeaderBackground]} />
-            : undefined,
-        headerStyle: {
-          backgroundColor: Platform.OS === 'ios' ? 'transparent' : colors.background,
-        },
-        headerTintColor: colors.tint,
-        headerTitleStyle: {
-          color: colors.text,
-        },
-        headerLargeTitleStyle: {
-          color: colors.text,
-        },
-        ...(Platform.OS === 'ios'
-          ? {
-              unstable_headerRightItems: () => [
-                createIconHeaderButton({
-                  label: 'Open account menu',
-                  icon: 'person.crop.circle',
-                  onPress: () => router.push('/account/menu'),
-                  tintColor: colors.tint,
-                }),
-              ],
-            }
-          : {
-              headerRight: () => (
-                <Host style={styles.headerActions} matchContents>
-                  <Row alignment="center">
-                    <RNHostView matchContents>
-                      <AvatarSidebarButton />
-                    </RNHostView>
-                  </Row>
-                </Host>
-              ),
-            }),
-      }}
-    >
+    <Stack screenOptions={screenOptions}>
       <Stack.Screen
         name="index"
         options={{
@@ -66,12 +22,3 @@ export default function PantryLayout() {
     </Stack>
   );
 }
-
-const styles = StyleSheet.create({
-  headerActions: {
-    backgroundColor: 'transparent',
-  },
-  transparentHeaderBackground: {
-    backgroundColor: 'transparent',
-  },
-});

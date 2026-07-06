@@ -21,7 +21,7 @@ export function AppStackHeader({
   showAccountMenu?: boolean;
   minimalBackButton?: boolean;
 }) {
-  const {colors, isDark} = useAppTheme();
+  const {colors} = useAppTheme();
 
   return (
     <Stack.Screen

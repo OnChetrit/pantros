@@ -7,7 +7,9 @@ import {
   getDeviceTimeZone,
   registerForPushNotifications,
 } from '@/services/supabase/notification-service';
-import { useAppContext } from '@/state/app-context';
+import { useAuthState } from '@/state/auth-state';
+import { useNotificationState } from '@/state/notification-state';
+import { useWorkspaceState } from '@/state/workspace-state';
 import { AccountActionsSection, AccountOverviewSection, AppearanceSection, RemindersSection, SupportSection } from '../account-menu/account-menu-sections';
 import { AccountProfileHeader } from '../account-menu/account-profile-header';
 import type { AccountMenuDestination } from '../account-menu/account-menu.types';
@@ -30,15 +32,9 @@ export function AccountMenuContent({
   const router = useRouter();
   const styles = useThemedStyles(createStyles);
   const { themePreference, setThemePreference } = useAppTheme();
-  const {
-    notificationBusy,
-    notificationPreferences,
-    pantries,
-    profile,
-    saveNotificationPreferences,
-    selectedPantry,
-    signOut,
-  } = useAppContext();
+  const {signOut} = useAuthState();
+  const {notificationBusy, notificationPreferences, saveNotificationPreferences} = useNotificationState();
+  const {pantries, profile, selectedPantry} = useWorkspaceState();
   const [reminderTimeOverride, setReminderTimeOverride] = useState<Date | null>(null);
   const [notificationActionBusy, setNotificationActionBusy] = useState(false);
   const [notificationError, setNotificationError] = useState<string | null>(null);

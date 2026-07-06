@@ -5,7 +5,8 @@ import { Alert } from 'react-native';
 
 import type { PantryItem, PantryItemInput } from '@/domain/models';
 import { matchPantryItems } from '@/lib/pantry-insights';
-import { useAppContext } from '@/state/app-context';
+import { useItemState } from '@/state/item-state';
+import { useWorkspaceState } from '@/state/workspace-state';
 
 import { buildItemInput, hasItemInputChanges, isValidIsoDate } from '../item-form/item-form.utils';
 
@@ -20,7 +21,8 @@ export { ItemFormSaveButton } from '../item-form-save-button/item-form-save-butt
 
 export function useItemFormController({initialBarcode, item, initialName}: ItemFormScreenProps) {
   const router = useRouter();
-  const {addItem, itemBusy, pantryCarts, pantryItems, selectedPantry, selectedPantryId, updateItem} = useAppContext();
+  const {addItem, itemBusy, updateItem} = useItemState();
+  const {pantryCarts, pantryItems, selectedPantry, selectedPantryId} = useWorkspaceState();
 
   const primaryCartId = pantryCarts.find(cart => cart.isPrimary)?.id ?? pantryCarts[0]?.id ?? null;
 

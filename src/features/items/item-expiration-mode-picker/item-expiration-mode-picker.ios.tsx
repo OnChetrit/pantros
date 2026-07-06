@@ -1,6 +1,5 @@
 import { Host, Picker, Text } from '@expo/ui/swift-ui';
 import { pickerStyle, tag } from '@expo/ui/swift-ui/modifiers';
-import { StyleSheet } from 'react-native';
 
 type ExpirationMode = 'manual' | 'relative';
 
@@ -23,5 +22,3 @@ export function ItemExpirationModePicker({mode, onChange}: ItemExpirationModePic
     </Host>
   );
 }
-
-const styles = StyleSheet.create({});
