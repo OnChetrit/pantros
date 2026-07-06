@@ -17,11 +17,11 @@ import { formatReminderTime, parseReminderTime } from '../account-menu/account-m
 
 export type { AccountMenuDestination } from '../account-menu/account-menu.types';
 
-const destinationHrefMap: Record<AccountMenuDestination, '/account/delete' | '/legal/privacy' | '/legal/support' | '/legal/terms'> = {
+const destinationHrefMap: Record<AccountMenuDestination, '/account/delete' | '/account/privacy' | '/account/support' | '/account/terms'> = {
   delete: '/account/delete',
-  privacy: '/legal/privacy',
-  support: '/legal/support',
-  terms: '/legal/terms',
+  privacy: '/account/privacy',
+  support: '/account/support',
+  terms: '/account/terms',
 };
 
 export function AccountMenuContent({
@@ -53,7 +53,7 @@ export function AccountMenuContent({
       return;
     }
 
-    router.replace(destinationHrefMap[destination]);
+    router.push(destinationHrefMap[destination]);
   };
 
   const handleSignOut = () => {

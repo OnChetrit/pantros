@@ -8,7 +8,6 @@ export default function AccountMenuRoute() {
       <Stack.Screen
         options={{
           title: 'Account',
-          presentation: 'modal',
         }}
       />
       <AccountMenuContent />
