@@ -3,7 +3,7 @@ import { Host, List, Section } from '@expo/ui/swift-ui';
 import { listStyle } from '@expo/ui/swift-ui/modifiers';
 import { Stack, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { Alert, LayoutAnimation, StyleSheet, View } from 'react-native';
 
 import { createIconHeaderButton } from '@/components/navigation/native-header-items/native-header-items';
 import { PantryFilterMenu, type PantryListSortOption } from '@/components/pantry/pantry-filter-menu/pantry-filter-menu';
@@ -28,8 +28,12 @@ export default function PantryScreen() {
   const [quantityItem, setQuantityItem] = useState<PantryItem | null>(null);
   const [quantityErrorMessage, setQuantityErrorMessage] = useState<string | null>(null);
 
-  const {cartItems, pantryListItems} = useMemo(() => {
+  const visibleItems = useMemo(() => {
     const compareBySort = (left: (typeof pantryItems)[number], right: (typeof pantryItems)[number]) => {
+      if (left.isInCart !== right.isInCart) {
+        return left.isInCart ? 1 : -1;
+      }
+
       if (sortOption === 'name') {
         return left.name.localeCompare(right.name);
       }
@@ -56,12 +60,7 @@ export default function PantryScreen() {
       return leftTime - rightTime;
     };
 
-    const sorted = [...pantryItems].sort(compareBySort);
-
-    return {
-      pantryListItems: sorted.filter(item => !item.isInCart),
-      cartItems: sorted.filter(item => item.isInCart),
-    };
+    return [...pantryItems].sort(compareBySort);
   }, [pantryItems, sortOption]);
 
   const primaryCart = pantryCarts.find(cart => cart.isPrimary) ?? pantryCarts[0] ?? null;
@@ -94,7 +93,13 @@ export default function PantryScreen() {
       return;
     }
 
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     await moveItemToCart(itemId, primaryCart.id);
+  };
+
+  const handleMoveToPantry = async (itemId: string) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    await moveItemToPantry(itemId);
   };
 
   const handleSaveReview = async () => {
@@ -178,22 +183,23 @@ export default function PantryScreen() {
       <Host colorScheme={isDark ? 'dark' : 'light'} style={[styles.host, {backgroundColor: colors.background}]}>
         <List modifiers={[listStyle('insetGrouped')]}>
           <Section title="Pantry">
-            {pantryListItems.length > 0 ? (
-              pantryListItems.map((item, index) => {
+            {visibleItems.length > 0 ? (
+              visibleItems.map((item, index) => {
                 const leftActionLabel = item.isInCart ? 'Move to Pantry' : 'Add to Cart';
                 const onLeftAction = item.isInCart
-                  ? () => void moveItemToPantry(item.id)
+                  ? () => void handleMoveToPantry(item.id)
                   : () => void handleAddToCart(item.id);
 
                 return (
                   <PantryItemNativeListRow
                     key={item.id}
                     item={item}
-                    displayMode="pantry"
-                    isLast={index === pantryListItems.length - 1}
+                    displayMode={item.isInCart ? 'cart' : 'pantry'}
+                    isLast={index === visibleItems.length - 1}
                     onPress={() => router.push(`/items/${item.id}`)}
                     onEdit={() => router.push(`/items/${item.id}`)}
-                    onReviewExpiration={() => openReviewSheet(item)}
+                    onReviewExpiration={item.isInCart ? undefined : () => openReviewSheet(item)}
+                    onReviewQuantity={item.isInCart ? () => openQuantitySheet(item) : undefined}
                     leftActionLabel={leftActionLabel}
                     onLeftAction={onLeftAction}
                     onDelete={() => void deleteItem(item.id)}
@@ -211,24 +217,6 @@ export default function PantryScreen() {
               </ListItem>
             )}
           </Section>
-          {cartItems.length > 0 ? (
-            <Section title="Cart">
-              {cartItems.map((item, index) => (
-                <PantryItemNativeListRow
-                  key={item.id}
-                  item={item}
-                  displayMode="cart"
-                  isLast={index === cartItems.length - 1}
-                  onPress={() => router.push(`/items/${item.id}`)}
-                  onEdit={() => router.push(`/items/${item.id}`)}
-                  onReviewQuantity={() => openQuantitySheet(item)}
-                  leftActionLabel="Move to Pantry"
-                  onLeftAction={() => void moveItemToPantry(item.id)}
-                  onDelete={() => void deleteItem(item.id)}
-                />
-              ))}
-            </Section>
-          ) : null}
         </List>
       </Host>
       <ItemExpirationReviewSheet

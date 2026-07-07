@@ -1,6 +1,6 @@
 import { Host, RNHostView, Row, Spacer } from '@expo/ui';
 import { Ionicons } from '@expo/vector-icons';
-import { StyleSheet, Switch, Text, View, Pressable } from 'react-native';
+import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 
 import { appColors } from '@/components/ui/primitives';
 import { useThemedStyles } from '@/lib/theme';
@@ -15,13 +15,7 @@ type ItemCartSectionProps = {
   onIncrement: () => void;
 };
 
-export function ItemCartSection({
-  isInCart,
-  quantity,
-  onToggle,
-  onDecrement,
-  onIncrement,
-}: ItemCartSectionProps) {
+export function ItemCartSection({isInCart, quantity, onToggle, onDecrement, onIncrement}: ItemCartSectionProps) {
   const styles = useThemedStyles(createStyles);
 
   return (
@@ -32,7 +26,6 @@ export function ItemCartSection({
             <RNHostView matchContents>
               <ItemFormFieldLabel>Add To Cart</ItemFormFieldLabel>
             </RNHostView>
-            <Spacer flexible />
             <RNHostView matchContents>
               <Switch value={isInCart} onValueChange={onToggle} />
             </RNHostView>
@@ -48,7 +41,7 @@ export function ItemCartSection({
               <RNHostView matchContents>
                 <Pressable
                   onPress={onDecrement}
-                  style={({ pressed }) => [styles.stepperButton, pressed ? styles.stepperButtonPressed : null]}
+                  style={({pressed}) => [styles.stepperButton, pressed ? styles.stepperButtonPressed : null]}
                 >
                   <Ionicons name="remove" size={18} color={appColors.text} />
                 </Pressable>
@@ -61,7 +54,7 @@ export function ItemCartSection({
               <RNHostView matchContents>
                 <Pressable
                   onPress={onIncrement}
-                  style={({ pressed }) => [styles.stepperButton, pressed ? styles.stepperButtonPressed : null]}
+                  style={({pressed}) => [styles.stepperButton, pressed ? styles.stepperButtonPressed : null]}
                 >
                   <Ionicons name="add" size={18} color={appColors.text} />
                 </Pressable>
@@ -80,6 +73,7 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
       gap: 6,
     },
     fieldHeader: {
+      flex: 1,
     },
     stepper: {
       minHeight: 48,

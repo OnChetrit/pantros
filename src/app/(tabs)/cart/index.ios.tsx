@@ -3,7 +3,7 @@ import { Host, List, Section } from '@expo/ui/swift-ui';
 import { listStyle } from '@expo/ui/swift-ui/modifiers';
 import { Stack, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { LayoutAnimation, StyleSheet, View } from 'react-native';
 
 import {
   createIconHeaderButton,
@@ -53,9 +53,7 @@ export default function CartScreen() {
   const [quantityItem, setQuantityItem] = useState<PantryItem | null>(null);
   const [quantityErrorMessage, setQuantityErrorMessage] = useState<string | null>(null);
 
-  const itemsInCart = useMemo(() => {
-    return sortCartItems(getCartItems(pantryItems), sortOption);
-  }, [pantryItems, sortOption]);
+  const itemsInCart = useMemo(() => sortCartItems(getCartItems(pantryItems), sortOption), [pantryItems, sortOption]);
   const unselectedItems = useMemo(
     () => itemsInCart.filter(item => !selectedItemIds.includes(item.id)),
     [itemsInCart, selectedItemIds]
@@ -72,6 +70,10 @@ export default function CartScreen() {
   useEffect(() => {
     setVisibleItems(itemsInCart);
   }, [itemsInCart, setVisibleItems]);
+
+  const animateListLayout = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+  };
 
   const openQuantitySheet = (item: PantryItem) => {
     setQuantityItem(item);
@@ -104,6 +106,11 @@ export default function CartScreen() {
     } catch (error) {
       setQuantityErrorMessage(error instanceof Error ? error.message : 'Unable to update quantity.');
     }
+  };
+
+  const handleMoveToPantry = async (itemId: string) => {
+    animateListLayout();
+    await moveItemToPantry(itemId);
   };
 
   if (!selectedPantry) {
@@ -144,7 +151,15 @@ export default function CartScreen() {
               ? [
                   createTextHeaderButton({
                     label: allSelected ? 'Clear' : 'Select All',
-                    onPress: () => (allSelected ? clearSelection() : selectAll(itemsInCart.map(item => item.id))),
+                    onPress: () => {
+                      animateListLayout();
+                      if (allSelected) {
+                        clearSelection();
+                        return;
+                      }
+
+                      selectAll(itemsInCart.map(item => item.id));
+                    },
                     tintColor: colors.tint,
                   }),
                 ]
@@ -176,11 +191,7 @@ export default function CartScreen() {
           {checkoutProgress.errorMessage ? (
             <ListItem key="checkout-error">
               <View style={styles.noticeRow}>
-                <CartCheckoutNotice
-                  tone="error"
-                  message={checkoutProgress.errorMessage}
-                  onDismiss={clearCheckoutError}
-                />
+                <CartCheckoutNotice tone="error" message={checkoutProgress.errorMessage} onDismiss={clearCheckoutError} />
               </View>
             </ListItem>
           ) : null}
@@ -203,16 +214,30 @@ export default function CartScreen() {
                   item={item}
                   displayMode="cart"
                   isLast={index === unselectedItems.length - 1 && selectedItems.length === 0}
-                  onPress={() => (isSelectionMode ? toggleItemSelection(item.id) : router.push(`/items/${item.id}`))}
+                  onPress={() => {
+                    if (isSelectionMode) {
+                      animateListLayout();
+                      toggleItemSelection(item.id);
+                      return;
+                    }
+
+                    router.push(`/items/${item.id}`);
+                  }}
                   onEdit={() => router.push(`/items/${item.id}`)}
                   onReviewQuantity={isSelectionMode ? undefined : () => openQuantitySheet(item)}
                   leftActionLabel={isSelectionMode ? undefined : 'Move to Pantry'}
-                  onLeftAction={isSelectionMode ? undefined : () => void moveItemToPantry(item.id)}
+                  onLeftAction={isSelectionMode ? undefined : () => void handleMoveToPantry(item.id)}
                   onDelete={() => void deleteItem(item.id)}
                   isSelectionMode={isSelectionMode}
                   isSelected={selectedItemIds.includes(item.id)}
-                  onToggleSelection={() => toggleItemSelection(item.id)}
-                  onStartSelection={() => enterSelectionMode(item.id)}
+                  onToggleSelection={() => {
+                    animateListLayout();
+                    toggleItemSelection(item.id);
+                  }}
+                  onStartSelection={() => {
+                    animateListLayout();
+                    enterSelectionMode(item.id);
+                  }}
                 />
               ))
             ) : (
@@ -226,28 +251,6 @@ export default function CartScreen() {
               </ListItem>
             )}
           </Section>
-          {selectedItems.length > 0 ? (
-            <Section title={`${selectedItems.length} Selected`}>
-              {selectedItems.map((item, index) => (
-                <PantryItemNativeListRow
-                  key={item.id}
-                  item={item}
-                  displayMode="cart"
-                  isLast={index === selectedItems.length - 1}
-                  onPress={() => toggleItemSelection(item.id)}
-                  onEdit={() => router.push(`/items/${item.id}`)}
-                  onReviewQuantity={undefined}
-                  leftActionLabel={undefined}
-                  onLeftAction={undefined}
-                  onDelete={() => void deleteItem(item.id)}
-                  isSelectionMode={isSelectionMode}
-                  isSelected
-                  onToggleSelection={() => toggleItemSelection(item.id)}
-                  onStartSelection={() => enterSelectionMode(item.id)}
-                />
-              ))}
-            </Section>
-          ) : null}
         </List>
       </Host>
       <CartCheckoutSheet
@@ -257,7 +260,20 @@ export default function CartScreen() {
         totalCount={itemsInCart.length}
         processing={checkoutProgress.processing}
         onSubmit={() => void startCheckout()}
-        onSecondaryAction={() => (allSelected ? clearSelection() : selectAll(itemsInCart.map(item => item.id)))}
+        onSecondaryAction={() => {
+          animateListLayout();
+          if (allSelected) {
+            clearSelection();
+            return;
+          }
+
+          selectAll(itemsInCart.map(item => item.id));
+        }}
+        selectedItems={selectedItems}
+        onPressSelectedItem={itemId => {
+          animateListLayout();
+          toggleItemSelection(itemId);
+        }}
       />
       <CartExpirationReviewModal
         visible={checkoutQueue.length > 0 && currentReviewItem !== null}

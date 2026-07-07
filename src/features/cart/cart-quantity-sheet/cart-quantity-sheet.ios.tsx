@@ -1,4 +1,4 @@
-import { BottomSheet, Button, Host } from '@expo/ui';
+import { BottomSheet, Button, Host, RNHostView } from '@expo/ui';
 import { Picker as NativePicker } from '@react-native-picker/picker';
 import { useMemo, useState } from 'react';
 import { Text, View } from 'react-native';
@@ -34,38 +34,48 @@ export function CartQuantitySheet({visible, item, processing, errorMessage, onSa
   );
 }
 
-function CartQuantitySheetContent({visible, item, processing, errorMessage, onSave, onCancel}: CartQuantitySheetProps & {item: PantryItem}) {
+function CartQuantitySheetContent({
+  visible,
+  item,
+  processing,
+  errorMessage,
+  onSave,
+  onCancel,
+}: CartQuantitySheetProps & {item: PantryItem}) {
   const {colors} = useAppTheme();
   const [quantity, setQuantity] = useState(item.quantity);
   const quantityOptions = useMemo(() => Array.from({length: 50}, (_, index) => index + 1), []);
 
   return (
     <BottomSheet isPresented={visible} onDismiss={onCancel} snapPoints={[{height: 220}]}>
-      <Host style={{flex: 1}}>
-        <HStack alignment="firstTextBaseline">
-          <Text style={[styles.title, {color: colors.text}]} numberOfLines={1}>
-            {item.name}
-          </Text>
-
-          <View style={[styles.quantityInput, {backgroundColor: colors.background, borderColor: colors.border}]}>
-            <View style={styles.quantityPickerContainer}>
-              <NativePicker
-                selectedValue={quantity}
-                enabled={!processing}
-                onValueChange={nextValue => {
-                  if (typeof nextValue === 'number') {
-                    setQuantity(nextValue);
-                  }
-                }}
-                itemStyle={[styles.quantityPickerItem, {color: colors.text}]}
-                style={[styles.quantityPicker, {color: colors.text}]}
-              >
-                {quantityOptions.map(option => (
-                  <NativePicker.Item key={option} label={String(option)} value={option} />
-                ))}
-              </NativePicker>
+      <Host style={{flex: 1}} matchContents>
+        <HStack alignment="center">
+          <RNHostView matchContents>
+            <Text style={[styles.title, {color: colors.text}]} numberOfLines={1}>
+              {item.name}
+            </Text>
+          </RNHostView>
+          <RNHostView matchContents>
+            <View style={[styles.quantityInput, {backgroundColor: colors.background, borderColor: colors.border}]}>
+              <View style={styles.quantityPickerContainer}>
+                <NativePicker
+                  selectedValue={quantity}
+                  enabled={!processing}
+                  onValueChange={nextValue => {
+                    if (typeof nextValue === 'number') {
+                      setQuantity(nextValue);
+                    }
+                  }}
+                  itemStyle={[styles.quantityPickerItem, {color: colors.text}]}
+                  style={[styles.quantityPicker, {color: colors.text}]}
+                >
+                  {quantityOptions.map(option => (
+                    <NativePicker.Item key={option} label={String(option)} value={option} />
+                  ))}
+                </NativePicker>
+              </View>
             </View>
-          </View>
+          </RNHostView>
         </HStack>
       </Host>
 

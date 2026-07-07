@@ -15,7 +15,6 @@ export function CartCheckoutBar({
   const {colors} = useAppTheme();
   const hasSelection = selectedCount > 0;
   const secondaryLabel = hasSelection && selectedCount === totalCount ? 'Clear' : 'Select All';
-  const countLabel = selectedCount === 1 ? '1 item selected' : `${selectedCount} items selected`;
 
   return (
     <View style={[styles.shell]}>
@@ -23,9 +22,6 @@ export function CartCheckoutBar({
         <View style={styles.summaryWrap}>
           <Text style={[styles.title, {color: colors.text}]} numberOfLines={1}>
             Shopping Complete
-          </Text>
-          <Text style={[styles.count, {color: colors.muted}]} numberOfLines={1}>
-            {countLabel}
           </Text>
         </View>
         <View

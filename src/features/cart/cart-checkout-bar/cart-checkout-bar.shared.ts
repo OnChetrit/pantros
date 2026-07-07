@@ -16,10 +16,13 @@ export const styles = StyleSheet.create({
   },
   shell: {
     gap: 14,
+    padding: 16,
+    paddingBottom: 0,
   },
   summaryWrap: {
     flex: 1,
     minWidth: 0,
+    height: 100,
   },
   headerRow: {
     flexDirection: 'row',
@@ -30,11 +33,6 @@ export const styles = StyleSheet.create({
     fontSize: 17,
     lineHeight: 20,
     fontWeight: '800',
-  },
-  count: {
-    fontSize: 13,
-    lineHeight: 16,
-    fontWeight: '700',
   },
   countBadge: {
     minWidth: 48,
@@ -51,12 +49,11 @@ export const styles = StyleSheet.create({
     fontWeight: '800',
   },
   actions: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     gap: 10,
     alignItems: 'center',
   },
   actionsSheet: {
-    width: '100%',
     justifyContent: 'flex-end',
     marginTop: 2,
   },
@@ -68,6 +65,7 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    width: '100%',
   },
   secondaryButtonText: {
     fontSize: 15,
@@ -81,6 +79,7 @@ export const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
+    width: '100%',
   },
   primaryButtonText: {
     fontSize: 15,

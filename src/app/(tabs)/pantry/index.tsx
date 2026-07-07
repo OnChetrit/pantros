@@ -1,6 +1,6 @@
 import { Stack, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Alert, FlatList, StyleSheet, Text, View } from 'react-native';
+import { Alert, FlatList, LayoutAnimation, StyleSheet, View } from 'react-native';
 
 import { PantryFilterMenu, type PantryListSortOption } from '@/components/pantry/pantry-filter-menu/pantry-filter-menu';
 import { PantryItemRow } from '@/components/pantry/pantry-item-row/pantry-item-row';
@@ -13,8 +13,12 @@ export default function PantryScreen() {
   const router = useRouter();
   const [sortOption, setSortOption] = useState<PantryListSortOption>('expiration');
 
-  const {cartItems, pantryListItems} = useMemo(() => {
+  const visibleItems = useMemo(() => {
     const compareBySort = (left: (typeof pantryItems)[number], right: (typeof pantryItems)[number]) => {
+      if (left.isInCart !== right.isInCart) {
+        return left.isInCart ? 1 : -1;
+      }
+
       if (sortOption === 'name') {
         return left.name.localeCompare(right.name);
       }
@@ -43,10 +47,7 @@ export default function PantryScreen() {
 
     const sorted = [...pantryItems].sort(compareBySort);
 
-    return {
-      pantryListItems: sorted.filter(item => !item.isInCart),
-      cartItems: sorted.filter(item => item.isInCart),
-    };
+    return [...pantryItems].sort(compareBySort);
   }, [pantryItems, sortOption]);
 
   const primaryCart = pantryCarts.find(cart => cart.isPrimary) ?? pantryCarts[0] ?? null;
@@ -57,7 +58,13 @@ export default function PantryScreen() {
       return;
     }
 
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     await moveItemToCart(itemId, primaryCart.id);
+  };
+
+  const handleMoveToPantry = async (itemId: string) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    await moveItemToPantry(itemId);
   };
 
   if (!selectedPantry) {
@@ -78,12 +85,12 @@ export default function PantryScreen() {
     displayMode: 'pantry' | 'cart'
   ) => {
     const leftActionLabel = item.isInCart ? 'Move to Pantry' : 'Add to Cart';
-    const onLeftAction = item.isInCart ? () => void moveItemToPantry(item.id) : () => void handleAddToCart(item.id);
+    const onLeftAction = item.isInCart ? () => void handleMoveToPantry(item.id) : () => void handleAddToCart(item.id);
 
     return (
       <PantryItemRow
         item={item}
-        displayMode={displayMode}
+        displayMode={item.isInCart ? 'cart' : displayMode}
         isLast={index === total - 1}
         onPress={() => router.push(`/items/${item.id}`)}
         onEdit={() => router.push(`/items/${item.id}`)}
@@ -103,10 +110,10 @@ export default function PantryScreen() {
       />
       <FlatList
         style={styles.screen}
-        data={pantryListItems}
+        data={visibleItems}
         keyExtractor={item => item.id}
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, visibleItems.length > 0 ? styles.filledContent : null]}
         ListEmptyComponent={
           <View style={styles.listEmpty}>
             <EmptyNotice
@@ -115,21 +122,8 @@ export default function PantryScreen() {
             />
           </View>
         }
-        ListFooterComponent={
-          cartItems.length > 0 ? (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Cart</Text>
-              <View style={styles.sectionCard}>
-                {cartItems.map((item, index) => (
-                  <View key={item.id}>{renderItemRow(item, index, cartItems.length, 'cart')}</View>
-                ))}
-              </View>
-            </View>
-          ) : null
-        }
-        ListFooterComponentStyle={styles.footer}
         renderItem={({item, index}) => {
-          return renderItemRow(item, index, pantryListItems.length, 'pantry');
+          return renderItemRow(item, index, visibleItems.length, 'pantry');
         }}
       />
     </>
@@ -145,9 +139,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingBottom: 40,
   },
-  footer: {
-    marginTop: 18,
-  },
   emptyScreen: {
     flex: 1,
     backgroundColor: appColors.background,
@@ -158,19 +149,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 6,
   },
-  section: {
-    gap: 10,
-  },
-  sectionTitle: {
-    color: appColors.muted,
-    fontSize: 13,
-    fontWeight: '700',
-    paddingHorizontal: 4,
-  },
-  sectionCard: {
+  filledContent: {
+    marginHorizontal: 12,
     borderRadius: 26,
     backgroundColor: appColors.card,
-    paddingVertical: 2,
     overflow: 'hidden',
   },
 });
