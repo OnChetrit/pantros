@@ -1,8 +1,6 @@
-import { Host, RNHostView, Row, Spacer } from '@expo/ui';
-import { Ionicons } from '@expo/vector-icons';
-import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
+import { Button, Host, Row, Spacer, Switch, Text } from '@expo/ui';
+import { StyleSheet, View } from 'react-native';
 
-import { appColors } from '@/components/ui/primitives';
 import { useThemedStyles } from '@/lib/theme';
 
 import { ItemFormFieldLabel } from './item-form-field-label';
@@ -23,12 +21,9 @@ export function ItemCartSection({isInCart, quantity, onToggle, onDecrement, onIn
       <View style={styles.fieldGroup}>
         <Host style={styles.fieldHeader}>
           <Row alignment="center" spacing={12}>
-            <RNHostView matchContents>
-              <ItemFormFieldLabel>Add To Cart</ItemFormFieldLabel>
-            </RNHostView>
-            <RNHostView matchContents>
-              <Switch value={isInCart} onValueChange={onToggle} />
-            </RNHostView>
+            <ItemFormFieldLabel>Add To Cart</ItemFormFieldLabel>
+            <Spacer flexible />
+            <Switch value={isInCart} onValueChange={onToggle} />
           </Row>
         </Host>
       </View>
@@ -38,27 +33,11 @@ export function ItemCartSection({isInCart, quantity, onToggle, onDecrement, onIn
           <ItemFormFieldLabel>Quantity</ItemFormFieldLabel>
           <Host style={styles.stepper}>
             <Row alignment="center" spacing={12}>
-              <RNHostView matchContents>
-                <Pressable
-                  onPress={onDecrement}
-                  style={({pressed}) => [styles.stepperButton, pressed ? styles.stepperButtonPressed : null]}
-                >
-                  <Ionicons name="remove" size={18} color={appColors.text} />
-                </Pressable>
-              </RNHostView>
+              <Button onPress={onDecrement} label="−" variant="outlined" style={styles.stepperButton} />
               <Spacer flexible />
-              <RNHostView matchContents>
-                <Text style={styles.stepperValue}>{quantity}</Text>
-              </RNHostView>
+              <Text textStyle={styles.stepperValue}>{String(quantity)}</Text>
               <Spacer flexible />
-              <RNHostView matchContents>
-                <Pressable
-                  onPress={onIncrement}
-                  style={({pressed}) => [styles.stepperButton, pressed ? styles.stepperButtonPressed : null]}
-                >
-                  <Ionicons name="add" size={18} color={appColors.text} />
-                </Pressable>
-              </RNHostView>
+              <Button onPress={onIncrement} label="+" variant="outlined" style={styles.stepperButton} />
             </Row>
           </Host>
         </View>
@@ -92,9 +71,6 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
       backgroundColor: colors.card,
       borderWidth: 1,
       borderColor: colors.border,
-    },
-    stepperButtonPressed: {
-      opacity: 0.6,
     },
     stepperValue: {
       color: colors.text,

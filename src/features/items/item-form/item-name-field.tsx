@@ -1,5 +1,5 @@
-import { Host, RNHostView, Row, Spacer } from '@expo/ui';
-import { StyleSheet, Text, View, Pressable } from 'react-native';
+import { Button, Row, Spacer, Text } from '@expo/ui';
+import { StyleSheet, View } from 'react-native';
 
 import { AppTextInput } from '@/components/ui/primitives';
 import type { PantryItem } from '@/domain/models';
@@ -32,25 +32,21 @@ export function ItemNameField({
         <View style={styles.suggestionList}>
           {duplicateCandidates.map(candidate => {
             const isExact = candidate.id === exactDuplicateId;
+            const rowStyle = StyleSheet.compose(styles.suggestionRow, isExact ? styles.suggestionRowExact : null);
 
             return (
-              <Pressable
+              <Button
                 key={candidate.id}
                 onPress={() => onSelectDuplicate(candidate.id)}
-                style={({ pressed }) => [pressed ? styles.suggestionRowPressed : null]}
+                variant="text"
+                style={rowStyle as never}
               >
-                <Host style={[styles.suggestionRow, isExact ? styles.suggestionRowExact : null]}>
-                  <Row alignment="center" spacing={12}>
-                    <RNHostView matchContents>
-                      <Text style={styles.suggestionName}>{candidate.name}</Text>
-                    </RNHostView>
-                    <Spacer flexible />
-                    <RNHostView matchContents>
-                      <Text style={styles.suggestionAction}>{isExact ? 'Open existing' : 'Use existing'}</Text>
-                    </RNHostView>
-                  </Row>
-                </Host>
-              </Pressable>
+                <Row alignment="center" spacing={12}>
+                  <Text textStyle={styles.suggestionName}>{candidate.name}</Text>
+                  <Spacer flexible />
+                  <Text textStyle={styles.suggestionAction}>{isExact ? 'Open existing' : 'Use existing'}</Text>
+                </Row>
+              </Button>
             );
           })}
         </View>
@@ -80,11 +76,7 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
     suggestionRowExact: {
       backgroundColor: colors.tintSoft,
     },
-    suggestionRowPressed: {
-      opacity: 0.7,
-    },
     suggestionName: {
-      flex: 1,
       color: colors.text,
       fontSize: 14,
       fontWeight: '700',

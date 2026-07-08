@@ -1,4 +1,5 @@
-import { StyleSheet, Text, Pressable } from 'react-native';
+import { Button, Host, Text } from '@expo/ui';
+import { StyleSheet } from 'react-native';
 
 import { useThemedStyles } from '@/lib/theme';
 
@@ -12,11 +13,15 @@ export function ItemExpirationModeChip({
   onPress: () => void;
 }) {
   const styles = useThemedStyles(createStyles);
+  const chipStyle = StyleSheet.compose(styles.modeChip, active ? styles.modeChipActive : null);
+  const chipTextStyle = [styles.modeChipText, active ? styles.modeChipTextActive : null] as const;
 
   return (
-    <Pressable onPress={onPress} style={[styles.modeChip, active ? styles.modeChipActive : null]}>
-      <Text style={[styles.modeChipText, active ? styles.modeChipTextActive : null]}>{label}</Text>
-    </Pressable>
+    <Host>
+      <Button onPress={onPress} variant="text" style={chipStyle as never}>
+        <Text textStyle={chipTextStyle as never}>{label}</Text>
+      </Button>
+    </Host>
   );
 }
 

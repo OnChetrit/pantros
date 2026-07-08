@@ -1,5 +1,6 @@
+import { Button, Host, RNHostView } from '@expo/ui';
 import { Ionicons } from '@expo/vector-icons';
-import { StyleSheet, Pressable } from 'react-native';
+import { StyleSheet } from 'react-native';
 
 import { appColors } from '@/components/ui/primitives';
 
@@ -15,15 +16,13 @@ export function ScanIconCircleButton({
   disabled?: boolean;
 }) {
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      disabled={disabled}
-      onPress={onPress}
-      style={({pressed}) => [styles.iconCircleButton, (pressed || disabled) ? styles.buttonPressed : null]}
-    >
-      <Ionicons name={icon} size={22} color={disabled ? appColors.muted : appColors.tint} />
-    </Pressable>
+    <Host>
+      <Button disabled={disabled} onPress={onPress} variant="outlined" style={styles.iconCircleButton as never}>
+        <RNHostView matchContents>
+          <Ionicons name={icon} size={22} color={disabled ? appColors.muted : appColors.tint} />
+        </RNHostView>
+      </Button>
+    </Host>
   );
 }
 
@@ -37,8 +36,5 @@ const styles = StyleSheet.create({
     backgroundColor: appColors.card,
     borderWidth: 1,
     borderColor: appColors.border,
-  },
-  buttonPressed: {
-    opacity: 0.75,
   },
 });

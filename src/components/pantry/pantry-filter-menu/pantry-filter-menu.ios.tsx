@@ -1,7 +1,11 @@
-import { BottomSheet, ListItem } from '@expo/ui';
-import { Host, List, Section, Text } from '@expo/ui/swift-ui';
+import { BottomSheet, Button, Host, ListItem, Text } from '@expo/ui';
+import { List, Section } from '@expo/ui/swift-ui';
 import {
   background,
+  buttonBorderShape,
+  buttonStyle,
+  controlSize,
+  disabled,
   font,
   foregroundStyle,
   frame,
@@ -10,7 +14,7 @@ import {
   shapes,
 } from '@expo/ui/swift-ui/modifiers';
 import { useCallback, useState } from 'react';
-import { Pressable, Text as RNText, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { SHEET_HORIZONTAL_PADDING, createBottomSheetModifiers } from '@/components/sheets/sheet-presets/sheet-presets';
 import { appColors, useThemedStyles } from '@/lib/theme';
@@ -76,22 +80,21 @@ export function PantryFilterMenu({
   return (
     <View style={hideTrigger ? undefined : styles.iconWrapper}>
       {hideTrigger ? null : (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Open sort menu"
-          disabled={!onSelectSort}
-          onPress={() => {
-            setDraftSortOption(sortOption ?? 'expiration');
-            setMenuVisible(true);
-          }}
-          style={({pressed}) => [
-            styles.iconTrigger,
-            pressed ? styles.triggerPressed : null,
-            !onSelectSort ? styles.triggerDisabled : null,
-          ]}
-        >
-          <RNText style={styles.triggerGlyph}>⇅</RNText>
-        </Pressable>
+        <Host matchContents>
+          <Button
+            label="Sort"
+            onPress={() => {
+              setDraftSortOption(sortOption ?? 'expiration');
+              setMenuVisible(true);
+            }}
+            modifiers={[
+              disabled(!onSelectSort),
+              controlSize('regular'),
+              buttonStyle('glass'),
+              buttonBorderShape('capsule'),
+            ]}
+          />
+        </Host>
       )}
       <BottomSheet
         isPresented={isMenuVisible}
@@ -146,27 +149,5 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
     iconWrapper: {
       alignSelf: 'center',
       backgroundColor: 'transparent',
-    },
-    triggerPressed: {
-      opacity: 0.8,
-    },
-    triggerDisabled: {
-      opacity: 0.45,
-    },
-    iconTrigger: {
-      width: 36,
-      height: 36,
-      borderRadius: 18,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: colors.card,
-      borderWidth: 1,
-      borderColor: colors.border,
-    },
-    triggerGlyph: {
-      color: appColors.tint,
-      fontSize: 20,
-      fontWeight: '700',
-      lineHeight: 20,
     },
   });

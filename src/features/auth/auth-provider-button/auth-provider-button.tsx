@@ -1,5 +1,6 @@
+import { Button, Host, RNHostView } from '@expo/ui';
 import { Ionicons } from '@expo/vector-icons';
-import { StyleSheet, Pressable } from 'react-native';
+import { StyleSheet } from 'react-native';
 
 import { appColors } from '@/components/ui/primitives';
 
@@ -15,15 +16,13 @@ export function AuthProviderButton({
   disabled: boolean;
 }) {
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      disabled={disabled}
-      onPress={onPress}
-      style={({pressed}) => [styles.providerIconButton, (pressed || disabled) && styles.providerButtonPressed]}
-    >
-      <Ionicons name={icon} size={18} color={appColors.text} />
-    </Pressable>
+    <Host>
+      <Button disabled={disabled} onPress={onPress} variant="outlined" style={styles.providerIconButton as never}>
+        <RNHostView matchContents>
+          <Ionicons name={icon} size={18} color={appColors.text} />
+        </RNHostView>
+      </Button>
+    </Host>
   );
 }
 
@@ -37,8 +36,5 @@ const styles = StyleSheet.create({
     backgroundColor: appColors.background,
     borderWidth: 1,
     borderColor: appColors.border,
-  },
-  providerButtonPressed: {
-    opacity: 0.6,
   },
 });

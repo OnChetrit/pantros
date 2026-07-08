@@ -1,11 +1,12 @@
-import { StyleSheet, Text } from 'react-native';
+import { Text } from '@expo/ui';
+import { StyleSheet } from 'react-native';
 
 import { useThemedStyles } from '@/lib/theme';
 
 export function ItemFormFieldLabel({ children }: { children: string }) {
   const styles = useThemedStyles(createStyles);
 
-  return <Text style={styles.label}>{children}</Text>;
+  return <Text textStyle={styles.label}>{children}</Text>;
 }
 
 const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>

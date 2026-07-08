@@ -78,22 +78,6 @@ export function PantryItemRowContent({
   );
 }
 
-export const rowStyles = StyleSheet.create({
-  contextMenuHost: {
-    alignSelf: 'stretch',
-    width: '100%',
-    minWidth: 0,
-    flex: 1,
-  },
-  nativeListHost: {
-    alignSelf: 'stretch',
-    width: '100%',
-    maxWidth: '100%',
-    minWidth: 0,
-    flex: 1,
-  },
-});
-
 const styles = StyleSheet.create({
   row: {
     position: 'relative',

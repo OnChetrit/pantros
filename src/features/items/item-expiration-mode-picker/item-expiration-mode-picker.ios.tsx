@@ -1,5 +1,4 @@
-import { Host, Picker, Text } from '@expo/ui/swift-ui';
-import { pickerStyle, tag } from '@expo/ui/swift-ui/modifiers';
+import { Host, Picker } from '@expo/ui';
 
 type ExpirationMode = 'manual' | 'relative';
 
@@ -12,12 +11,12 @@ export function ItemExpirationModePicker({mode, onChange}: ItemExpirationModePic
   return (
     <Host matchContents>
       <Picker
-        selection={mode}
-        onSelectionChange={selection => onChange(selection as ExpirationMode)}
-        modifiers={[pickerStyle('segmented')]}
+        selectedValue={mode}
+        onValueChange={selection => onChange(selection as ExpirationMode)}
+        appearance="menu"
       >
-        <Text modifiers={[tag('manual')]}>Manual</Text>
-        <Text modifiers={[tag('relative')]}>Relative</Text>
+        <Picker.Item label="Manual" value="manual" />
+        <Picker.Item label="Relative" value="relative" />
       </Picker>
     </Host>
   );

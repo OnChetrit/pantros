@@ -1,5 +1,5 @@
+import { Button, Host, RNHostView } from '@expo/ui';
 import { Ionicons } from '@expo/vector-icons';
-import { Pressable } from 'react-native';
 
 import { appColors } from '@/components/ui/primitives';
 import { useThemedStyles } from '@/lib/theme';
@@ -20,17 +20,12 @@ export function ItemFormSaveButton({
   const styles = useThemedStyles(createStyles);
 
   return (
-    <Pressable
-      onPress={onPress}
-      disabled={itemBusy || !canSave}
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      style={({pressed}) => [
-        styles.headerActionButton,
-        pressed || itemBusy || !canSave ? styles.headerActionButtonPressed : null,
-      ]}
-    >
-      <Ionicons name="checkmark" size={24} color={itemBusy || !canSave ? appColors.muted : appColors.tint} />
-    </Pressable>
+    <Host>
+      <Button onPress={onPress} disabled={itemBusy || !canSave} variant="text" style={styles.headerActionButton as never}>
+        <RNHostView matchContents>
+          <Ionicons name="checkmark" size={24} color={itemBusy || !canSave ? appColors.muted : appColors.tint} />
+        </RNHostView>
+      </Button>
+    </Host>
   );
 }
