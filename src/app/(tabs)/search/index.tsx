@@ -7,7 +7,7 @@ import { Alert, FlatList, StyleSheet, Text, View, Pressable } from 'react-native
 
 import { AvatarSidebarButton } from '@/components/navigation/avatar-sidebar/avatar-sidebar';
 import { PantryItemRow } from '@/components/pantry/pantry-item-row/pantry-item-row';
-import { AppTextInput, EmptyNotice } from '@/components/ui/primitives';
+import { AppTextInput, EmptyNotice, ListRow } from '@/components/ui/primitives';
 import { matchPantryItems } from '@/lib/pantry-insights';
 import { useAppTheme, useThemedStyles } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
@@ -23,6 +23,7 @@ export default function SearchScreen() {
   const trimmedQuery = query.trim();
   const results = useMemo(() => matchPantryItems(pantryItems, query), [pantryItems, query]);
   const visibleItems = results.visibleResults;
+  const shouldShowCreateItem = Boolean(trimmedQuery) && !results.exactMatch;
   const primaryCart = pantryCarts.find(cart => cart.isPrimary) ?? pantryCarts[0] ?? null;
 
   const handleAddToCart = async (itemId: string) => {
@@ -34,12 +35,7 @@ export default function SearchScreen() {
     await moveItemToCart(itemId, primaryCart.id);
   };
 
-  const handlePrimaryAction = () => {
-    if (results.exactMatch) {
-      router.push(`/items/${results.exactMatch.id}`);
-      return;
-    }
-
+  const handleCreateItem = () => {
     if (!trimmedQuery) {
       return;
     }
@@ -120,17 +116,8 @@ export default function SearchScreen() {
                 ? `${visibleItems.length} ${visibleItems.length === 1 ? 'match' : 'matches'} in ${selectedPantry.name}`
                 : `${visibleItems.length} ${visibleItems.length === 1 ? 'item' : 'items'} in ${selectedPantry.name}`}
             </Text>
-            {trimmedQuery ? (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={results.exactMatch ? 'Open existing item' : `Add ${trimmedQuery} as new item`}
-                onPress={handlePrimaryAction}
-                style={({pressed}) => [styles.primaryAction, pressed ? styles.primaryActionPressed : null]}
-              >
-                <Text style={styles.primaryActionText}>
-                  {results.exactMatch ? 'Open existing item' : `Add "${trimmedQuery}" as new item`}
-                </Text>
-              </Pressable>
+            {shouldShowCreateItem ? (
+              <ListRow title={trimmedQuery} subtitle="Create a new item with this name" onPress={handleCreateItem} />
             ) : null}
           </View>
         }
@@ -208,23 +195,6 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
       fontSize: 13,
       color: colors.muted,
       paddingHorizontal: 2,
-    },
-    primaryAction: {
-      minHeight: 46,
-      borderRadius: 16,
-      backgroundColor: colors.tint,
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingHorizontal: 16,
-    },
-    primaryActionPressed: {
-      opacity: 0.75,
-    },
-    primaryActionText: {
-      fontSize: 15,
-      fontWeight: '700',
-      color: colors.textInverse,
-      textAlign: 'center',
     },
     listEmpty: {
       paddingHorizontal: 16,

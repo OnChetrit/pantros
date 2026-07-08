@@ -1,11 +1,11 @@
-import { BottomSheet, Button, Host, RNHostView } from '@expo/ui';
+import { BottomSheet } from '@expo/ui';
 import { Picker as NativePicker } from '@react-native-picker/picker';
 import { useMemo, useState } from 'react';
-import { Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { createBottomSheetModifiers } from '@/components/sheets/sheet-presets/sheet-presets';
 import type { PantryItem } from '@/domain/models';
 import { useAppTheme } from '@/lib/theme';
-import { HStack } from '@expo/ui/swift-ui';
 
 type CartQuantitySheetProps = {
   visible: boolean;
@@ -45,96 +45,128 @@ function CartQuantitySheetContent({
   const {colors} = useAppTheme();
   const [quantity, setQuantity] = useState(item.quantity);
   const quantityOptions = useMemo(() => Array.from({length: 50}, (_, index) => index + 1), []);
+  const modifiers = useMemo(() => createBottomSheetModifiers(320), []);
 
   return (
-    <BottomSheet isPresented={visible} onDismiss={onCancel} snapPoints={[{height: 220}]}>
-      <Host style={{flex: 1}} matchContents>
-        <HStack alignment="center">
-          <RNHostView matchContents>
-            <Text style={[styles.title, {color: colors.text}]} numberOfLines={1}>
-              {item.name}
-            </Text>
-          </RNHostView>
-          <RNHostView matchContents>
-            <View style={[styles.quantityInput, {backgroundColor: colors.background, borderColor: colors.border}]}>
-              <View style={styles.quantityPickerContainer}>
-                <NativePicker
-                  selectedValue={quantity}
-                  enabled={!processing}
-                  onValueChange={nextValue => {
-                    if (typeof nextValue === 'number') {
-                      setQuantity(nextValue);
-                    }
-                  }}
-                  itemStyle={[styles.quantityPickerItem, {color: colors.text}]}
-                  style={[styles.quantityPicker, {color: colors.text}]}
-                >
-                  {quantityOptions.map(option => (
-                    <NativePicker.Item key={option} label={String(option)} value={option} />
-                  ))}
-                </NativePicker>
-              </View>
-            </View>
-          </RNHostView>
-        </HStack>
-      </Host>
+    <BottomSheet isPresented={visible} onDismiss={onCancel} modifiers={modifiers}>
+      <View style={styles.sheet}>
+        <Text numberOfLines={1} style={[styles.title, {color: colors.text}]}>
+          {item.name}
+        </Text>
 
-      {errorMessage ? <Text style={[styles.error, {color: colors.danger}]}>{errorMessage}</Text> : null}
-
-      <Host matchContents style={styles.actionsHost}>
-        <HStack spacing={12}>
-          <Button
-            label={processing ? 'Saving…' : 'Save'}
-            variant="filled"
-            disabled={processing}
-            onPress={() => {
-              onSave(quantity);
+        <View style={[styles.quantityInput, {backgroundColor: colors.card, borderColor: colors.border}]}>
+          <NativePicker
+            selectedValue={quantity}
+            enabled={!processing}
+            onValueChange={nextValue => {
+              if (typeof nextValue === 'number') {
+                setQuantity(nextValue);
+              }
             }}
-          />
-          <Button label="Cancel" variant="text" disabled={processing} onPress={onCancel} />
-        </HStack>
-      </Host>
+            itemStyle={[styles.quantityPickerItem, {color: colors.text}]}
+            style={[styles.quantityPicker, {color: colors.text}]}
+          >
+            {quantityOptions.map(option => (
+              <NativePicker.Item key={option} label={String(option)} value={option} />
+            ))}
+          </NativePicker>
+        </View>
+
+        {errorMessage ? <Text style={[styles.error, {color: colors.danger}]}>{errorMessage}</Text> : null}
+
+        <View style={styles.actions}>
+          <Pressable
+            disabled={processing}
+            onPress={() => onSave(quantity)}
+            style={({pressed}) => [
+              styles.primaryButton,
+              {
+                backgroundColor: colors.tint,
+                borderColor: colors.tint,
+                opacity: processing ? 0.45 : pressed ? 0.8 : 1,
+              },
+            ]}
+          >
+            <Text style={[styles.primaryButtonText, {color: colors.textInverse}]}>
+              {processing ? 'Saving…' : 'Save'}
+            </Text>
+          </Pressable>
+          <Pressable
+            disabled={processing}
+            onPress={onCancel}
+            style={({pressed}) => [
+              styles.secondaryButton,
+              {
+                backgroundColor: colors.background,
+                borderColor: colors.border,
+                opacity: processing ? 0.45 : pressed ? 0.8 : 1,
+              },
+            ]}
+          >
+            <Text style={[styles.secondaryButtonText, {color: colors.text}]}>Cancel</Text>
+          </Pressable>
+        </View>
+      </View>
     </BottomSheet>
   );
 }
-const styles = {
+
+const styles = StyleSheet.create({
+  sheet: {
+    gap: 16,
+  },
   title: {
-    fontSize: 22,
-    lineHeight: 26,
-    fontWeight: '800' as const,
+    fontSize: 24,
+    lineHeight: 28,
+    fontWeight: '800',
+    textAlign: 'center',
   },
   quantityInput: {
-    height: 88,
-    borderRadius: 18,
+    height: 120,
+    borderRadius: 22,
     borderWidth: 1,
-    overflow: 'hidden' as const,
-    flexDirection: 'row' as const,
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-    paddingRight: 14,
+    overflow: 'hidden',
+    justifyContent: 'center',
   },
   quantityPicker: {
-    flex: 1,
-    height: 88,
-    display: 'flex' as const,
-    justifyContent: 'center' as const,
-  },
-  quantityPickerContainer: {
-    flex: 1,
-    height: 88,
-    minWidth: 0,
-    justifyContent: 'center' as const,
-    overflow: 'hidden' as const,
+    height: 120,
+    width: '100%',
   },
   quantityPickerItem: {
-    fontSize: 20,
+    fontSize: 24,
   },
   error: {
-    fontSize: 13,
-    lineHeight: 18,
-    fontWeight: '600' as const,
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '600',
   },
-  actionsHost: {
-    flex: 1,
+  actions: {
+    gap: 8,
   },
-};
+  primaryButton: {
+    width: '100%',
+    minHeight: 52,
+    borderRadius: 16,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  primaryButtonText: {
+    fontSize: 16,
+    lineHeight: 20,
+    fontWeight: '700',
+  },
+  secondaryButton: {
+    width: '100%',
+    minHeight: 52,
+    borderRadius: 16,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  secondaryButtonText: {
+    fontSize: 16,
+    lineHeight: 20,
+    fontWeight: '700',
+  },
+});

@@ -1,8 +1,9 @@
+import { ListItem } from '@expo/ui';
 import { Host, List, Section } from '@expo/ui/swift-ui';
 import { listStyle } from '@expo/ui/swift-ui/modifiers';
 import { Stack, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 
 import { createIconHeaderButton } from '@/components/navigation/native-header-items/native-header-items';
 import { PantryItemNativeListRow } from '@/components/pantry/pantry-item-row/pantry-item-row';
@@ -20,6 +21,7 @@ export default function SearchScreen() {
   const trimmedQuery = query.trim();
   const results = useMemo(() => matchPantryItems(pantryItems, query), [pantryItems, query]);
   const visibleItems = results.visibleResults;
+  const shouldShowCreateItem = Boolean(trimmedQuery) && !results.exactMatch;
   const primaryCart = pantryCarts.find(cart => cart.isPrimary) ?? pantryCarts[0] ?? null;
 
   const handleAddToCart = async (itemId: string) => {
@@ -31,12 +33,7 @@ export default function SearchScreen() {
     await moveItemToCart(itemId, primaryCart.id);
   };
 
-  const handlePrimaryAction = () => {
-    if (results.exactMatch) {
-      router.push(`/items/${results.exactMatch.id}`);
-      return;
-    }
-
+  const handleCreateItem = () => {
     if (!trimmedQuery) {
       return;
     }
@@ -104,31 +101,16 @@ export default function SearchScreen() {
       <Host colorScheme={isDark ? 'dark' : 'light'} style={[styles.host, {backgroundColor: colors.background}]}>
         <List modifiers={[listStyle('insetGrouped')]}>
           <Section title={trimmedQuery ? 'Search Results' : 'All Items'}>
-            <View style={styles.searchSection}>
-              <Text style={[styles.searchMeta, {color: colors.muted}]}>
-                {trimmedQuery
-                  ? `${visibleItems.length} ${visibleItems.length === 1 ? 'match' : 'matches'} in ${selectedPantry.name}`
-                  : `${visibleItems.length} ${visibleItems.length === 1 ? 'item' : 'items'} in ${selectedPantry.name}`}
-              </Text>
-              {trimmedQuery ? (
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={results.exactMatch ? 'Open existing item' : `Add ${trimmedQuery} as new item`}
-                  onPress={handlePrimaryAction}
-                  style={({pressed}) => [
-                    styles.primaryAction,
-                    {backgroundColor: colors.tint},
-                    pressed ? styles.primaryActionPressed : null,
-                  ]}
-                >
-                  <Text style={[styles.primaryActionText, {color: colors.textInverse}]}>
-                    {results.exactMatch ? 'Open existing item' : `Add "${trimmedQuery}" as new item`}
+            {shouldShowCreateItem ? (
+              <ListItem onPress={handleCreateItem}>
+                <View style={styles.createRowContent}>
+                  <Text numberOfLines={1} style={[styles.createTitle, {color: colors.text}]}>
+                    {trimmedQuery}
                   </Text>
-                </Pressable>
-              ) : null}
-            </View>
-          </Section>
-          <Section title={trimmedQuery ? 'Results' : 'Items'}>
+                  <Text style={[styles.createMeta, {color: colors.muted}]}>Create a new item with this name</Text>
+                </View>
+              </ListItem>
+            ) : null}
             {visibleItems.length > 0 ? (
               visibleItems.map((item, index) => (
                 <PantryItemNativeListRow
@@ -173,30 +155,19 @@ const styles = StyleSheet.create({
     padding: 20,
     justifyContent: 'center',
   },
-  searchSection: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 14,
-    gap: 8,
+  createRowContent: {
+    minHeight: 54,
+    justifyContent: 'center',
+    gap: 4,
   },
-  searchMeta: {
+  createTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    lineHeight: 22,
+  },
+  createMeta: {
     fontSize: 13,
     lineHeight: 18,
-  },
-  primaryAction: {
-    minHeight: 46,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 16,
-  },
-  primaryActionPressed: {
-    opacity: 0.75,
-  },
-  primaryActionText: {
-    fontSize: 15,
-    fontWeight: '700',
-    textAlign: 'center',
   },
   listEmpty: {
     paddingHorizontal: 4,
