@@ -1,5 +1,7 @@
-import type { ReactNode, Ref } from 'react';
-import { TextInput, View } from 'react-native';
+import type { ReactElement, ReactNode, Ref } from 'react';
+import { Host, RNHostView, TextInput } from '@expo/ui';
+import type { TextInputRef } from '@expo/ui';
+import { View } from 'react-native';
 
 import { useAppTheme, useThemedStyles } from '@/lib/theme';
 
@@ -12,7 +14,7 @@ type AppTextInputProps = {
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
   autoCorrect?: boolean;
   autoFocus?: boolean;
-  inputRef?: Ref<TextInput>;
+  inputRef?: Ref<TextInputRef>;
   rightSlot?: ReactNode;
 };
 
@@ -30,19 +32,26 @@ export function AppTextInput({
   const styles = useThemedStyles(createStyles);
 
   return (
-    <View style={styles.inputShell}>
-      <TextInput
-        ref={inputRef}
-        value={value}
-        onChangeText={onChangeText}
-        placeholder={placeholder}
-        placeholderTextColor={colors.muted}
-        autoCapitalize={autoCapitalize}
-        autoCorrect={autoCorrect}
-        autoFocus={autoFocus}
-        style={styles.input}
-      />
-      {rightSlot ? <View style={styles.inputRightSlot}>{rightSlot}</View> : null}
-    </View>
+    <Host style={styles.inputShell}>
+      <View style={styles.inputShell}>
+        <TextInput
+          key={`app-text-input-${placeholder}-${value}`}
+          ref={inputRef}
+          defaultValue={value}
+          onChangeText={onChangeText}
+          placeholder={placeholder}
+          placeholderTextColor={colors.muted}
+          autoCapitalize={autoCapitalize}
+          autoCorrect={autoCorrect}
+          autoFocus={autoFocus}
+          style={styles.input}
+        />
+        {rightSlot ? (
+          <View style={styles.inputRightSlot}>
+            <RNHostView matchContents>{rightSlot as ReactElement}</RNHostView>
+          </View>
+        ) : null}
+      </View>
+    </Host>
   );
 }

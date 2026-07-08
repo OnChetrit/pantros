@@ -75,6 +75,9 @@ export const createStyles = (colors: AppThemeColors) =>
     inputShell: {
       position: 'relative',
     },
+    inputRow: {
+      minHeight: 52,
+    },
     input: {
       minHeight: 52,
       borderRadius: 16,
@@ -98,6 +101,9 @@ export const createStyles = (colors: AppThemeColors) =>
       alignItems: 'center',
       justifyContent: 'space-between',
       gap: 12,
+    },
+    rowSpacer: {
+      flex: 1,
     },
     rowLabel: {
       color: colors.muted,
@@ -184,6 +190,12 @@ export const createStyles = (colors: AppThemeColors) =>
       justifyContent: 'space-between',
       gap: 12,
     },
+    listRowContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      width: '100%',
+      gap: 12,
+    },
     listRowEmphasized: {
       borderColor: colors.tint,
       backgroundColor: colors.tintSoft,
@@ -194,6 +206,9 @@ export const createStyles = (colors: AppThemeColors) =>
     listRowCopy: {
       flex: 1,
       gap: 3,
+    },
+    listRowSpacer: {
+      flex: 1,
     },
     listRowTitle: {
       color: colors.text,

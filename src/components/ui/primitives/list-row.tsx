@@ -1,4 +1,5 @@
-import { Text, View, Pressable } from 'react-native';
+import { Button, Host, Text } from '@expo/ui';
+import { StyleSheet, View } from 'react-native';
 
 import { useThemedStyles } from '@/lib/theme';
 
@@ -18,31 +19,41 @@ export function ListRow({
   onPress?: () => void;
 }) {
   const styles = useThemedStyles(createStyles);
+  const rowStyle = StyleSheet.compose(styles.listRow, emphasized ? styles.listRowEmphasized : null);
+  const rowViewStyle = rowStyle as never;
 
   const content = (
     <>
       <View style={styles.listRowCopy}>
-        <Text style={styles.listRowTitle}>{title}</Text>
-        {subtitle ? <Text style={styles.listRowSubtitle}>{subtitle}</Text> : null}
+        <Text textStyle={styles.listRowTitle}>{title}</Text>
+        {subtitle ? <Text textStyle={styles.listRowSubtitle}>{subtitle}</Text> : null}
       </View>
-      {rightValue ? <Text style={styles.listRowValue}>{rightValue}</Text> : null}
+      <View style={styles.listRowSpacer} />
+      {rightValue ? <Text textStyle={styles.listRowValue}>{rightValue}</Text> : null}
     </>
   );
 
   if (onPress) {
     return (
-      <Pressable
-        onPress={onPress}
-        style={({pressed}) => [
-          styles.listRow,
-          emphasized ? styles.listRowEmphasized : null,
-          pressed ? styles.listRowPressed : null,
-        ]}
-      >
-        {content}
-      </Pressable>
+      <Host>
+        <Button
+          onPress={onPress}
+          variant="text"
+          style={rowViewStyle}
+        >
+          <View style={styles.listRowContent}>
+            {content}
+          </View>
+        </Button>
+      </Host>
     );
   }
 
-  return <View style={[styles.listRow, emphasized ? styles.listRowEmphasized : null]}>{content}</View>;
+  return (
+    <Host>
+      <View style={[rowViewStyle, styles.listRowContent]}>
+        {content}
+      </View>
+    </Host>
+  );
 }

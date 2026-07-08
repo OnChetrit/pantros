@@ -1,5 +1,6 @@
 import type { PropsWithChildren, ReactNode } from 'react';
-import { Text, View } from 'react-native';
+import { Host, Text } from '@expo/ui';
+import { View } from 'react-native';
 
 import { useThemedStyles } from '@/lib/theme';
 
@@ -18,15 +19,17 @@ export function SectionCard({
   const styles = useThemedStyles(createStyles);
 
   return (
-    <View style={styles.card}>
-      <View style={styles.cardHeader}>
-        <View style={styles.cardCopy}>
-          <Text style={styles.cardTitle}>{title}</Text>
-          {subtitle ? <Text style={styles.cardSubtitle}>{subtitle}</Text> : null}
+    <Host>
+      <View style={styles.card}>
+        <View style={styles.cardHeader}>
+          <View style={styles.cardCopy}>
+            <Text textStyle={styles.cardTitle}>{title}</Text>
+            {subtitle ? <Text textStyle={styles.cardSubtitle}>{subtitle}</Text> : null}
+          </View>
+          {rightSlot}
         </View>
-        {rightSlot}
+        {children}
       </View>
-      {children}
-    </View>
+    </Host>
   );
 }

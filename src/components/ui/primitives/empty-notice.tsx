@@ -1,4 +1,4 @@
-import { Text, View } from 'react-native';
+import { Column, Host, Text } from '@expo/ui';
 
 import { useThemedStyles } from '@/lib/theme';
 
@@ -8,9 +8,11 @@ export function EmptyNotice({title, body}: {title: string; body: string}) {
   const styles = useThemedStyles(createStyles);
 
   return (
-    <View style={styles.emptyState}>
-      <Text style={styles.emptyTitle}>{title}</Text>
-      <Text style={styles.emptyBody}>{body}</Text>
-    </View>
+    <Host>
+      <Column spacing={6} style={styles.emptyState}>
+        <Text textStyle={styles.emptyTitle}>{title}</Text>
+        <Text textStyle={styles.emptyBody}>{body}</Text>
+      </Column>
+    </Host>
   );
 }
