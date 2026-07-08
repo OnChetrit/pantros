@@ -1,9 +1,9 @@
-import { ListItem } from '@expo/ui';
-import { Host, List, Section } from '@expo/ui/swift-ui';
-import { listStyle } from '@expo/ui/swift-ui/modifiers';
+import { Host, ListItem, Text } from '@expo/ui';
+import { List, Section, VStack } from '@expo/ui/swift-ui';
+import { font, foregroundStyle, listStyle } from '@expo/ui/swift-ui/modifiers';
 import { Stack, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 
 import { createIconHeaderButton } from '@/components/navigation/native-header-items/native-header-items';
 import { PantryItemNativeListRow } from '@/components/pantry/pantry-item-row/pantry-item-row';
@@ -103,12 +103,10 @@ export default function SearchScreen() {
           <Section title={trimmedQuery ? 'Search Results' : 'All Items'}>
             {shouldShowCreateItem ? (
               <ListItem onPress={handleCreateItem}>
-                <View style={styles.createRowContent}>
-                  <Text numberOfLines={1} style={[styles.createTitle, {color: colors.text}]}>
-                    {trimmedQuery}
-                  </Text>
-                  <Text style={[styles.createMeta, {color: colors.muted}]}>Create a new item with this name</Text>
-                </View>
+                <VStack spacing={4}>
+                  <Text modifiers={[font({weight: 'semibold', size: 17}), foregroundStyle(colors.text)]}>{trimmedQuery}</Text>
+                  <Text modifiers={[font({size: 13}), foregroundStyle(colors.muted)]}>Create a new item with this name</Text>
+                </VStack>
               </ListItem>
             ) : null}
             {visibleItems.length > 0 ? (
@@ -154,20 +152,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     justifyContent: 'center',
-  },
-  createRowContent: {
-    minHeight: 54,
-    justifyContent: 'center',
-    gap: 4,
-  },
-  createTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-    lineHeight: 22,
-  },
-  createMeta: {
-    fontSize: 13,
-    lineHeight: 18,
   },
   listEmpty: {
     paddingHorizontal: 4,

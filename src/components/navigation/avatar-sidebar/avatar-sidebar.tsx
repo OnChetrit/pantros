@@ -1,6 +1,7 @@
+import { Button, Host, RNHostView } from '@expo/ui';
 import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
-import { StyleSheet, Pressable } from 'react-native';
+import { StyleSheet } from 'react-native';
 
 import { AvatarBadge } from '@/components/ui/primitives';
 import { useThemedStyles } from '@/lib/theme';
@@ -17,18 +18,18 @@ export function AvatarSidebarButton() {
   );
 
   return (
-    <Pressable
-      accessibilityLabel="Open account menu"
-      onPress={() => router.push('/account/menu')}
-      style={({ pressed }) => [styles.avatarButton, pressed ? styles.avatarButtonPressed : null]}
-    >
-      <AvatarBadge
-        name={expanderName}
-        imageUrl={profile?.avatarUrl}
-        size={34}
-        showBackground={false}
-      />
-    </Pressable>
+    <Host>
+      <Button onPress={() => router.push('/account/menu')} variant="text" style={styles.avatarButton as never}>
+        <RNHostView matchContents>
+          <AvatarBadge
+            name={expanderName}
+            imageUrl={profile?.avatarUrl}
+            size={34}
+            showBackground={false}
+          />
+        </RNHostView>
+      </Button>
+    </Host>
   );
 }
 
@@ -47,9 +48,5 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) => StyleShee
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 4 },
     elevation: 3,
-  },
-  avatarButtonPressed: {
-    opacity: 0.82,
-    transform: [{ scale: 0.96 }],
   },
 });

@@ -45,8 +45,6 @@ export default function PantryScreen() {
       return leftTime - rightTime;
     };
 
-    const sorted = [...pantryItems].sort(compareBySort);
-
     return [...pantryItems].sort(compareBySort);
   }, [pantryItems, sortOption]);
 

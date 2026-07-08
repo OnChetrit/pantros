@@ -1,8 +1,8 @@
 import { Host, RNHostView, Row } from '@expo/ui';
+import type { TextInputRef } from '@expo/ui';
 import { Ionicons } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
 import { useMemo, useRef, useState } from 'react';
-import type { TextInput } from 'react-native';
 import { Alert, FlatList, StyleSheet, Text, View, Pressable } from 'react-native';
 
 import { AvatarSidebarButton } from '@/components/navigation/avatar-sidebar/avatar-sidebar';
@@ -18,7 +18,7 @@ export default function SearchScreen() {
   const styles = useThemedStyles(createStyles);
   const router = useRouter();
   const [query, setQuery] = useState('');
-  const searchInputRef = useRef<TextInput>(null);
+  const searchInputRef = useRef<TextInputRef>(null);
 
   const trimmedQuery = query.trim();
   const results = useMemo(() => matchPantryItems(pantryItems, query), [pantryItems, query]);

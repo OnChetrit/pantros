@@ -4,7 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect, useMemo } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-import { useBaseStackOptions } from '@/app/stack-options';
+import { useBaseStackOptions } from '@/components/navigation/stack-options';
 import { useAppTheme } from '@/lib/theme';
 import { AppProvider } from '@/state/app-context';
 

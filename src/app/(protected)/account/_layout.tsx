@@ -1,6 +1,6 @@
 import { Stack } from 'expo-router';
 
-import { createDetailStackOptions } from '@/app/stack-options';
+import { createDetailStackOptions } from '@/components/navigation/stack-options';
 
 export default function ProtectedAccountLayout() {
   return (

@@ -1,9 +1,8 @@
-import { Host, Picker, Text } from '@expo/ui/swift-ui';
-import { pickerStyle, tag } from '@expo/ui/swift-ui/modifiers';
+import { Host, Picker } from '@expo/ui';
 
 import type { ThemePreference } from '@/lib/theme';
 
-const THEME_OPTIONS: Array<{label: string; value: ThemePreference}> = [
+const THEME_OPTIONS: {label: string; value: ThemePreference}[] = [
   {label: 'Device', value: 'device'},
   {label: 'Light', value: 'light'},
   {label: 'Dark', value: 'dark'},
@@ -18,14 +17,12 @@ export function ThemePreferenceSelector({value, onChange}: ThemePreferenceSelect
   return (
     <Host matchContents>
       <Picker
-        selection={value}
-        onSelectionChange={selection => onChange(selection as ThemePreference)}
-        modifiers={[pickerStyle('menu')]}
+        selectedValue={value}
+        onValueChange={selection => onChange(selection as ThemePreference)}
+        appearance="menu"
       >
         {THEME_OPTIONS.map(option => (
-          <Text key={option.value} modifiers={[tag(option.value)]}>
-            {option.label}
-          </Text>
+          <Picker.Item key={option.value} label={option.label} value={option.value} />
         ))}
       </Picker>
     </Host>

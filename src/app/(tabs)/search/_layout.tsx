@@ -1,6 +1,6 @@
 import { Stack, useRouter } from 'expo-router';
 
-import { useTopLevelStackOptions } from '@/app/stack-options';
+import { useTopLevelStackOptions } from '@/components/navigation/stack-options';
 
 export default function SearchLayout() {
   const router = useRouter();

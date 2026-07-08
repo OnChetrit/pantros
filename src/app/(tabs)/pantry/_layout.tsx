@@ -1,6 +1,6 @@
 import { Stack, useRouter } from 'expo-router';
 
-import { useTopLevelStackOptions } from '@/app/stack-options';
+import { useTopLevelStackOptions } from '@/components/navigation/stack-options';
 import { useWorkspaceState } from '@/state/workspace-state';
 
 export default function PantryLayout() {

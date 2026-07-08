@@ -1,6 +1,6 @@
 import { Redirect, Stack } from 'expo-router';
 
-import { createDetailStackOptions, useBaseStackOptions } from '@/app/stack-options';
+import { createDetailStackOptions, useBaseStackOptions } from '@/components/navigation/stack-options';
 import { useAuthState } from '@/state/auth-state';
 import { useWorkspaceState } from '@/state/workspace-state';
 
