@@ -1,4 +1,5 @@
-import { Pressable, Text, View } from 'react-native';
+import { Button, Host, Text } from '@expo/ui';
+import { StyleSheet, View } from 'react-native';
 
 import { useAppTheme } from '@/lib/theme';
 
@@ -15,12 +16,23 @@ export function CartCheckoutBar({
   const {colors} = useAppTheme();
   const hasSelection = selectedCount > 0;
   const secondaryLabel = hasSelection && selectedCount === totalCount ? 'Clear' : 'Select All';
+  const titleStyle = [styles.title, {color: colors.text}] as const;
+  const countValueStyle = [styles.countBadgeValue, {color: colors.tint}] as const;
+  const secondaryButtonStyle = StyleSheet.compose(styles.secondaryButton, {
+    borderColor: colors.borderStrong,
+    backgroundColor: colors.background,
+  });
+  const secondaryTextStyle = [styles.secondaryButtonText, {color: colors.tint}] as const;
+  const primaryButtonStyle = StyleSheet.compose(styles.primaryButton, {
+    backgroundColor: hasSelection && !processing ? colors.tint : colors.borderStrong,
+  });
+  const primaryTextStyle = [styles.primaryButtonText, {color: colors.textInverse}] as const;
 
   return (
     <View style={[styles.shell]}>
       <View style={styles.headerRow}>
         <View style={styles.summaryWrap}>
-          <Text style={[styles.title, {color: colors.text}]} numberOfLines={1}>
+          <Text style={titleStyle as never} numberOfLines={1}>
             Shopping Complete
           </Text>
         </View>
@@ -33,39 +45,32 @@ export function CartCheckoutBar({
             },
           ]}
         >
-          <Text style={[styles.countBadgeValue, {color: colors.tint}]}>{selectedCount}</Text>
+          <Text style={countValueStyle as never}>{String(selectedCount)}</Text>
         </View>
       </View>
       <View style={[styles.actions, sheet ? styles.actionsSheet : null]}>
-        <Pressable
+        <Host>
+        <Button
           disabled={processing}
           onPress={onSecondaryAction}
-          style={({pressed}) => [
-            styles.secondaryButton,
-            {
-              borderColor: colors.borderStrong,
-              backgroundColor: colors.background,
-            },
-            (pressed || processing) && styles.buttonPressed,
-          ]}
+          variant="outlined"
+          style={secondaryButtonStyle as never}
         >
-          <Text style={[styles.secondaryButtonText, {color: colors.tint}]}>{secondaryLabel}</Text>
-        </Pressable>
-        <Pressable
+          <Text textStyle={secondaryTextStyle as never}>{secondaryLabel}</Text>
+        </Button>
+        </Host>
+        <Host>
+        <Button
           disabled={!hasSelection || processing}
           onPress={onSubmit}
-          style={({pressed}) => [
-            styles.primaryButton,
-            {
-              backgroundColor: hasSelection && !processing ? colors.tint : colors.borderStrong,
-            },
-            (pressed || processing || !hasSelection) && styles.buttonPressed,
-          ]}
+          variant="filled"
+          style={primaryButtonStyle as never}
         >
-          <Text style={[styles.primaryButtonText, {color: colors.textInverse}]}>
+          <Text textStyle={primaryTextStyle as never}>
             {processing ? 'Moving…' : 'Finish'}
           </Text>
-        </Pressable>
+        </Button>
+        </Host>
       </View>
     </View>
   );

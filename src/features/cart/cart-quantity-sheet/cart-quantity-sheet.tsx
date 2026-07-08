@@ -1,7 +1,7 @@
-import { BottomSheet } from '@expo/ui';
+import { BottomSheet, Button, Host, RNHostView, Row, Spacer, Text } from '@expo/ui';
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { createBottomSheetModifiers } from '@/components/sheets/sheet-presets/sheet-presets';
 import type { PantryItem } from '@/domain/models';
@@ -42,71 +42,87 @@ function CartQuantitySheetContent({visible, item, processing, errorMessage, onSa
   return (
     <BottomSheet isPresented={visible} onDismiss={onCancel} modifiers={modifiers}>
       <View style={styles.sheet}>
-        <Text style={[styles.title, {color: colors.text}]}>{item.name}</Text>
+        <Text textStyle={[styles.title, {color: colors.text}] as never}>{item.name}</Text>
 
-        <View style={[styles.stepper, {backgroundColor: colors.card, borderColor: colors.border}]}>
-          <Pressable
+        <Host style={[styles.stepper, {backgroundColor: colors.card, borderColor: colors.border}]}>
+          <Row alignment="center" spacing={12}>
+          <Button
             disabled={processing || quantity <= 1}
             onPress={() => setQuantity(current => Math.max(1, current - 1))}
-            style={({pressed}) => [
+            variant="outlined"
+            style={[
               styles.stepperButton,
               {
                 backgroundColor: colors.background,
                 borderColor: colors.border,
-                opacity: processing || quantity <= 1 ? 0.4 : pressed ? 0.7 : 1,
+                opacity: processing || quantity <= 1 ? 0.4 : 1,
               },
-            ]}
+            ] as never}
           >
-            <Ionicons name="remove" size={24} color={colors.text} />
-          </Pressable>
-          <Text style={[styles.value, {color: colors.text}]}>{quantity}</Text>
-          <Pressable
+            <RNHostView matchContents>
+              <Ionicons name="remove" size={24} color={colors.text} />
+            </RNHostView>
+          </Button>
+          <Spacer flexible />
+          <Text textStyle={[styles.value, {color: colors.text}] as never}>{String(quantity)}</Text>
+          <Spacer flexible />
+          <Button
             disabled={processing}
             onPress={() => setQuantity(current => current + 1)}
-            style={({pressed}) => [
+            variant="outlined"
+            style={[
               styles.stepperButton,
               {
                 backgroundColor: colors.background,
                 borderColor: colors.border,
-                opacity: processing ? 0.4 : pressed ? 0.7 : 1,
+                opacity: processing ? 0.4 : 1,
               },
-            ]}
+            ] as never}
           >
-            <Ionicons name="add" size={24} color={colors.text} />
-          </Pressable>
-        </View>
+            <RNHostView matchContents>
+              <Ionicons name="add" size={24} color={colors.text} />
+            </RNHostView>
+          </Button>
+          </Row>
+        </Host>
 
-        {errorMessage ? <Text style={[styles.error, {color: colors.danger}]}>{errorMessage}</Text> : null}
+        {errorMessage ? <Text textStyle={[styles.error, {color: colors.danger}] as never}>{errorMessage}</Text> : null}
 
         <View style={styles.actions}>
-          <Pressable
+          <Host>
+          <Button
             disabled={processing}
             onPress={() => onSave(quantity)}
-            style={({pressed}) => [
+            variant="filled"
+            style={[
               styles.actionButton,
               {
                 backgroundColor: colors.tint,
                 borderColor: colors.tint,
-                opacity: processing ? 0.45 : pressed ? 0.8 : 1,
+                opacity: processing ? 0.45 : 1,
               },
-            ]}
+            ] as never}
           >
-            <Text style={[styles.actionButtonLabel, {color: colors.textInverse}]}>Save quantity</Text>
-          </Pressable>
-          <Pressable
+            <Text textStyle={[styles.actionButtonLabel, {color: colors.textInverse}] as never}>Save quantity</Text>
+          </Button>
+          </Host>
+          <Host>
+          <Button
             disabled={processing}
             onPress={onCancel}
-            style={({pressed}) => [
+            variant="outlined"
+            style={[
               styles.actionButton,
               {
                 backgroundColor: colors.background,
                 borderColor: colors.border,
-                opacity: processing ? 0.45 : pressed ? 0.8 : 1,
+                opacity: processing ? 0.45 : 1,
               },
-            ]}
+            ] as never}
           >
-            <Text style={[styles.actionButtonLabel, {color: colors.text}]}>Cancel</Text>
-          </Pressable>
+            <Text textStyle={[styles.actionButtonLabel, {color: colors.text}] as never}>Cancel</Text>
+          </Button>
+          </Host>
         </View>
       </View>
     </BottomSheet>

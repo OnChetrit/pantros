@@ -1,4 +1,4 @@
-import { BottomSheet } from '@expo/ui';
+import { BottomSheet, Column, Host, RNHostView } from '@expo/ui';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useEffect, useMemo, useState } from 'react';
 import { Platform, Text, View } from 'react-native';
@@ -68,47 +68,61 @@ export function ReviewModalContent({
   const sheetModifiers = useMemo(() => createBottomSheetModifiers(), []);
 
   return (
-    <BottomSheet isPresented={visible} onDismiss={onCancel} modifiers={sheetModifiers}>
-      <View style={styles.sheet}>
-        <View style={styles.header}>
-          <Text style={[styles.title, {color: colors.text}]}>{item.name}</Text>
-        </View>
+    <Host style={{flex: 1}}>
+      <BottomSheet isPresented={visible} onDismiss={onCancel} modifiers={sheetModifiers} snapPoints={['half', 'full']}>
+        {/* <RNHostView matchContents> */}
+        <Column style={styles.sheet}>
+          <Column>
+            <RNHostView matchContents>
+              <View>
+                <Text style={[styles.title, {color: colors.text}]}>{item.name}</Text>
 
-        <View style={[styles.previewCard, {backgroundColor: colors.background, borderColor: colors.border}]}>
-          <Text style={[styles.previewLabel, {color: colors.muted}]}>Selected date</Text>
-          <Text style={[styles.previewValue, {color: colors.text}]}>{formatExpiration(reviewDate)}</Text>
-        </View>
+                <View style={[styles.previewCard, {backgroundColor: colors.background, borderColor: colors.border}]}>
+                  <Text style={[styles.previewLabel, {color: colors.muted}]}>Selected date</Text>
+                  <Text style={[styles.previewValue, {color: colors.text}]}>{formatExpiration(reviewDate)}</Text>
+                </View>
 
-        <ItemExpirationModePicker mode={mode} onChange={setMode} />
+                <ItemExpirationModePicker mode={mode} onChange={setMode} />
 
-        {mode === 'manual' ? (
-          <View style={[styles.dateCard, {backgroundColor: colors.background, borderColor: colors.border}]}>
-            <DateTimePicker
-              value={manualDate}
-              mode="date"
-              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-              onValueChange={(_, selectedDate) => {
-                if (selectedDate) {
-                  setManualDate(selectedDate);
-                }
-              }}
-              themeVariant={isDark ? 'dark' : 'light'}
-              accentColor={colors.tint}
-              textColor={colors.text}
-              style={styles.datePicker}
-            />
-          </View>
-        ) : (
-          <View style={styles.relativeInlineRow}>
-            <RelativePicker shortLabel="D" value={relativeDays} options={dayOptions} onChange={setRelativeDays} />
-            <RelativePicker shortLabel="W" value={relativeWeeks} options={weekOptions} onChange={setRelativeWeeks} />
-            <RelativePicker shortLabel="M" value={relativeMonths} options={monthOptions} onChange={setRelativeMonths} />
-          </View>
-        )}
+                {mode === 'manual' ? (
+                  <View style={[styles.dateCard, {backgroundColor: colors.background, borderColor: colors.border}]}>
+                    <DateTimePicker
+                      value={manualDate}
+                      mode="date"
+                      display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                      onValueChange={(_, selectedDate) => {
+                        if (selectedDate) {
+                          setManualDate(selectedDate);
+                        }
+                      }}
+                      themeVariant={isDark ? 'dark' : 'light'}
+                      accentColor={colors.tint}
+                      textColor={colors.text}
+                      style={styles.datePicker}
+                    />
+                  </View>
+                ) : (
+                  <View style={styles.relativeInlineRow}>
+                    <RelativePicker label="Days" value={relativeDays} options={dayOptions} onChange={setRelativeDays} />
+                    <RelativePicker
+                      label="Weeks"
+                      value={relativeWeeks}
+                      options={weekOptions}
+                      onChange={setRelativeWeeks}
+                    />
+                    <RelativePicker
+                      label="Months"
+                      value={relativeMonths}
+                      options={monthOptions}
+                      onChange={setRelativeMonths}
+                    />
+                  </View>
+                )}
 
-        {errorMessage ? <Text style={[styles.error, {color: colors.danger}]}>{errorMessage}</Text> : null}
-
-        <View style={styles.actions}>
+                {errorMessage ? <Text style={[styles.error, {color: colors.danger}]}>{errorMessage}</Text> : null}
+              </View>
+            </RNHostView>
+          </Column>
           <ActionButton
             label={isSingleItemReview ? 'Save' : step >= totalSteps ? 'Save & Finish' : 'Save & Next'}
             primary
@@ -120,9 +134,9 @@ export function ReviewModalContent({
             disabled={processing}
             onPress={onSkip}
           />
-          <ActionButton label="Cancel review" subtle disabled={processing} onPress={onCancel} />
-        </View>
-      </View>
-    </BottomSheet>
+        </Column>
+        {/* </RNHostView> */}
+      </BottomSheet>
+    </Host>
   );
 }

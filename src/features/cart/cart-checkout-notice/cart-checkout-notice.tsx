@@ -1,5 +1,5 @@
-import { Host, RNHostView, Row, Spacer } from '@expo/ui';
-import { StyleSheet, Text, Pressable, View } from 'react-native';
+import { Button, Host, RNHostView, Row, Spacer, Text } from '@expo/ui';
+import { StyleSheet, View } from 'react-native';
 
 import { useAppTheme } from '@/lib/theme';
 
@@ -13,6 +13,8 @@ export function CartCheckoutNotice({
   onDismiss: () => void;
 }) {
   const {colors} = useAppTheme();
+  const messageStyle = [styles.noticeBannerText, {color: colors.text}] as const;
+  const dismissStyle = [styles.noticeBannerDismiss, {color: colors.tint}] as const;
 
   return (
     <Host
@@ -27,14 +29,14 @@ export function CartCheckoutNotice({
       <Row alignment="center" spacing={12}>
         <RNHostView matchContents>
           <View style={styles.noticeBannerCopy}>
-            <Text style={[styles.noticeBannerText, {color: colors.text}]}>{message}</Text>
+            <Text style={messageStyle as never}>{message}</Text>
           </View>
         </RNHostView>
         <Spacer flexible />
         <RNHostView matchContents>
-          <Pressable onPress={onDismiss}>
-            <Text style={[styles.noticeBannerDismiss, {color: colors.tint}]}>Dismiss</Text>
-          </Pressable>
+          <Button onPress={onDismiss} variant="text">
+            <Text textStyle={dismissStyle as never}>Dismiss</Text>
+          </Button>
         </RNHostView>
       </Row>
     </Host>

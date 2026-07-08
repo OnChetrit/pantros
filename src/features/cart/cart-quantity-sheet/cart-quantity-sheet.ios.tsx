@@ -1,9 +1,17 @@
-import { BottomSheet } from '@expo/ui';
-import { Picker as NativePicker } from '@react-native-picker/picker';
+import { BottomSheet, Button, Column, Host, RNHostView, Text } from '@expo/ui';
+import {
+  buttonBorderShape,
+  buttonStyle,
+  controlSize,
+  disabled,
+  font,
+  foregroundStyle,
+  padding,
+} from '@expo/ui/swift-ui/modifiers';
 import { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
-import { createBottomSheetModifiers } from '@/components/sheets/sheet-presets/sheet-presets';
+import { NumberWheelInput } from '@/components/ui/primitives';
 import type { PantryItem } from '@/domain/models';
 import { useAppTheme } from '@/lib/theme';
 
@@ -45,128 +53,69 @@ function CartQuantitySheetContent({
   const {colors} = useAppTheme();
   const [quantity, setQuantity] = useState(item.quantity);
   const quantityOptions = useMemo(() => Array.from({length: 50}, (_, index) => index + 1), []);
-  const modifiers = useMemo(() => createBottomSheetModifiers(320), []);
 
   return (
-    <BottomSheet isPresented={visible} onDismiss={onCancel} modifiers={modifiers}>
-      <View style={styles.sheet}>
-        <Text numberOfLines={1} style={[styles.title, {color: colors.text}]}>
-          {item.name}
-        </Text>
+    <Host style={{flex: 1}}>
+      <BottomSheet isPresented={visible} snapPoints={[{fraction: 0.4}]} onDismiss={onCancel}>
+        <Column spacing={16} modifiers={[padding({top: 18, leading: 16, trailing: 16, bottom: 16})]}>
+          <RNHostView>
+            <View style={styles.topRow}>
+              <Host matchContents>
+                <Text modifiers={[font({weight: 'bold', size: 24}), foregroundStyle(colors.text)]}>{item.name}</Text>
+              </Host>
+              <View style={styles.wheelWrap}>
+                <NumberWheelInput
+                  compact
+                  value={quantity}
+                  options={quantityOptions}
+                  onChange={setQuantity}
+                  disabled={processing}
+                />
+              </View>
+            </View>
+          </RNHostView>
 
-        <View style={[styles.quantityInput, {backgroundColor: colors.card, borderColor: colors.border}]}>
-          <NativePicker
-            selectedValue={quantity}
-            enabled={!processing}
-            onValueChange={nextValue => {
-              if (typeof nextValue === 'number') {
-                setQuantity(nextValue);
-              }
-            }}
-            itemStyle={[styles.quantityPickerItem, {color: colors.text}]}
-            style={[styles.quantityPicker, {color: colors.text}]}
-          >
-            {quantityOptions.map(option => (
-              <NativePicker.Item key={option} label={String(option)} value={option} />
-            ))}
-          </NativePicker>
-        </View>
-
-        {errorMessage ? <Text style={[styles.error, {color: colors.danger}]}>{errorMessage}</Text> : null}
-
-        <View style={styles.actions}>
-          <Pressable
-            disabled={processing}
-            onPress={() => onSave(quantity)}
-            style={({pressed}) => [
-              styles.primaryButton,
-              {
-                backgroundColor: colors.tint,
-                borderColor: colors.tint,
-                opacity: processing ? 0.45 : pressed ? 0.8 : 1,
-              },
-            ]}
-          >
-            <Text style={[styles.primaryButtonText, {color: colors.textInverse}]}>
-              {processing ? 'Saving…' : 'Save'}
+          {errorMessage ? (
+            <Text modifiers={[font({weight: 'semibold', size: 14}), foregroundStyle(colors.danger)]}>
+              {errorMessage}
             </Text>
-          </Pressable>
-          <Pressable
-            disabled={processing}
-            onPress={onCancel}
-            style={({pressed}) => [
-              styles.secondaryButton,
-              {
-                backgroundColor: colors.background,
-                borderColor: colors.border,
-                opacity: processing ? 0.45 : pressed ? 0.8 : 1,
-              },
+          ) : null}
+
+          <Button
+            label={processing ? 'Saving…' : 'Save'}
+            onPress={() => onSave(quantity)}
+            modifiers={[
+              disabled(processing),
+              controlSize('large'),
+              buttonStyle('glassProminent'),
+              buttonBorderShape('roundedRectangle', 16),
             ]}
-          >
-            <Text style={[styles.secondaryButtonText, {color: colors.text}]}>Cancel</Text>
-          </Pressable>
-        </View>
-      </View>
-    </BottomSheet>
+          />
+          <Button
+            label="Cancel"
+            onPress={onCancel}
+            modifiers={[
+              disabled(processing),
+              controlSize('large'),
+              buttonStyle('glass'),
+              buttonBorderShape('roundedRectangle', 16),
+            ]}
+          />
+        </Column>
+      </BottomSheet>
+    </Host>
   );
 }
 
 const styles = StyleSheet.create({
-  sheet: {
-    gap: 16,
-  },
-  title: {
-    fontSize: 24,
-    lineHeight: 28,
-    fontWeight: '800',
-    textAlign: 'center',
-  },
-  quantityInput: {
-    height: 120,
-    borderRadius: 22,
-    borderWidth: 1,
-    overflow: 'hidden',
-    justifyContent: 'center',
-  },
-  quantityPicker: {
-    height: 120,
-    width: '100%',
-  },
-  quantityPickerItem: {
-    fontSize: 24,
-  },
-  error: {
-    fontSize: 14,
-    lineHeight: 20,
-    fontWeight: '600',
-  },
-  actions: {
-    gap: 8,
-  },
-  primaryButton: {
-    width: '100%',
-    minHeight: 52,
-    borderRadius: 16,
-    borderWidth: 1,
+  topRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
   },
-  primaryButtonText: {
-    fontSize: 16,
-    lineHeight: 20,
-    fontWeight: '700',
-  },
-  secondaryButton: {
-    width: '100%',
-    minHeight: 52,
-    borderRadius: 16,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  secondaryButtonText: {
-    fontSize: 16,
-    lineHeight: 20,
-    fontWeight: '700',
+  wheelWrap: {
+    width: 132,
+    flexShrink: 0,
   },
 });

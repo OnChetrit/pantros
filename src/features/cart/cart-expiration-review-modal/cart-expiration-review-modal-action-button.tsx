@@ -1,4 +1,5 @@
-import { Text, Pressable } from 'react-native';
+import { Button, Host, Text } from '@expo/ui';
+import { StyleSheet } from 'react-native';
 
 import { useAppTheme } from '@/lib/theme';
 
@@ -18,30 +19,27 @@ export function ActionButton({
   subtle?: boolean;
 }) {
   const {colors} = useAppTheme();
+  const buttonStyle = StyleSheet.compose(styles.button, {
+    backgroundColor: subtle ? 'transparent' : primary ? colors.tint : colors.tintSoft,
+    borderColor: subtle ? colors.border : primary ? colors.tint : colors.borderStrong,
+  });
+  const textStyle = [
+    styles.buttonText,
+    {
+      color: subtle ? colors.muted : primary ? colors.textInverse : colors.tint,
+    },
+  ] as const;
 
   return (
-    <Pressable
-      disabled={isDisabled}
-      onPress={onPress}
-      style={({pressed}) => [
-        styles.button,
-        {
-          backgroundColor: subtle ? 'transparent' : primary ? colors.tint : colors.tintSoft,
-          borderColor: subtle ? colors.border : primary ? colors.tint : colors.borderStrong,
-          opacity: isDisabled || pressed ? 0.55 : 1,
-        },
-      ]}
-    >
-      <Text
-        style={[
-          styles.buttonText,
-          {
-            color: subtle ? colors.muted : primary ? colors.textInverse : colors.tint,
-          },
-        ]}
+    <Host matchContents style={{flex: 1}}>
+      <Button
+        disabled={isDisabled}
+        onPress={onPress}
+        variant={subtle ? 'text' : primary ? 'filled' : 'outlined'}
+        style={buttonStyle as never}
       >
-        {label}
-      </Text>
-    </Pressable>
+        <Text textStyle={textStyle as never}>{label}</Text>
+      </Button>
+    </Host>
   );
 }

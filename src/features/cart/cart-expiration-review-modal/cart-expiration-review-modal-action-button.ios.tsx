@@ -1,4 +1,5 @@
 import { Button, Host } from '@expo/ui';
+import { buttonBorderShape, buttonStyle, controlSize, disabled } from '@expo/ui/swift-ui/modifiers';
 import { StyleSheet } from 'react-native';
 
 export function ActionButton({
@@ -18,9 +19,13 @@ export function ActionButton({
     <Host matchContents style={styles.host}>
       <Button
         label={label}
-        disabled={isDisabled}
         onPress={onPress}
-        variant={subtle ? 'text' : primary ? 'filled' : 'outlined'}
+        modifiers={[
+          disabled(isDisabled),
+          controlSize('large'),
+          buttonStyle(subtle ? 'plain' : primary ? 'glassProminent' : 'glass'),
+          buttonBorderShape('roundedRectangle', 16),
+        ]}
       />
     </Host>
   );
@@ -29,5 +34,6 @@ export function ActionButton({
 const styles = StyleSheet.create({
   host: {
     alignSelf: 'stretch',
+    flex: 1,
   },
 });

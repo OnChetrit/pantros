@@ -86,10 +86,11 @@ export function formatExpiration(value: string | null) {
 
 export const styles = StyleSheet.create({
   sheet: {
+    alignItems: 'stretch',
+    justifyContent: 'space-between',
     gap: 16,
-  },
-  header: {
-    gap: 6,
+    width: '100%',
+    flex: 1,
   },
   title: {
     fontSize: 30,
@@ -176,8 +177,11 @@ export const styles = StyleSheet.create({
   actions: {
     gap: 8,
     paddingTop: 2,
+    display: 'flex',
+    width: '100%',
   },
   button: {
+    width: '100%',
     minHeight: 52,
     borderRadius: 18,
     borderWidth: 1,
