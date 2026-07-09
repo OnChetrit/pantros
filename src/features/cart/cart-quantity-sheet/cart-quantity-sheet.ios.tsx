@@ -1,15 +1,33 @@
-import { BottomSheet, Button, Column, Host, RNHostView, Text } from '@expo/ui';
+import {
+  BottomSheet,
+  Button as SwiftUIButton,
+  Group,
+  HStack,
+  Host,
+  ProgressView,
+  RNHostView,
+  Spacer,
+  Text,
+  VStack,
+  ZStack,
+} from '@expo/ui/swift-ui';
 import {
   buttonBorderShape,
   buttonStyle,
   controlSize,
   disabled,
   font,
+  frame,
   foregroundStyle,
+  interactiveDismissDisabled,
+  lineLimit,
+  multilineTextAlignment,
   padding,
+  presentationDetents,
+  progressViewStyle,
 } from '@expo/ui/swift-ui/modifiers';
-import { useMemo, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Alert } from 'react-native';
 
 import { NumberWheelInput } from '@/components/ui/primitives';
 import type { PantryItem } from '@/domain/models';
@@ -51,71 +69,154 @@ function CartQuantitySheetContent({
   onCancel,
 }: CartQuantitySheetProps & {item: PantryItem}) {
   const {colors} = useAppTheme();
+  const [presented, setPresented] = useState(visible);
+  const allowDismissRef = useRef(false);
   const [quantity, setQuantity] = useState(item.quantity);
   const quantityOptions = useMemo(() => Array.from({length: 50}, (_, index) => index + 1), []);
+  const hasChanges = quantity !== item.quantity;
+  const confirmDisabled = processing || quantity < 1 || !hasChanges;
+
+  const requestDismiss = useCallback(() => {
+    if (processing) {
+      return;
+    }
+
+    if (!hasChanges) {
+      allowDismissRef.current = true;
+      setPresented(false);
+      return;
+    }
+
+    Alert.alert('Discard changes?', 'Your quantity change will be lost.', [
+      {
+        text: 'Keep Editing',
+        style: 'cancel',
+      },
+      {
+        text: 'Discard Changes',
+        style: 'destructive',
+        onPress: () => {
+          allowDismissRef.current = true;
+          setPresented(false);
+        },
+      },
+    ]);
+  }, [hasChanges, processing]);
+
+  const handlePresentedChange = useCallback(
+    (nextPresented: boolean) => {
+      if (!nextPresented) {
+        if (allowDismissRef.current) {
+          allowDismissRef.current = false;
+          setPresented(false);
+          return;
+        }
+
+        if (!hasChanges) {
+          allowDismissRef.current = true;
+          setPresented(false);
+          return;
+        }
+
+        Alert.alert('Discard changes?', 'Your quantity change will be lost.', [
+          {
+            text: 'Keep Editing',
+            style: 'cancel',
+            onPress: () => setPresented(true),
+          },
+          {
+            text: 'Discard Changes',
+            style: 'destructive',
+            onPress: () => {
+              allowDismissRef.current = true;
+              setPresented(false);
+            },
+          },
+        ]);
+      }
+    },
+    [hasChanges]
+  );
+
+  useEffect(() => {
+    setPresented(visible);
+  }, [visible]);
 
   return (
-    <Host style={{flex: 1}}>
-      <BottomSheet isPresented={visible} snapPoints={[{fraction: 0.4}]} onDismiss={onCancel}>
-        <Column spacing={16} modifiers={[padding({top: 18, leading: 16, trailing: 16, bottom: 16})]}>
-          <RNHostView>
-            <View style={styles.topRow}>
-              <Host matchContents>
-                <Text modifiers={[font({weight: 'bold', size: 24}), foregroundStyle(colors.text)]}>{item.name}</Text>
-              </Host>
-              <View style={styles.wheelWrap}>
-                <NumberWheelInput
-                  compact
-                  value={quantity}
-                  options={quantityOptions}
-                  onChange={setQuantity}
-                  disabled={processing}
+    <Host matchContents style={{flex: 1}}>
+      <BottomSheet isPresented={presented} onIsPresentedChange={handlePresentedChange} onDismiss={onCancel}>
+        <Group
+          modifiers={[
+            presentationDetents([{height: 180}]),
+            interactiveDismissDisabled(processing),
+            padding({top: 12, leading: 16, trailing: 16, bottom: 20}),
+          ]}
+        >
+          <VStack spacing={18}>
+            <ZStack modifiers={[frame({maxWidth: 9999})]}>
+              <Text
+                modifiers={[
+                  font({weight: 'semibold', size: 17}),
+                  lineLimit(1),
+                  multilineTextAlignment('center'),
+                  frame({maxWidth: 9999}),
+                ]}
+              >
+                {item.name}
+              </Text>
+
+              <HStack spacing={12} modifiers={[frame({maxWidth: 9999})]}>
+                <SwiftUIButton
+                  label=""
+                  systemImage="xmark"
+                  onPress={requestDismiss}
+                  modifiers={[
+                    controlSize('large'),
+                    buttonStyle('glass'),
+                    buttonBorderShape('circle'),
+                    disabled(processing),
+                    frame({width: 44, height: 44}),
+                  ]}
                 />
-              </View>
-            </View>
-          </RNHostView>
+                <Spacer />
+                <ZStack modifiers={[frame({width: 44, height: 44})]}>
+                  <SwiftUIButton
+                    label=""
+                    systemImage={processing ? undefined : 'checkmark'}
+                    onPress={() => onSave(quantity)}
+                    modifiers={[
+                      controlSize('large'),
+                      buttonStyle('glassProminent'),
+                      buttonBorderShape('circle'),
+                      disabled(confirmDisabled),
+                      frame({width: 44, height: 44}),
+                    ]}
+                  />
+                  {processing ? (
+                    <ProgressView modifiers={[progressViewStyle('circular'), controlSize('regular')]} />
+                  ) : null}
+                </ZStack>
+              </HStack>
+            </ZStack>
 
-          {errorMessage ? (
-            <Text modifiers={[font({weight: 'semibold', size: 14}), foregroundStyle(colors.danger)]}>
-              {errorMessage}
-            </Text>
-          ) : null}
+            <RNHostView>
+              <NumberWheelInput
+                compact
+                value={quantity}
+                options={quantityOptions}
+                onChange={setQuantity}
+                disabled={processing}
+              />
+            </RNHostView>
 
-          <Button
-            label={processing ? 'Saving…' : 'Save'}
-            onPress={() => onSave(quantity)}
-            modifiers={[
-              disabled(processing),
-              controlSize('large'),
-              buttonStyle('glassProminent'),
-              buttonBorderShape('roundedRectangle', 16),
-            ]}
-          />
-          <Button
-            label="Cancel"
-            onPress={onCancel}
-            modifiers={[
-              disabled(processing),
-              controlSize('large'),
-              buttonStyle('glass'),
-              buttonBorderShape('roundedRectangle', 16),
-            ]}
-          />
-        </Column>
+            {errorMessage ? (
+              <Text modifiers={[font({weight: 'semibold', size: 14}), foregroundStyle(colors.danger)]}>
+                {errorMessage}
+              </Text>
+            ) : null}
+          </VStack>
+        </Group>
       </BottomSheet>
     </Host>
   );
 }
-
-const styles = StyleSheet.create({
-  topRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  wheelWrap: {
-    width: 132,
-    flexShrink: 0,
-  },
-});

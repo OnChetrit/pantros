@@ -1,13 +1,37 @@
-import { BottomSheet, Column, Host, RNHostView } from '@expo/ui';
+import {
+  BottomSheet,
+  Button as SwiftUIButton,
+  Group,
+  HStack,
+  Host,
+  ProgressView,
+  RNHostView,
+  Spacer,
+  Text,
+  VStack,
+  ZStack,
+} from '@expo/ui/swift-ui';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { useEffect, useMemo, useState } from 'react';
-import { Platform, Text, View } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Alert, Platform, Text as RNText, View } from 'react-native';
 
-import { createBottomSheetModifiers } from '@/components/sheets/sheet-presets/sheet-presets';
 import type { PantryItem } from '@/domain/models';
 import { ItemExpirationModePicker } from '@/features/items/item-expiration-mode-picker/item-expiration-mode-picker';
-
-import { ActionButton } from './cart-expiration-review-modal-action-button';
+import {
+  buttonBorderShape,
+  buttonStyle,
+  controlSize,
+  disabled,
+  font,
+  foregroundStyle,
+  frame,
+  interactiveDismissDisabled,
+  lineLimit,
+  multilineTextAlignment,
+  padding,
+  presentationDetents,
+  progressViewStyle,
+} from '@expo/ui/swift-ui/modifiers';
 import { RelativePicker } from './cart-expiration-review-modal-relative-picker';
 import {
   addRelativeDate,
@@ -28,8 +52,6 @@ import {
 export function ReviewModalContent({
   item,
   visible,
-  step,
-  totalSteps,
   reviewDate,
   processing,
   errorMessage,
@@ -44,12 +66,14 @@ export function ReviewModalContent({
   colors: AppThemeColors;
   isDark: boolean;
 }) {
+  const [presented, setPresented] = useState(visible);
+  const allowDismissRef = useRef(false);
   const [mode, setMode] = useState<ExpirationMode>('manual');
   const [manualDate, setManualDate] = useState(() => parseIsoDate(reviewDate) ?? startOfDay(new Date()));
   const [relativeDays, setRelativeDays] = useState(() => initialRelativeState(reviewDate).days);
   const [relativeWeeks, setRelativeWeeks] = useState(() => initialRelativeState(reviewDate).weeks);
   const [relativeMonths, setRelativeMonths] = useState(() => initialRelativeState(reviewDate).months);
-  const isSingleItemReview = totalSteps <= 1;
+  const [initialReviewDate] = useState(reviewDate);
 
   const resolvedDate = useMemo(() => {
     if (mode === 'manual') {
@@ -64,22 +88,125 @@ export function ReviewModalContent({
       onChangeDate(resolvedDate);
     }
   }, [onChangeDate, resolvedDate, reviewDate]);
+  const hasChanges = resolvedDate !== initialReviewDate;
 
-  const sheetModifiers = useMemo(() => createBottomSheetModifiers(), []);
+  const requestDismiss = useCallback(() => {
+    if (processing) {
+      return;
+    }
+
+    if (!hasChanges) {
+      allowDismissRef.current = true;
+      setPresented(false);
+      return;
+    }
+
+    Alert.alert('Discard changes?', 'Your expiration changes will be lost.', [
+      {text: 'Keep Editing', style: 'cancel', onPress: () => setPresented(true)},
+      {
+        text: 'Discard Changes',
+        style: 'destructive',
+        onPress: () => {
+          allowDismissRef.current = true;
+          setPresented(false);
+        },
+      },
+    ]);
+  }, [hasChanges, processing]);
+
+  const handlePresentedChange = useCallback(
+    (nextPresented: boolean) => {
+      if (!nextPresented) {
+        if (allowDismissRef.current) {
+          allowDismissRef.current = false;
+          setPresented(false);
+          return;
+        }
+
+        requestDismiss();
+      }
+    },
+    [requestDismiss]
+  );
+
+  useEffect(() => {
+    setPresented(visible);
+  }, [visible]);
 
   return (
-    <Host style={{flex: 1}}>
-      <BottomSheet isPresented={visible} onDismiss={onCancel} modifiers={sheetModifiers} snapPoints={['half', 'full']}>
-        {/* <RNHostView matchContents> */}
-        <Column style={styles.sheet}>
-          <Column>
+    <Host>
+      <BottomSheet isPresented={presented} onIsPresentedChange={handlePresentedChange} onDismiss={onCancel}>
+        <Group
+          modifiers={[
+            presentationDetents(['medium', 'large']),
+            interactiveDismissDisabled(processing),
+            padding({top: 12, leading: 16, trailing: 16, bottom: 20}),
+          ]}
+        >
+          <VStack spacing={18}>
+            <ZStack modifiers={[frame({maxWidth: 9999})]}>
+              <Text
+                modifiers={[
+                  font({weight: 'semibold', size: 17}),
+                  lineLimit(1),
+                  multilineTextAlignment('center'),
+                  frame({maxWidth: 9999}),
+                ]}
+              >
+                {item.name}
+              </Text>
+
+              <HStack spacing={12} modifiers={[frame({maxWidth: 9999})]}>
+                <SwiftUIButton
+                  label=""
+                  systemImage="xmark"
+                  onPress={requestDismiss}
+                  modifiers={[
+                    controlSize('large'),
+                    buttonStyle('glass'),
+                    buttonBorderShape('circle'),
+                    disabled(processing),
+                    frame({width: 44, height: 44}),
+                  ]}
+                />
+                <Spacer />
+                <SwiftUIButton
+                  label=""
+                  systemImage="forward.fill"
+                  onPress={onSkip}
+                  modifiers={[
+                    controlSize('large'),
+                    buttonStyle('glass'),
+                    buttonBorderShape('circle'),
+                    disabled(processing),
+                    frame({width: 44, height: 44}),
+                  ]}
+                />
+                <ZStack modifiers={[frame({width: 44, height: 44})]}>
+                  <SwiftUIButton
+                    label=""
+                    systemImage={processing ? undefined : 'checkmark'}
+                    onPress={onSave}
+                    modifiers={[
+                      controlSize('large'),
+                      buttonStyle('glassProminent'),
+                      buttonBorderShape('circle'),
+                      disabled(!hasChanges || processing),
+                      frame({width: 44, height: 44}),
+                    ]}
+                  />
+                  {processing ? (
+                    <ProgressView modifiers={[progressViewStyle('circular'), controlSize('regular')]} />
+                  ) : null}
+                </ZStack>
+              </HStack>
+            </ZStack>
+
             <RNHostView matchContents>
               <View>
-                <Text style={[styles.title, {color: colors.text}]}>{item.name}</Text>
-
                 <View style={[styles.previewCard, {backgroundColor: colors.background, borderColor: colors.border}]}>
-                  <Text style={[styles.previewLabel, {color: colors.muted}]}>Selected date</Text>
-                  <Text style={[styles.previewValue, {color: colors.text}]}>{formatExpiration(reviewDate)}</Text>
+                  <RNText style={[styles.previewLabel, {color: colors.muted}]}>Selected date</RNText>
+                  <RNText style={[styles.previewValue, {color: colors.text}]}>{formatExpiration(resolvedDate)}</RNText>
                 </View>
 
                 <ItemExpirationModePicker mode={mode} onChange={setMode} />
@@ -119,23 +246,17 @@ export function ReviewModalContent({
                   </View>
                 )}
 
-                {errorMessage ? <Text style={[styles.error, {color: colors.danger}]}>{errorMessage}</Text> : null}
+                {errorMessage ? <RNText style={[styles.error, {color: colors.danger}]}>{errorMessage}</RNText> : null}
               </View>
             </RNHostView>
-          </Column>
-          <ActionButton
-            label={isSingleItemReview ? 'Save' : step >= totalSteps ? 'Save & Finish' : 'Save & Next'}
-            primary
-            disabled={processing}
-            onPress={onSave}
-          />
-          <ActionButton
-            label={isSingleItemReview ? 'Skip' : step >= totalSteps ? 'Skip & Finish' : 'Skip'}
-            disabled={processing}
-            onPress={onSkip}
-          />
-        </Column>
-        {/* </RNHostView> */}
+
+            {!hasChanges ? (
+              <Text modifiers={[font({size: 13}), foregroundStyle('secondaryLabel')]}>
+                No changes yet.
+              </Text>
+            ) : null}
+          </VStack>
+        </Group>
       </BottomSheet>
     </Host>
   );
