@@ -19,12 +19,11 @@ export default function ProtectedLayout() {
   }
 
   return (
-      <Stack screenOptions={screenOptions}>
+    <Stack screenOptions={screenOptions}>
       <Stack.Screen name="profile" options={createDetailStackOptions('Profile')} />
       <Stack.Screen name="settings" options={createDetailStackOptions('Settings')} />
       <Stack.Screen name="notifications" options={createDetailStackOptions('Notifications')} />
       <Stack.Screen name="account" options={{headerShown: false}} />
-      <Stack.Screen name="items" options={{headerShown: false}} />
       <Stack.Screen name="legal" options={{headerShown: false}} />
     </Stack>
   );

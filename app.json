@@ -13,7 +13,8 @@
       "deploymentTarget": "16.4",
       "usesAppleSignIn": true,
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIDesignRequiresCompatibility": true
       }
     },
     "android": {
@@ -78,7 +79,9 @@
             "buildReactNativeFromSource": true
           }
         }
-      ]
+      ],
+      "expo-asset",
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true,

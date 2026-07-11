@@ -1,6 +1,6 @@
-import { useLocalSearchParams } from 'expo-router';
+import {useLocalSearchParams} from 'expo-router';
 
-import { ItemFormScreen } from '@/features/items/item-form-screen/item-form-screen';
+import {ItemFormScreen} from '@/features/items/item-form-screen/item-form-screen';
 
 export default function NewItemModal() {
   const {barcode, name} = useLocalSearchParams<{barcode?: string | string[]; name?: string | string[]}>();

@@ -33,8 +33,8 @@ export function RootLayoutContent() {
     const handleNotificationResponse = (response: Notifications.NotificationResponse) => {
       const route = response.notification.request.content.data?.route;
 
-      if (route === '/(tabs)/cart') {
-        router.replace('/(tabs)/cart');
+      if (route === '/(tabs)/cart' || route === '/(tabs)/(main)/cart') {
+        router.replace('/(tabs)/(main)/cart');
       }
     };
 

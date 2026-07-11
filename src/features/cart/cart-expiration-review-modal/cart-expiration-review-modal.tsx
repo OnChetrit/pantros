@@ -18,14 +18,13 @@ export function CartExpirationReviewModal({
 }: CartExpirationReviewModalProps) {
   const {colors, isDark} = useAppTheme();
 
-  if (!item) {
+  if (!visible || !item) {
     return null;
   }
 
   return (
     <ReviewModalContent
       key={item.id}
-      visible={visible}
       item={item}
       step={step}
       totalSteps={totalSteps}

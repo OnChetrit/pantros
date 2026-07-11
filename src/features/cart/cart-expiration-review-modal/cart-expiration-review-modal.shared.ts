@@ -117,6 +117,8 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
   },
   dateCard: {
+    flex: 1,
+    alignItems: 'stretch',
     width: '100%',
     borderWidth: 1,
     borderRadius: 20,
@@ -136,6 +138,7 @@ export const styles = StyleSheet.create({
     gap: 10,
   },
   relativeInlineRow: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,

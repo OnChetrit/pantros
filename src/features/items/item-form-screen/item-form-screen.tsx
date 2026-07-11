@@ -3,7 +3,12 @@ import { KeyboardAvoidingView, StyleSheet } from 'react-native';
 
 import { useThemedStyles } from '@/lib/theme';
 
-import { ItemFormBody, ItemFormSaveButton, type ItemFormScreenProps, useItemFormController } from './item-form-screen.shared';
+import {
+  ItemFormBody,
+  ItemFormSaveButton,
+  type ItemFormScreenProps,
+  useItemFormController,
+} from './item-form-screen.shared';
 
 export function ItemFormScreen(props: ItemFormScreenProps) {
   const styles = useThemedStyles(createStyles);
@@ -14,6 +19,7 @@ export function ItemFormScreen(props: ItemFormScreenProps) {
       <Stack.Screen
         options={{
           title: controller.title,
+          presentation: 'formSheet',
           headerTitleAlign: 'center',
           headerBackVisible: true,
           headerRight: () => (

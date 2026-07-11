@@ -1,13 +1,11 @@
-import { Host, RNHostView, Row } from '@expo/ui';
 import type { TextInputRef } from '@expo/ui';
-import { Ionicons } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
 import { useMemo, useRef, useState } from 'react';
-import { Alert, FlatList, StyleSheet, Text, View, Pressable } from 'react-native';
+import { Alert, FlatList, StyleSheet, Text, View } from 'react-native';
 
-import { AvatarSidebarButton } from '@/components/navigation/avatar-sidebar/avatar-sidebar';
+import { createIconHeaderButton } from '@/components/navigation/native-header-items/native-header-items';
 import { PantryItemRow } from '@/components/pantry/pantry-item-row/pantry-item-row';
-import { AppTextInput, EmptyNotice, ListRow } from '@/components/ui/primitives';
+import { EmptyNotice, ListRow } from '@/components/ui/primitives';
 import { matchPantryItems } from '@/lib/pantry-insights';
 import { useAppTheme, useThemedStyles } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
@@ -70,26 +68,29 @@ export default function SearchScreen() {
       <Stack.Screen
         options={{
           title: 'Explore',
-          headerRight: () => (
-            <Host style={styles.headerActions} matchContents>
-              <Row alignment="center" spacing={10}>
-                <RNHostView matchContents>
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel="Scan barcode"
-                    accessibilityHint="Open the barcode scanner to find or create an item"
-                    onPress={handleScanBarcode}
-                    style={({pressed}) => [styles.headerIconButton, pressed ? styles.headerIconButtonPressed : null]}
-                  >
-                    <Ionicons name="barcode-outline" size={22} color={colors.tint} />
-                  </Pressable>
-                </RNHostView>
-                <RNHostView matchContents>
-                  <AvatarSidebarButton />
-                </RNHostView>
-              </Row>
-            </Host>
-          ),
+          unstable_headerRightItems: () => [
+            createIconHeaderButton({icon: 'barcode', label: 'Barcode', onPress: handleScanBarcode}),
+          ],
+          // headerRight: () => (
+          //   <Host style={styles.headerActions} matchContents>
+          //     <Row alignment="center" spacing={10}>
+          //       <RNHostView matchContents>
+          //         <Pressable
+          //           accessibilityRole="button"
+          //           accessibilityLabel="Scan barcode"
+          //           accessibilityHint="Open the barcode scanner to find or create an item"
+          //           onPress={handleScanBarcode}
+          //           style={({pressed}) => [styles.headerIconButton, pressed ? styles.headerIconButtonPressed : null]}
+          //         >
+          //           <Ionicons name="barcode-outline" size={22} color={colors.tint} />
+          //         </Pressable>
+          //       </RNHostView>
+          //       <RNHostView matchContents>
+          //         <AvatarSidebarButton />
+          //       </RNHostView>
+          //     </Row>
+          //   </Host>
+          // ),
         }}
       />
       <FlatList
@@ -103,14 +104,14 @@ export default function SearchScreen() {
         ListHeaderComponent={
           <View style={styles.searchSection}>
             <Text style={styles.eyebrow}>{trimmedQuery ? 'Search Results' : 'All Items'}</Text>
-            <AppTextInput
+            {/* <AppTextInput
               value={query}
               onChangeText={setQuery}
               placeholder="Search by name or barcode"
               autoCapitalize="none"
               autoFocus
               inputRef={searchInputRef}
-            />
+            /> */}
             <Text style={styles.searchMeta}>
               {trimmedQuery
                 ? `${visibleItems.length} ${visibleItems.length === 1 ? 'match' : 'matches'} in ${selectedPantry.name}`
@@ -167,8 +168,7 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
       padding: 20,
       justifyContent: 'center',
     },
-    headerActions: {
-    },
+    headerActions: {},
     headerIconButton: {
       minWidth: 36,
       minHeight: 36,

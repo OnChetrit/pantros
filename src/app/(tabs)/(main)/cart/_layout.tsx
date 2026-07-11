@@ -1,13 +1,11 @@
 import { Stack, useRouter } from 'expo-router';
 
 import { useTopLevelStackOptions } from '@/components/navigation/stack-options';
-import { useWorkspaceState } from '@/state/workspace-state';
 
-export default function PantryLayout() {
-  const {selectedPantry} = useWorkspaceState();
+export default function CartLayout() {
   const router = useRouter();
   const screenOptions = useTopLevelStackOptions({
-    title: selectedPantry?.name ?? 'Pantry',
+    title: 'Cart',
     onAccountPress: () => router.push('/account/menu'),
   });
 
@@ -16,7 +14,17 @@ export default function PantryLayout() {
       <Stack.Screen
         name="index"
         options={{
-          title: selectedPantry?.name ?? 'Pantry',
+          title: 'Cart',
+        }}
+      />
+      <Stack.Screen
+        name="quantity"
+        options={{
+          presentation: 'formSheet',
+          sheetGrabberVisible: true,
+          sheetAllowedDetents: [0.38],
+          headerTransparent: true,
+          contentStyle: {backgroundColor: 'transparent'},
         }}
       />
     </Stack>

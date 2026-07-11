@@ -1,5 +1,4 @@
-import { Button, Row, Spacer, Text } from '@expo/ui';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { AppTextInput } from '@/components/ui/primitives';
 import type { PantryItem } from '@/domain/models';
@@ -32,21 +31,15 @@ export function ItemNameField({
         <View style={styles.suggestionList}>
           {duplicateCandidates.map(candidate => {
             const isExact = candidate.id === exactDuplicateId;
-            const rowStyle = StyleSheet.compose(styles.suggestionRow, isExact ? styles.suggestionRowExact : null);
+            const rowStyle = [styles.suggestionRow, isExact ? styles.suggestionRowExact : null];
 
             return (
-              <Button
-                key={candidate.id}
-                onPress={() => onSelectDuplicate(candidate.id)}
-                variant="text"
-                style={rowStyle as never}
-              >
-                <Row alignment="center" spacing={12}>
-                  <Text textStyle={styles.suggestionName}>{candidate.name}</Text>
-                  <Spacer flexible />
-                  <Text textStyle={styles.suggestionAction}>{isExact ? 'Open existing' : 'Use existing'}</Text>
-                </Row>
-              </Button>
+              <Pressable key={candidate.id} onPress={() => onSelectDuplicate(candidate.id)} style={rowStyle}>
+                <View style={styles.suggestionRowContent}>
+                  <Text style={styles.suggestionName}>{candidate.name}</Text>
+                  <Text style={styles.suggestionAction}>{isExact ? 'Open existing' : 'Use existing'}</Text>
+                </View>
+              </Pressable>
             );
           })}
         </View>
@@ -70,8 +63,15 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
     suggestionRow: {
       minHeight: 40,
       paddingHorizontal: 12,
+      justifyContent: 'center',
       borderBottomWidth: StyleSheet.hairlineWidth,
       borderBottomColor: colors.border,
+    },
+    suggestionRowContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: 12,
     },
     suggestionRowExact: {
       backgroundColor: colors.tintSoft,
@@ -80,6 +80,7 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
       color: colors.text,
       fontSize: 14,
       fontWeight: '700',
+      flex: 1,
     },
     suggestionAction: {
       color: colors.tint,

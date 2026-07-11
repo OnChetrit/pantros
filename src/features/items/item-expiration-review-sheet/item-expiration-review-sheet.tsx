@@ -24,16 +24,15 @@ export function ItemExpirationReviewSheet({
   onSave,
   onCancel,
 }: ItemExpirationReviewSheetProps) {
-  const { colors, isDark } = useAppTheme();
+  const {colors, isDark} = useAppTheme();
 
-  if (!item) {
+  if (!visible || !item) {
     return null;
   }
 
   return (
     <ReviewModalContent
       key={item.id}
-      visible={visible}
       item={item}
       step={1}
       totalSteps={1}

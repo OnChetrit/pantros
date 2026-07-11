@@ -51,7 +51,6 @@ import {
 
 export function ReviewModalContent({
   item,
-  visible,
   reviewDate,
   processing,
   errorMessage,
@@ -61,12 +60,12 @@ export function ReviewModalContent({
   onCancel,
   colors,
   isDark,
-}: CartExpirationReviewModalProps & {
+}: Omit<CartExpirationReviewModalProps, 'visible' | 'item'> & {
   item: PantryItem;
   colors: AppThemeColors;
   isDark: boolean;
 }) {
-  const [presented, setPresented] = useState(visible);
+  const [presented, setPresented] = useState(true);
   const allowDismissRef = useRef(false);
   const [mode, setMode] = useState<ExpirationMode>('manual');
   const [manualDate, setManualDate] = useState(() => parseIsoDate(reviewDate) ?? startOfDay(new Date()));
@@ -128,11 +127,6 @@ export function ReviewModalContent({
     },
     [requestDismiss]
   );
-
-  useEffect(() => {
-    setPresented(visible);
-  }, [visible]);
-
   return (
     <Host>
       <BottomSheet isPresented={presented} onIsPresentedChange={handlePresentedChange} onDismiss={onCancel}>

@@ -79,14 +79,14 @@ export const createStyles = (colors: AppThemeColors) =>
       minHeight: 52,
     },
     input: {
-      minHeight: 52,
+      // minHeight: 52,
       borderRadius: 16,
       borderWidth: 1,
       borderColor: colors.borderStrong,
       backgroundColor: colors.input,
       color: colors.text,
       paddingHorizontal: 14,
-      fontSize: 16,
+      // fontSize: 16,
     },
     inputRightSlot: {
       position: 'absolute',

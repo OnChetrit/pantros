@@ -16,7 +16,6 @@ import {
   presentationDetents,
   progressViewStyle,
 } from '@expo/ui/swift-ui/modifiers';
-import { useEffect, useState } from 'react';
 
 import type { PantryItem } from '@/domain/models';
 
@@ -38,19 +37,14 @@ export function CartCheckoutSheet({
   onDismiss: () => void;
 }) {
   const hasSelection = selectedCount > 0;
-  const [presented, setPresented] = useState(isPresented);
-
-  useEffect(() => {
-    setPresented(isPresented);
-  }, [isPresented]);
 
   return (
     <Host>
       <BottomSheet
-        isPresented={presented}
+        isPresented={isPresented}
         onIsPresentedChange={presented => {
           if (!presented) {
-            setPresented(false);
+            onDismiss();
           }
         }}
         onDismiss={onDismiss}
@@ -80,7 +74,7 @@ export function CartCheckoutSheet({
                 <SwiftUIButton
                   label=""
                   systemImage="xmark"
-                  onPress={() => setPresented(false)}
+                  onPress={onDismiss}
                   modifiers={[
                     controlSize('large'),
                     buttonStyle('glass'),
