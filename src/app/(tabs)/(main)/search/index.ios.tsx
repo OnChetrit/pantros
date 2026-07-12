@@ -3,12 +3,12 @@ import { EmptyNotice } from '@/components/ui/primitives';
 import { matchPantryItems } from '@/lib/pantry-insights';
 import { useAppTheme } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
-import { Host, ListItem, Text } from '@expo/ui';
-import { List, Section, VStack } from '@expo/ui/swift-ui';
+import { Host, ListItem, Spacer, Text } from '@expo/ui';
+import { HStack, List, Section } from '@expo/ui/swift-ui';
 import { font, foregroundStyle, listStyle } from '@expo/ui/swift-ui/modifiers';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { Alert, LayoutAnimation, StyleSheet, View } from 'react-native';
 
 export default function SearchScreen() {
   const {deleteItem, moveItemToCart, moveItemToPantry, pantryCarts, pantryItems, selectedPantry} = useAppContext();
@@ -24,13 +24,28 @@ export default function SearchScreen() {
   const shouldShowCreateItem = Boolean(trimmedQuery) && !results.exactMatch;
   const primaryCart = pantryCarts.find(cart => cart.isPrimary) ?? pantryCarts[0] ?? null;
 
+  const animateListLayout = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+  };
+
   const handleAddToCart = async (itemId: string) => {
     if (!primaryCart) {
       Alert.alert('No cart available', 'Create a cart before sending items to purchase.');
       return;
     }
 
+    animateListLayout();
     await moveItemToCart(itemId, primaryCart.id);
+  };
+
+  const handleMoveToPantry = async (itemId: string) => {
+    animateListLayout();
+    await moveItemToPantry(itemId);
+  };
+
+  const handleDelete = async (itemId: string) => {
+    animateListLayout();
+    await deleteItem(itemId);
   };
 
   const handleCreateItem = () => {
@@ -58,7 +73,7 @@ export default function SearchScreen() {
       <>
         <Stack.Screen
           options={{
-            title: 'Search + Add',
+            title: 'Explore',
           }}
         />
         <View style={styles.emptyScreen}>
@@ -75,7 +90,7 @@ export default function SearchScreen() {
     <>
       <Stack.Screen
         options={{
-          title: 'Search + Add',
+          title: 'Explore',
         }}
       />
       <Stack.Toolbar placement="right">
@@ -87,14 +102,18 @@ export default function SearchScreen() {
           <Section title={trimmedQuery ? 'Search Results' : 'All Items'}>
             {shouldShowCreateItem ? (
               <ListItem onPress={handleCreateItem}>
-                <VStack spacing={4}>
-                  <Text modifiers={[font({weight: 'semibold', size: 17}), foregroundStyle(colors.text)]}>
+                <HStack spacing={4}>
+                  <Text
+                    numberOfLines={1}
+                    modifiers={[font({weight: 'semibold', size: 17}), foregroundStyle(colors.text)]}
+                  >
                     {trimmedQuery}
                   </Text>
-                  <Text modifiers={[font({size: 13}), foregroundStyle(colors.muted)]}>
+                  <Spacer />
+                  <Text numberOfLines={1} modifiers={[font({size: 13}), foregroundStyle(colors.muted)]}>
                     Create a new item with this name
                   </Text>
-                </VStack>
+                </HStack>
               </ListItem>
             ) : null}
             {visibleItems.length > 0 ? (
@@ -108,9 +127,9 @@ export default function SearchScreen() {
                   onEdit={() => router.push(`/items/${item.id}`)}
                   leftActionLabel={item.isInCart ? 'Move to Pantry' : 'Add to Cart'}
                   onLeftAction={
-                    item.isInCart ? () => void moveItemToPantry(item.id) : () => void handleAddToCart(item.id)
+                    item.isInCart ? () => void handleMoveToPantry(item.id) : () => void handleAddToCart(item.id)
                   }
-                  onDelete={() => void deleteItem(item.id)}
+                  onDelete={() => void handleDelete(item.id)}
                 />
               ))
             ) : (

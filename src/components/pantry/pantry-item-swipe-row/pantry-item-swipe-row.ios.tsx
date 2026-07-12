@@ -102,6 +102,14 @@ export function PantryItemSwipeRow({
       <ContextMenu.Items>
         <SwiftUIButton label="Edit item" systemImage="pencil" onPress={() => handleWithHaptics(onEdit)} />
 
+        {!isSelectionMode && onStartSelection ? (
+          <SwiftUIButton
+            label="Select"
+            systemImage="checkmark.circle"
+            onPress={() => handleWithHaptics(onStartSelection)}
+          />
+        ) : null}
+
         <SwiftUIButton
           label={isCart ? 'Update quantity' : 'Review expiration'}
           systemImage={isCart ? 'number.circle' : 'clock'}

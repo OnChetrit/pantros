@@ -13,7 +13,7 @@ export default function SearchScreen() {
   const styles = useThemedStyles(createStyles);
   const router = useRouter();
   const {q} = useLocalSearchParams<{q?: string | string[]}>();
-  const query = Array.isArray(q) ? q[0] ?? '' : q ?? '';
+  const query = Array.isArray(q) ? (q[0] ?? '') : (q ?? '');
 
   const trimmedQuery = query.trim();
   const results = useMemo(() => matchPantryItems(pantryItems, query), [pantryItems, query]);
@@ -43,7 +43,7 @@ export default function SearchScreen() {
       <>
         <Stack.Screen
           options={{
-            title: 'Search + Add',
+            title: 'Explore',
           }}
         />
         <View style={styles.emptyScreen}>
@@ -60,7 +60,7 @@ export default function SearchScreen() {
     <>
       <Stack.Screen
         options={{
-          title: 'Search + Add',
+          title: 'Explore',
           headerRight: () => null,
         }}
       />

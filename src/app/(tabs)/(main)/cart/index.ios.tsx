@@ -62,6 +62,11 @@ export default function CartScreen() {
     await moveItemToPantry(itemId);
   };
 
+  const handleDelete = async (itemId: string) => {
+    animateListLayout();
+    await deleteItem(itemId);
+  };
+
   if (!selectedPantry) {
     return (
       <View style={styles.emptyScreen}>
@@ -177,7 +182,7 @@ export default function CartScreen() {
                   }
                   leftActionLabel={isSelectionMode ? undefined : 'Move to Pantry'}
                   onLeftAction={isSelectionMode ? undefined : () => void handleMoveToPantry(item.id)}
-                  onDelete={() => void deleteItem(item.id)}
+                  onDelete={() => void handleDelete(item.id)}
                   isSelectionMode={isSelectionMode}
                   isSelected={selectedItemIds.includes(item.id)}
                   onToggleSelection={() => {

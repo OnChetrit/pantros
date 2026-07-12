@@ -112,6 +112,10 @@ export default function PantryScreen() {
                 const onLeftAction = item.isInCart
                   ? () => void handleMoveToPantry(item.id)
                   : () => void handleAddToCart(item.id);
+                const handleDelete = async () => {
+                  LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+                  await deleteItem(item.id);
+                };
 
                 return (
                   <PantryItemNativeListRow
@@ -141,7 +145,7 @@ export default function PantryScreen() {
                     }
                     leftActionLabel={leftActionLabel}
                     onLeftAction={onLeftAction}
-                    onDelete={() => void deleteItem(item.id)}
+                    onDelete={() => void handleDelete()}
                   />
                 );
               })

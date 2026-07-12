@@ -5,7 +5,7 @@ import { useTopLevelStackOptions } from '@/components/navigation/stack-options';
 export default function SearchLayout() {
   const router = useRouter();
   const screenOptions = useTopLevelStackOptions({
-    title: 'Search + Add',
+          title: 'Explore',
     onAccountPress: () => router.push('/account/menu'),
   });
 
@@ -14,7 +14,7 @@ export default function SearchLayout() {
       <Stack.Screen
         name="index"
         options={{
-          title: 'Search + Add',
+          title: 'Explore',
           headerSearchBarOptions: {
             placeholder: 'Search by name or barcode',
             autoCapitalize: 'none',

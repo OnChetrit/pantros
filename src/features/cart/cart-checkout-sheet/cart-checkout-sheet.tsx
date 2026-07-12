@@ -16,7 +16,6 @@ import {
   controlSize,
   disabled,
   font,
-  foregroundStyle,
   interactiveDismissDisabled,
   padding,
   presentationBackgroundInteraction,
@@ -25,12 +24,17 @@ import {
 } from '@expo/ui/swift-ui/modifiers';
 import { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import Animated, { Easing, FadeInDown, FadeOutDown, LinearTransition } from 'react-native-reanimated';
 
 import { useCartCheckout } from '@/features/cart/cart-checkout-context/cart-checkout-context';
 import { sortCartItems } from '@/features/cart/cart-items/cart-items';
 import { getCartItems } from '@/lib/pantry-insights';
 import { useAppTheme } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
+
+const CARD_STAGGER_MS = 32;
+const MAX_CARD_STAGGER_STEPS = 6;
+const CARD_LAYOUT_TRANSITION = LinearTransition.duration(180).easing(Easing.out(Easing.quad));
 
 export function CartCheckoutSheet() {
   const {pantryItems} = useAppContext();
@@ -67,7 +71,7 @@ export function CartCheckoutSheet() {
           spacing={18}
           modifiers={[
             presentationBackgroundInteraction('enabled'),
-            presentationDetents([{fraction: 0.34}, {fraction: 0.5}]),
+            presentationDetents([{height: 320}]),
             interactiveDismissDisabled(checkoutProgress.processing),
             padding({top: 12, leading: 16, trailing: 16, bottom: 16}),
           ]}
@@ -94,29 +98,36 @@ export function CartCheckoutSheet() {
                 contentInsetAdjustmentBehavior="never"
                 showsVerticalScrollIndicator={false}
               >
-                {selectedItems.map(item => (
-                  <Pressable
+                {selectedItems.map((item, index) => (
+                  <Animated.View
                     key={item.id}
-                    accessibilityRole="button"
-                    onPress={() => toggleItemSelection(item.id)}
-                    disabled={checkoutProgress.processing}
-                    style={({pressed}) => [
-                      styles.card,
-                      {
-                        backgroundColor: colors.card,
-                        borderColor: colors.border,
-                      },
-                      pressed ? {backgroundColor: colors.rowPressed} : null,
-                      checkoutProgress.processing ? styles.disabledCard : null,
-                    ]}
+                    entering={FadeInDown.duration(220).delay(Math.min(index, MAX_CARD_STAGGER_STEPS) * CARD_STAGGER_MS)}
+                    exiting={FadeOutDown.duration(160)}
+                    layout={CARD_LAYOUT_TRANSITION}
+                    style={styles.cardWrap}
                   >
-                    <Text numberOfLines={2} selectable style={[styles.cardTitle, {color: colors.text}]}>
-                      {item.name}
-                    </Text>
-                    <Text selectable style={[styles.cardMeta, {color: colors.muted}]}>
-                      {item.quantity}
-                    </Text>
-                  </Pressable>
+                    <Pressable
+                      accessibilityRole="button"
+                      onPress={() => toggleItemSelection(item.id)}
+                      disabled={checkoutProgress.processing}
+                      style={({pressed}) => [
+                        styles.card,
+                        {
+                          backgroundColor: colors.card,
+                          borderColor: colors.border,
+                        },
+                        pressed ? {backgroundColor: colors.rowPressed} : null,
+                        checkoutProgress.processing ? styles.disabledCard : null,
+                      ]}
+                    >
+                      <Text numberOfLines={2} selectable style={[styles.cardTitle, {color: colors.text}]}>
+                        {item.name}
+                      </Text>
+                      <Text selectable style={[styles.cardMeta, {color: colors.muted}]}>
+                        {item.quantity}
+                      </Text>
+                    </Pressable>
+                  </Animated.View>
                 ))}
               </ScrollView>
             </View>
@@ -156,17 +167,6 @@ function SheetHeader({
           modifiers={[controlSize('large'), buttonStyle('glass'), buttonBorderShape('automatic'), disabled(processing)]}
         />
         <Spacer />
-        <SwiftUIButton
-          label=""
-          systemImage={allSelected ? 'checklist.unchecked' : 'checklist'}
-          onPress={onSecondaryAction}
-          modifiers={[
-            controlSize('large'),
-            buttonStyle('glass'),
-            buttonBorderShape('circle'),
-            disabled(!allSelected || processing),
-          ]}
-        />
         <ZStack>
           <SwiftUIButton
             label=""
@@ -184,7 +184,9 @@ function SheetHeader({
       </HStack>
 
       <RNHostView matchContents>
-        <HeaderSummary selectedCount={selectedCount} totalCount={totalCount} />
+        <VStack spacing={4}>
+          <SwiftText modifiers={[font({weight: 'semibold', size: 22})]}>Shopping</SwiftText>
+        </VStack>
       </RNHostView>
     </VStack>
   );
@@ -204,13 +206,16 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
   },
   card: {
-    width: '48%',
+    width: '100%',
     minHeight: 104,
     borderWidth: 1,
     borderRadius: 20,
     paddingHorizontal: 14,
     paddingVertical: 14,
     justifyContent: 'space-between',
+  },
+  cardWrap: {
+    width: '48%',
   },
   disabledCard: {
     opacity: 0.5,
@@ -227,14 +232,3 @@ const styles = StyleSheet.create({
     fontVariant: ['tabular-nums'],
   },
 });
-
-function HeaderSummary({selectedCount, totalCount}: {selectedCount: number; totalCount: number}) {
-  return (
-    <VStack spacing={4}>
-      <SwiftText modifiers={[font({weight: 'semibold', size: 22})]}>Shopping</SwiftText>
-      <SwiftText modifiers={[font({size: 14}), foregroundStyle('secondaryLabel')]}>
-        {`${selectedCount} of ${totalCount} selected`}
-      </SwiftText>
-    </VStack>
-  );
-}
