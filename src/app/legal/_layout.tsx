@@ -1,6 +1,6 @@
 import { Stack } from 'expo-router';
 
-export default function ProtectedLegalLayout() {
+export default function LegalLayout() {
   return (
     <Stack>
       <Stack.Screen

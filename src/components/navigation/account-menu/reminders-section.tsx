@@ -1,5 +1,5 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { Platform, Switch, Text, Pressable } from 'react-native';
+import { Platform, Pressable, Switch, Text, View } from 'react-native';
 
 import type { NotificationPreferences } from '@/domain/models';
 import { useThemedStyles } from '@/lib/theme';
@@ -38,11 +38,13 @@ export function RemindersSection({
         icon="notifications-outline"
         label="Cart reminders"
         rightSlot={
-          <Switch
-            value={notificationPreferences?.cartRemindersEnabled ?? false}
-            disabled={!notificationPreferences || notificationsBusy}
-            onValueChange={onToggleCartReminders}
-          />
+          <View>
+            <Switch
+              value={notificationPreferences?.cartRemindersEnabled ?? false}
+              disabled={!notificationPreferences || notificationsBusy}
+              onValueChange={onToggleCartReminders}
+            />
+          </View>
         }
       />
       <MenuRow

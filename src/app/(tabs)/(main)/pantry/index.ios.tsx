@@ -1,14 +1,14 @@
-import { ListItem } from '@expo/ui';
+import { PantryItemNativeListRow } from '@/components/pantry/pantry-item-row/pantry-item-row';
+import { parsePantrySortOption } from '@/features/pantry/pantry-sort/pantry-sort-options';
+import { useAppTheme } from '@/lib/theme';
+import { useAppContext } from '@/state/app-context';
 import { Host, List, Section } from '@expo/ui/swift-ui';
 import { listStyle } from '@expo/ui/swift-ui/modifiers';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo } from 'react';
-import { Alert, LayoutAnimation, StyleSheet, View } from 'react-native';
-import { PantryItemNativeListRow } from '@/components/pantry/pantry-item-row/pantry-item-row';
-import { EmptyNotice } from '@/components/ui/primitives';
-import { parsePantrySortOption } from '@/features/pantry/pantry-sort/pantry-sort-options';
-import { useAppTheme } from '@/lib/theme';
-import { useAppContext } from '@/state/app-context';
+import { Alert, Image, LayoutAnimation, StyleSheet, Text, View } from 'react-native';
+
+const pantryEmptyIllustration = require('../../../../../assets/images/pantry-empty-state-transparent.png');
 
 export default function PantryScreen() {
   const {deleteItem, moveItemToCart, moveItemToPantry, pantryCarts, pantryItems, selectedPantry} = useAppContext();
@@ -72,20 +72,19 @@ export default function PantryScreen() {
   if (!selectedPantry) {
     return (
       <View style={styles.emptyScreen}>
-        <EmptyNotice
-          title="No pantry workspace yet"
-          body="The app is authenticated and loaded correctly, but there is no pantry membership yet. The next workspace step is pantry creation and join-by-code flows."
-        />
+        <View style={styles.emptyStateCopy}>
+          <Text style={[styles.emptyStateTitle, {color: colors.text}]}>No pantry workspace yet</Text>
+          <Text style={[styles.emptyStateBody, {color: colors.muted}]}>
+            The app is authenticated and loaded correctly, but there is no pantry membership yet. The next workspace step is pantry creation and join-by-code flows.
+          </Text>
+        </View>
       </View>
     );
   }
 
   return (
     <>
-      <Stack.Screen
-        options={{
-        }}
-      />
+      <Stack.Screen options={{}} />
       <Stack.Toolbar placement="left">
         <Stack.Toolbar.Button
           icon="arrow.up.arrow.down"
@@ -98,16 +97,25 @@ export default function PantryScreen() {
         />
       </Stack.Toolbar>
       <Stack.Toolbar placement="right">
-        <Stack.Toolbar.Button
-          icon="person.crop.circle"
-          onPress={() => router.push('/account/menu')}
-        />
+        <Stack.Toolbar.Button icon="person.crop.circle" onPress={() => router.push('/account/menu')} />
       </Stack.Toolbar>
-      <Host colorScheme={isDark ? 'dark' : 'light'} style={[styles.host, {backgroundColor: colors.background}]}>
-        <List modifiers={[listStyle('insetGrouped')]}>
-          <Section title="Pantry">
-            {visibleItems.length > 0 ? (
-              visibleItems.map((item, index) => {
+      {visibleItems.length === 0 ? (
+        <View style={[styles.emptyStateScreen, {backgroundColor: colors.background}]}>
+          <View style={styles.emptyStateContent}>
+            <Image source={pantryEmptyIllustration} style={styles.illustration} resizeMode="contain" />
+            <View style={styles.emptyStateCopy}>
+              <Text style={[styles.emptyStateTitle, {color: colors.text}]}>Your pantry is ready to stock</Text>
+              <Text style={[styles.emptyStateBody, {color: colors.muted}]}>
+                Add your first item to start tracking what&apos;s on hand and what needs to be bought next.
+              </Text>
+            </View>
+          </View>
+        </View>
+      ) : (
+        <Host colorScheme={isDark ? 'dark' : 'light'} style={[styles.host, {backgroundColor: colors.background}]}>
+          <List modifiers={[listStyle('insetGrouped')]}>
+            <Section title="">
+              {visibleItems.map((item, index) => {
                 const leftActionLabel = item.isInCart ? 'Move to Pantry' : 'Add to Cart';
                 const onLeftAction = item.isInCart
                   ? () => void handleMoveToPantry(item.id)
@@ -148,20 +156,11 @@ export default function PantryScreen() {
                     onDelete={() => void handleDelete()}
                   />
                 );
-              })
-            ) : (
-              <ListItem key="empty-pantry">
-                <View style={styles.noticeRow}>
-                  <EmptyNotice
-                    title="No pantry items yet"
-                    body="Add your first inventory item to start using the pantry as a real iOS-style list with quick actions."
-                  />
-                </View>
-              </ListItem>
-            )}
-          </Section>
-        </List>
-      </Host>
+              })}
+            </Section>
+          </List>
+        </Host>
+      )}
     </>
   );
 }
@@ -175,8 +174,36 @@ const styles = StyleSheet.create({
     padding: 20,
     justifyContent: 'center',
   },
-  noticeRow: {
-    paddingHorizontal: 4,
-    paddingVertical: 6,
+  emptyStateScreen: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+  emptyStateContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingBottom: 72,
+    gap: 18,
+  },
+  emptyStateCopy: {
+    maxWidth: 320,
+    gap: 8,
+    alignItems: 'center',
+  },
+  emptyStateTitle: {
+    fontSize: 22,
+    lineHeight: 28,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  emptyStateBody: {
+    fontSize: 15,
+    lineHeight: 22,
+    textAlign: 'center',
+  },
+  illustration: {
+    width: 260,
+    height: 260,
+    alignSelf: 'center',
   },
 });

@@ -1,4 +1,3 @@
-import { Host, RNHostView, Row } from '@expo/ui';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 import { AppButton, SectionCard, appColors } from '@/components/ui/primitives';
@@ -30,16 +29,10 @@ export function DeleteAccountIntroCard({
       subtitle="Your profile, notification settings, push tokens, and pantry memberships will be removed. This cannot be undone."
     >
       {loading ? (
-        <Host style={styles.loadingRow} matchContents>
-          <Row alignment="center" spacing={12}>
-            <RNHostView matchContents>
-              <ActivityIndicator color={appColors.tint} />
-            </RNHostView>
-            <RNHostView matchContents>
-              <Text style={styles.mutedText}>Loading your pantry ownership...</Text>
-            </RNHostView>
-          </Row>
-        </Host>
+        <View style={styles.loadingRow}>
+          <ActivityIndicator color={appColors.tint} />
+          <Text style={styles.mutedText}>Loading your pantry ownership...</Text>
+        </View>
       ) : errorMessage && !preview ? (
         <>
           <Text style={styles.errorText}>{errorMessage}</Text>
@@ -67,6 +60,9 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
   StyleSheet.create({
     loadingRow: {
       minHeight: 48,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
     },
     infoGroup: {
       gap: 8,

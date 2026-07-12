@@ -53,16 +53,13 @@ export function PantryItemSwipeRow({
       spacing={12}
       modifiers={[
         onTapGesture(isSelectionMode ? (onToggleSelection ?? onPress) : onPress),
-        // padding({horizontal: 16, vertical: 12}),
-        // frame({minHeight: 60}),
-        // ...(isSelected && isSelectionMode ? [background('#F1F2F4', shapes.roundedRectangle({cornerRadius: 12}))] : []),
       ]}
     >
       <Text
         modifiers={[
           font({weight: 'bold', size: 15}),
-          frame({width: 36, height: 36}),
-          background(isSelected && isSelectionMode ? '#D9DCE1' : '#EAF2FF', shapes.circle()),
+          frame({width: 48, height: 48}),
+          background(isSelected && isSelectionMode ? '#D9DCE1' : '#EAF2FF', shapes.roundedRectangle({cornerRadius: 8})),
         ]}
       >
         {item.name.charAt(0).toUpperCase()}

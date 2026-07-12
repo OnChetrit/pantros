@@ -2,7 +2,6 @@ import { ScrollView, View } from 'react-native';
 import type { PropsWithChildren } from 'react';
 
 import { LegalSection } from '@/components/legal/legal-section/legal-section';
-import { AppStackHeader } from '@/components/navigation/app-stack-header/app-stack-header';
 import { AppButton, AppScreen, SectionCard, appColors } from '@/components/ui/primitives';
 
 import { styles } from '../legal-screen/legal-screen.styles';
@@ -14,7 +13,6 @@ function LegalScreenComponent({
   title,
   subtitle,
   actions,
-  showHeader = true,
   children,
 }: PropsWithChildren<{
   title: string;
@@ -24,7 +22,6 @@ function LegalScreenComponent({
     onPress: () => void;
     variant?: 'primary' | 'secondary';
   }[];
-  showHeader?: boolean;
 }>) {
   return (
     <ScrollView
@@ -32,7 +29,6 @@ function LegalScreenComponent({
       contentContainerStyle={{paddingBottom: 40}}
       contentInsetAdjustmentBehavior="automatic"
     >
-      {showHeader ? <AppStackHeader title={title} showAccountMenu={false} minimalBackButton /> : null}
       <AppScreen>
         <SectionCard title={title} subtitle={subtitle}>
           {children}

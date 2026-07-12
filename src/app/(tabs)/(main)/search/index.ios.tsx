@@ -3,12 +3,14 @@ import { EmptyNotice } from '@/components/ui/primitives';
 import { matchPantryItems } from '@/lib/pantry-insights';
 import { useAppTheme } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
-import { Host, ListItem, Spacer, Text } from '@expo/ui';
-import { HStack, List, Section } from '@expo/ui/swift-ui';
+import { ListItem } from '@expo/ui';
+import { Host, HStack, List, Section, Spacer, Text } from '@expo/ui/swift-ui';
 import { font, foregroundStyle, listStyle } from '@expo/ui/swift-ui/modifiers';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo } from 'react';
-import { Alert, LayoutAnimation, StyleSheet, View } from 'react-native';
+import { Alert, Image, LayoutAnimation, StyleSheet, Text as RNText, View } from 'react-native';
+
+const searchEmptyIllustration = require('../../../../../assets/images/search-empty-state-transparent.png');
 
 export default function SearchScreen() {
   const {deleteItem, moveItemToCart, moveItemToPantry, pantryCarts, pantryItems, selectedPantry} = useAppContext();
@@ -97,27 +99,40 @@ export default function SearchScreen() {
         <Stack.Toolbar.Button icon="barcode.viewfinder" onPress={handleScanBarcode} />
         <Stack.Toolbar.Button icon="person.crop.circle" onPress={() => router.push('/account/menu')} />
       </Stack.Toolbar>
-      <Host colorScheme={isDark ? 'dark' : 'light'} style={[styles.host, {backgroundColor: colors.background}]}>
-        <List modifiers={[listStyle('insetGrouped')]}>
-          <Section title={trimmedQuery ? 'Search Results' : 'All Items'}>
-            {shouldShowCreateItem ? (
-              <ListItem onPress={handleCreateItem}>
-                <HStack spacing={4}>
-                  <Text
-                    numberOfLines={1}
-                    modifiers={[font({weight: 'semibold', size: 17}), foregroundStyle(colors.text)]}
-                  >
-                    {trimmedQuery}
-                  </Text>
-                  <Spacer />
-                  <Text numberOfLines={1} modifiers={[font({size: 13}), foregroundStyle(colors.muted)]}>
-                    Create a new item with this name
-                  </Text>
-                </HStack>
-              </ListItem>
-            ) : null}
-            {visibleItems.length > 0 ? (
-              visibleItems.map((item, index) => (
+      {visibleItems.length === 0 && !shouldShowCreateItem ? (
+        <View style={[styles.emptyStateScreen, {backgroundColor: colors.background}]}>
+          <View style={styles.emptyStateContent}>
+            <Image source={searchEmptyIllustration} style={styles.illustration} resizeMode="contain" />
+            <View style={styles.emptyStateCopy}>
+              <RNText style={[styles.emptyStateTitle, {color: colors.text}]}>
+                {trimmedQuery ? 'No matches yet' : 'Search the pantry'}
+              </RNText>
+              <RNText style={[styles.emptyStateBody, {color: colors.muted}]}>
+                {trimmedQuery
+                  ? 'Try a broader item name or scan a barcode to look again.'
+                  : 'Search by name or barcode to quickly find what is already in your pantry.'}
+              </RNText>
+            </View>
+          </View>
+        </View>
+      ) : (
+        <Host colorScheme={isDark ? 'dark' : 'light'} style={[styles.host, {backgroundColor: colors.background}]}>
+          <List modifiers={[listStyle('insetGrouped')]}>
+            <Section title={trimmedQuery ? 'Search Results' : 'All Items'}>
+              {shouldShowCreateItem ? (
+                <ListItem onPress={handleCreateItem}>
+                  <HStack spacing={4}>
+                    <Text modifiers={[font({weight: 'semibold', size: 17}), foregroundStyle(colors.text)]}>
+                      {trimmedQuery}
+                    </Text>
+                    <Spacer />
+                    <Text modifiers={[font({size: 13}), foregroundStyle(colors.muted)]}>
+                      Create a new item with this name
+                    </Text>
+                  </HStack>
+                </ListItem>
+              ) : null}
+              {visibleItems.map((item, index) => (
                 <PantryItemNativeListRow
                   key={item.id}
                   item={item}
@@ -131,22 +146,11 @@ export default function SearchScreen() {
                   }
                   onDelete={() => void handleDelete(item.id)}
                 />
-              ))
-            ) : (
-              <View style={styles.listEmpty}>
-                <EmptyNotice
-                  title={trimmedQuery ? 'No matching items' : 'No search suggestions yet'}
-                  body={
-                    trimmedQuery
-                      ? 'Try a broader name fragment or a full barcode value.'
-                      : 'Add pantry items to search them here.'
-                  }
-                />
-              </View>
-            )}
-          </Section>
-        </List>
-      </Host>
+              ))}
+            </Section>
+          </List>
+        </Host>
+      )}
     </>
   );
 }
@@ -160,8 +164,36 @@ const styles = StyleSheet.create({
     padding: 20,
     justifyContent: 'center',
   },
-  listEmpty: {
-    paddingHorizontal: 4,
-    paddingVertical: 6,
+  emptyStateScreen: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+  emptyStateContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingBottom: 72,
+    gap: 18,
+  },
+  emptyStateCopy: {
+    maxWidth: 320,
+    gap: 8,
+    alignItems: 'center',
+  },
+  emptyStateTitle: {
+    fontSize: 22,
+    lineHeight: 28,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  emptyStateBody: {
+    fontSize: 15,
+    lineHeight: 22,
+    textAlign: 'center',
+  },
+  illustration: {
+    width: 260,
+    height: 260,
+    alignSelf: 'center',
   },
 });

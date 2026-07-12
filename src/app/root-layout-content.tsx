@@ -4,14 +4,12 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect, useMemo } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-import { useBaseStackOptions } from '@/components/navigation/stack-options';
 import { useAppTheme } from '@/lib/theme';
 import { AppProvider } from '@/state/app-context';
 
 export function RootLayoutContent() {
   const {colors, isDark} = useAppTheme();
   const router = useRouter();
-  const baseStackOptions = useBaseStackOptions();
   const navigationTheme = useMemo(() => {
     const baseTheme = isDark ? DarkTheme : DefaultTheme;
 
@@ -56,7 +54,16 @@ export function RootLayoutContent() {
       <AppProvider>
         <ThemeProvider value={navigationTheme}>
           <StatusBar style={isDark ? 'light' : 'dark'} />
-          <Stack screenOptions={baseStackOptions}>
+          <Stack
+            screenOptions={{
+              contentStyle: {backgroundColor: colors.background},
+              headerShadowVisible: false,
+              headerStyle: {backgroundColor: colors.background},
+              headerTintColor: colors.tint,
+              headerTitleStyle: {color: colors.text},
+              headerLargeTitleStyle: {color: colors.text},
+            }}
+          >
             <Stack.Screen name="index" options={{headerShown: false}} />
             <Stack.Screen name="+not-found" options={{title: 'Not Found'}} />
             <Stack.Screen name="(auth)" options={{headerShown: false}} />

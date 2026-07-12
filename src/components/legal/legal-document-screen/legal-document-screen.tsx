@@ -8,11 +8,9 @@ import {
 
 export function LegalDocumentScreen({
   document,
-  showHeader = true,
   actions,
 }: {
   document: LegalDocument;
-  showHeader?: boolean;
   actions?: {
     label: string;
     onPress: () => void;
@@ -23,7 +21,6 @@ export function LegalDocumentScreen({
     <LegalScreen
       title={document.title}
       subtitle={document.subtitle}
-      showHeader={showHeader}
       actions={actions}
     >
       {document.sections.map((section) => (

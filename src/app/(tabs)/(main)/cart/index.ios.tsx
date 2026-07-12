@@ -3,7 +3,7 @@ import { Host, List, Section } from '@expo/ui/swift-ui';
 import { listStyle } from '@expo/ui/swift-ui/modifiers';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo } from 'react';
-import { LayoutAnimation, StyleSheet, View } from 'react-native';
+import { Image, LayoutAnimation, StyleSheet, Text, View } from 'react-native';
 
 import { PantryItemNativeListRow } from '@/components/pantry/pantry-item-row/pantry-item-row';
 import { EmptyNotice } from '@/components/ui/primitives';
@@ -15,6 +15,9 @@ import { parsePantrySortOption } from '@/features/pantry/pantry-sort/pantry-sort
 import { getCartItems } from '@/lib/pantry-insights';
 import { useAppTheme } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
+
+const fullCartIllustration = require('../../../../../assets/images/cart-full-empty-state-transparent.png');
+const emptyCartIllustration = require('../../../../../assets/images/cart-empty-state-transparent.png');
 
 export default function CartScreen() {
   const {deleteItem, moveItemToPantry, pantryItems, selectedPantry} = useAppContext();
@@ -129,85 +132,116 @@ export default function CartScreen() {
           hidden={isSelectionMode}
         />
       </Stack.Toolbar>
-      <Host colorScheme={isDark ? 'dark' : 'light'} style={[styles.host, {backgroundColor: colors.background}]}>
-        <List modifiers={[listStyle('insetGrouped')]}>
+      {itemsInCart.length === 0 ? (
+        <View style={[styles.emptyStateScreen, {backgroundColor: colors.background}]}>
+          <View style={styles.emptyStateContent}>
+            <Image source={emptyCartIllustration} style={styles.illustration} resizeMode="contain" />
+            <View style={styles.emptyStateCopy}>
+              <Text style={[styles.emptyStateTitle, {color: colors.text}]}>Nothing to pick up right now</Text>
+              <Text style={[styles.emptyStateBody, {color: colors.muted}]}>
+                Move pantry items into your cart and they&apos;ll appear here, ready for a quick grocery run.
+              </Text>
+            </View>
+          </View>
+        </View>
+      ) : itemsInCart.length > 0 && unselectedItems.length === 0 ? (
+        <View style={[styles.allSelectedScreen, {backgroundColor: colors.background}]}>
           {checkoutProgress.errorMessage ? (
-            <ListItem key="checkout-error">
-              <View style={styles.noticeRow}>
-                <CartCheckoutNotice
-                  tone="error"
-                  message={checkoutProgress.errorMessage}
-                  onDismiss={clearCheckoutError}
-                />
-              </View>
-            </ListItem>
+            <View style={styles.noticeRow}>
+              <CartCheckoutNotice tone="error" message={checkoutProgress.errorMessage} onDismiss={clearCheckoutError} />
+            </View>
           ) : null}
           {checkoutProgress.completionMessage ? (
-            <ListItem key="checkout-success">
-              <View style={styles.noticeRow}>
-                <CartCheckoutNotice
-                  tone="success"
-                  message={checkoutProgress.completionMessage}
-                  onDismiss={dismissCompletionMessage}
-                />
-              </View>
-            </ListItem>
+            <View style={styles.noticeRow}>
+              <CartCheckoutNotice
+                tone="success"
+                message={checkoutProgress.completionMessage}
+                onDismiss={dismissCompletionMessage}
+              />
+            </View>
           ) : null}
-          <Section title="Cart">
-            {itemsInCart.length > 0 ? (
-              unselectedItems.map((item, index) => (
-                <PantryItemNativeListRow
-                  key={item.id}
-                  item={item}
-                  displayMode="cart"
-                  isLast={index === unselectedItems.length - 1 && selectedItems.length === 0}
-                  onPress={() => {
-                    if (isSelectionMode) {
-                      animateListLayout();
-                      toggleItemSelection(item.id);
-                      return;
-                    }
-
-                    router.push(`/items/${item.id}`);
-                  }}
-                  onEdit={() => router.push(`/items/${item.id}`)}
-                  onReviewQuantity={
-                    isSelectionMode
-                      ? undefined
-                      : () =>
-                          router.push({
-                            pathname: '/cart/quantity',
-                            params: {itemId: item.id},
-                          })
-                  }
-                  leftActionLabel={isSelectionMode ? undefined : 'Move to Pantry'}
-                  onLeftAction={isSelectionMode ? undefined : () => void handleMoveToPantry(item.id)}
-                  onDelete={() => void handleDelete(item.id)}
-                  isSelectionMode={isSelectionMode}
-                  isSelected={selectedItemIds.includes(item.id)}
-                  onToggleSelection={() => {
-                    animateListLayout();
-                    toggleItemSelection(item.id);
-                  }}
-                  onStartSelection={() => {
-                    animateListLayout();
-                    enterSelectionMode(item.id);
-                  }}
-                />
-              ))
-            ) : (
-              <ListItem key="empty-cart">
+          <View style={styles.allSelectedState}>
+            <Image source={fullCartIllustration} style={styles.illustration} resizeMode="contain" />
+            <View style={styles.allSelectedCopy}>
+              <Text style={[styles.allSelectedTitle, {color: colors.text}]}>Everything is packed and ready</Text>
+              <Text style={[styles.allSelectedBody, {color: colors.muted}]}>
+                Your cart is fully selected for checkout.
+              </Text>
+            </View>
+          </View>
+        </View>
+      ) : (
+        <Host colorScheme={isDark ? 'dark' : 'light'} style={[styles.host, {backgroundColor: colors.background}]}>
+          <List modifiers={[listStyle('insetGrouped')]}>
+            {checkoutProgress.errorMessage ? (
+              <ListItem key="checkout-error">
                 <View style={styles.noticeRow}>
-                  <EmptyNotice
-                    title="Nothing to buy right now"
-                    body="Items moved into a shopping list will appear here with working native swipe actions."
+                  <CartCheckoutNotice
+                    tone="error"
+                    message={checkoutProgress.errorMessage}
+                    onDismiss={clearCheckoutError}
                   />
                 </View>
               </ListItem>
-            )}
-          </Section>
-        </List>
-      </Host>
+            ) : null}
+            {checkoutProgress.completionMessage ? (
+              <ListItem key="checkout-success">
+                <View style={styles.noticeRow}>
+                  <CartCheckoutNotice
+                    tone="success"
+                    message={checkoutProgress.completionMessage}
+                    onDismiss={dismissCompletionMessage}
+                  />
+                </View>
+              </ListItem>
+            ) : null}
+            <Section title="">
+              {itemsInCart.length > 0 ? (
+                unselectedItems.map((item, index) => (
+                  <PantryItemNativeListRow
+                    key={item.id}
+                    item={item}
+                    displayMode="cart"
+                    isLast={index === unselectedItems.length - 1 && selectedItems.length === 0}
+                    onPress={() => {
+                      if (isSelectionMode) {
+                        animateListLayout();
+                        toggleItemSelection(item.id);
+                        return;
+                      }
+
+                      router.push(`/items/${item.id}`);
+                    }}
+                    onEdit={() => router.push(`/items/${item.id}`)}
+                    onReviewQuantity={
+                      isSelectionMode
+                        ? undefined
+                        : () =>
+                            router.push({
+                              pathname: '/cart/quantity',
+                              params: {itemId: item.id},
+                            })
+                    }
+                    leftActionLabel={isSelectionMode ? undefined : 'Move to Pantry'}
+                    onLeftAction={isSelectionMode ? undefined : () => void handleMoveToPantry(item.id)}
+                    onDelete={() => void handleDelete(item.id)}
+                    isSelectionMode={isSelectionMode}
+                    isSelected={selectedItemIds.includes(item.id)}
+                    onToggleSelection={() => {
+                      animateListLayout();
+                      toggleItemSelection(item.id);
+                    }}
+                    onStartSelection={() => {
+                      animateListLayout();
+                      enterSelectionMode(item.id);
+                    }}
+                  />
+                ))
+              ) : null}
+            </Section>
+          </List>
+        </Host>
+      )}
       <CartCheckoutSheet />
     </>
   );
@@ -225,5 +259,65 @@ const styles = StyleSheet.create({
   noticeRow: {
     paddingHorizontal: 4,
     paddingVertical: 6,
+  },
+  allSelectedScreen: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+  },
+  emptyStateScreen: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+  emptyStateContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingBottom: 72,
+    gap: 18,
+  },
+  emptyStateCopy: {
+    maxWidth: 320,
+    gap: 8,
+    alignItems: 'center',
+  },
+  emptyStateTitle: {
+    fontSize: 22,
+    lineHeight: 28,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  emptyStateBody: {
+    fontSize: 15,
+    lineHeight: 22,
+    textAlign: 'center',
+  },
+  allSelectedState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingBottom: 72,
+    gap: 18,
+  },
+  allSelectedCopy: {
+    maxWidth: 320,
+    gap: 8,
+    alignItems: 'center',
+  },
+  allSelectedTitle: {
+    fontSize: 22,
+    lineHeight: 28,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  allSelectedBody: {
+    fontSize: 15,
+    lineHeight: 22,
+    textAlign: 'center',
+  },
+  illustration: {
+    width: 260,
+    height: 260,
+    alignSelf: 'center',
   },
 });

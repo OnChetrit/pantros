@@ -8,5 +8,5 @@ export default function TermsScreen() {
     return null;
   }
 
-  return <LegalDocumentScreen document={document} showHeader={false} />;
+  return <LegalDocumentScreen document={document} />;
 }

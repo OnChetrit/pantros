@@ -66,6 +66,7 @@ export function CartCheckoutSheet() {
           }
         }}
         onDismiss={exitSelectionMode}
+        modifiers={[interactiveDismissDisabled(false)]}
       >
         <VStack
           spacing={18}
@@ -161,33 +162,33 @@ function SheetHeader({
     <VStack spacing={14}>
       <HStack spacing={12}>
         <SwiftUIButton
-          label="Dismiss"
-          systemImage="xmark"
+          label="Cancel"
+          // systemImage="xmark"
           onPress={onClose}
           modifiers={[controlSize('large'), buttonStyle('glass'), buttonBorderShape('automatic'), disabled(processing)]}
         />
         <Spacer />
+        <SwiftText modifiers={[font({weight: 'semibold', size: 22})]}>Shopping</SwiftText>
+        <Spacer />
+
         <ZStack>
           <SwiftUIButton
-            label=""
-            systemImage={processing ? undefined : 'checkmark'}
+            label={processing ? '' : 'Finish'}
             onPress={onPrimaryAction}
             modifiers={[
               controlSize('large'),
               buttonStyle('glassProminent'),
-              buttonBorderShape('circle'),
+              buttonBorderShape('automatic'),
               disabled(!hasSelection || processing),
             ]}
           />
-          {processing ? <ProgressView modifiers={[progressViewStyle('circular'), controlSize('regular')]} /> : null}
+          {processing ? (
+            <ProgressView
+              modifiers={[progressViewStyle('circular'), buttonBorderShape('automatic'), controlSize('regular')]}
+            />
+          ) : null}
         </ZStack>
       </HStack>
-
-      <RNHostView matchContents>
-        <VStack spacing={4}>
-          <SwiftText modifiers={[font({weight: 'semibold', size: 22})]}>Shopping</SwiftText>
-        </VStack>
-      </RNHostView>
     </VStack>
   );
 }

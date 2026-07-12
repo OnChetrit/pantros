@@ -8,5 +8,5 @@ export default function PrivacyPolicyScreen() {
     return null;
   }
 
-  return <LegalDocumentScreen document={document} showHeader={false} />;
+  return <LegalDocumentScreen document={document} />;
 }

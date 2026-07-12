@@ -12,7 +12,6 @@ export default function SupportScreen() {
   return (
     <LegalDocumentScreen
       document={document}
-      showHeader={false}
       actions={[
         {
           label: 'Email Support',
