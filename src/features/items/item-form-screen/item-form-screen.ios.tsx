@@ -1,7 +1,6 @@
 import { Stack } from 'expo-router';
 import { KeyboardAvoidingView, StyleSheet } from 'react-native';
 
-import { createIconHeaderButton, createTextHeaderButton } from '@/components/navigation/native-header-items/native-header-items';
 import { useThemedStyles } from '@/lib/theme';
 
 import { ItemFormBody, type ItemFormScreenProps, useItemFormController } from './item-form-screen.shared';
@@ -18,28 +17,26 @@ export function ItemFormScreen(props: ItemFormScreenProps) {
           headerTitleAlign: 'center',
           headerBackVisible: Boolean(controller.item),
           headerBackButtonDisplayMode: controller.item ? 'minimal' : undefined,
-          unstable_headerRightItems: () => [
-            createTextHeaderButton({
-              label: controller.item ? 'Save' : 'Add',
-              onPress: controller.selectedPantry ? () => void controller.handleSave() : controller.handleMissingPantry,
-              disabled: controller.itemBusy || (Boolean(controller.selectedPantry) && !controller.canSave),
-              tintColor: '#0a84ff',
-              variant: 'done',
-            }),
-          ],
-          unstable_headerLeftItems:
-            !controller.item
-              ? () => [
-                  createIconHeaderButton({
-                    label: 'Close',
-                    icon: 'xmark',
-                    onPress: () => controller.router.back(),
-                    tintColor: '#0a84ff',
-                  }),
-                ]
-              : undefined,
         }}
       />
+      <Stack.Toolbar placement="left">
+        <Stack.Toolbar.Button
+          icon="xmark"
+          onPress={() => controller.router.back()}
+          tintColor="#0a84ff"
+          hidden={Boolean(controller.item)}
+        />
+      </Stack.Toolbar>
+      <Stack.Toolbar placement="right">
+        <Stack.Toolbar.Button
+          onPress={controller.selectedPantry ? () => void controller.handleSave() : controller.handleMissingPantry}
+          disabled={controller.itemBusy || (Boolean(controller.selectedPantry) && !controller.canSave)}
+          tintColor="#0a84ff"
+          variant="done"
+        >
+          {controller.item ? 'Save' : 'Add'}
+        </Stack.Toolbar.Button>
+      </Stack.Toolbar>
       <ItemFormBody
         barcode={controller.barcode}
         duplicateCandidates={controller.duplicateCandidates}

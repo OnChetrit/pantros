@@ -2,7 +2,6 @@ import { Host, RNHostView, Row } from '@expo/ui';
 import { Platform } from 'react-native';
 
 import { AvatarSidebarButton } from '@/components/navigation/avatar-sidebar/avatar-sidebar';
-import { createIconHeaderButton } from '@/components/navigation/native-header-items/native-header-items';
 import { useAppTheme } from '@/lib/theme';
 
 export function useBaseStackOptions() {
@@ -29,17 +28,6 @@ export function useTopLevelStackOptions({title, onAccountPress}: {title?: string
     headerStyle: {
       backgroundColor: Platform.OS === 'ios' ? 'transparent' : colors.background,
     },
-    unstable_headerRightItems:
-      Platform.OS === 'ios'
-        ? () => [
-            createIconHeaderButton({
-              label: 'Open account menu',
-              icon: 'person.crop.circle',
-              onPress: onAccountPress,
-              tintColor: colors.tint,
-            }),
-          ]
-        : undefined,
     headerRight:
       Platform.OS === 'ios'
         ? undefined

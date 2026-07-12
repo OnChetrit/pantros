@@ -1,5 +1,6 @@
 import { Stack, useRouter } from 'expo-router';
 
+import { COMPACT_SHEET_DETENT, REVIEW_SHEET_DETENTS, createFormSheetOptions } from '@/components/sheets/sheet-presets/sheet-presets';
 import { useTopLevelStackOptions } from '@/components/navigation/stack-options';
 import { useWorkspaceState } from '@/state/workspace-state';
 
@@ -20,24 +21,16 @@ export default function PantryLayout() {
         }}
       />
       <Stack.Screen
+        name="sort"
+        options={createFormSheetOptions({detents: [COMPACT_SHEET_DETENT], title: 'Sort'})}
+      />
+      <Stack.Screen
         name="quantity"
-        options={{
-          presentation: 'formSheet',
-          sheetGrabberVisible: true,
-          sheetAllowedDetents: [0.38],
-          headerTransparent: true,
-          contentStyle: {backgroundColor: 'transparent'},
-        }}
+        options={createFormSheetOptions({detents: [COMPACT_SHEET_DETENT]})}
       />
       <Stack.Screen
         name="review-expiration"
-        options={{
-          presentation: 'formSheet',
-          sheetGrabberVisible: true,
-          sheetAllowedDetents: [0.72],
-          headerTransparent: true,
-          contentStyle: {backgroundColor: 'transparent'},
-        }}
+        options={createFormSheetOptions({detents: REVIEW_SHEET_DETENTS})}
       />
     </Stack>
   );

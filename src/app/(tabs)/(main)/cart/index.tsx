@@ -1,18 +1,18 @@
 import { Host, RNHostView, Row } from '@expo/ui';
-import { Stack, useRouter } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect, useMemo } from 'react';
 import { FlatList, LayoutAnimation, Platform, StyleSheet, UIManager, View } from 'react-native';
 
 import { AvatarSidebarButton } from '@/components/navigation/avatar-sidebar/avatar-sidebar';
-import { PantryFilterMenu, type PantryListSortOption } from '@/components/pantry/pantry-filter-menu/pantry-filter-menu';
+import { PantryFilterMenu } from '@/components/pantry/pantry-filter-menu/pantry-filter-menu';
 import { PantryItemRow } from '@/components/pantry/pantry-item-row/pantry-item-row';
 import { EmptyNotice } from '@/components/ui/primitives';
 import { CartCheckoutSheet } from '@/features/cart/cart-checkout-bar/cart-checkout-bar';
 import { CartCheckoutNotice } from '@/features/cart/cart-checkout-notice/cart-checkout-notice';
-import { CartExpirationReviewModal } from '@/features/cart/cart-expiration-review-modal/cart-expiration-review-modal';
 import { useCartCheckout } from '@/features/cart/cart-checkout-context/cart-checkout-context';
 import { CartHeaderAction } from '@/features/cart/cart-header-action/cart-header-action';
 import { sortCartItems } from '@/features/cart/cart-items/cart-items';
+import { parsePantrySortOption } from '@/features/pantry/pantry-sort/pantry-sort-options';
 import { getCartItems } from '@/lib/pantry-insights';
 import { appColors } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
@@ -25,27 +25,20 @@ export default function CartScreen() {
   const { deleteItem, moveItemToPantry, pantryItems, selectedPantry } = useAppContext();
   const {
     checkoutProgress,
-    checkoutQueue,
     clearCheckoutError,
     clearSelection,
-    currentReviewItem,
     dismissCompletionMessage,
     enterSelectionMode,
     exitSelectionMode,
     isSelectionMode,
-    reviewDate,
-    saveAndContinueReview,
     setVisibleItems,
     selectAll,
     selectedItemIds,
-    setReviewDate,
-    skipCurrentReview,
-    startCheckout,
     toggleItemSelection,
-    cancelReview,
   } = useCartCheckout();
   const router = useRouter();
-  const [sortOption, setSortOption] = useState<PantryListSortOption>('expiration');
+  const {sort} = useLocalSearchParams<{sort?: string | string[]}>();
+  const sortOption = parsePantrySortOption(sort);
 
   const itemsInCart = useMemo(() => {
     return sortCartItems(getCartItems(pantryItems), sortOption);
@@ -61,8 +54,6 @@ export default function CartScreen() {
 
   const selectedCount = selectedItemIds.length;
   const allSelected = itemsInCart.length > 0 && selectedCount === itemsInCart.length;
-  const reviewStep =
-    currentReviewItem ? checkoutQueue.findIndex((item) => item.id === currentReviewItem.id) + 1 : 0;
 
   useEffect(() => {
     setVisibleItems(itemsInCart);
@@ -91,7 +82,7 @@ export default function CartScreen() {
             isSelectionMode ? (
               <CartHeaderAction label="Cancel" onPress={exitSelectionMode} />
             ) : (
-              <PantryFilterMenu sortOption={sortOption} onSelectSort={setSortOption} />
+              <PantryFilterMenu sortOption={sortOption} sheetHref="/cart/sort" />
             ),
           title: isSelectionMode ? `${selectedCount} selected` : 'Cart',
           headerRight: () =>
@@ -214,28 +205,7 @@ export default function CartScreen() {
           )}
         />
       </View>
-      <CartCheckoutSheet
-        isPresented={isSelectionMode}
-        onDismiss={exitSelectionMode}
-        selectedCount={selectedCount}
-        totalCount={itemsInCart.length}
-        processing={checkoutProgress.processing}
-        onSubmit={() => void startCheckout()}
-        onSecondaryAction={() => (allSelected ? clearSelection() : selectAll(itemsInCart.map((item) => item.id)))}
-      />
-      <CartExpirationReviewModal
-        visible={checkoutQueue.length > 0 && currentReviewItem !== null}
-        item={currentReviewItem}
-        step={reviewStep}
-        totalSteps={checkoutQueue.length}
-        reviewDate={reviewDate}
-        processing={checkoutProgress.processing}
-        errorMessage={checkoutProgress.errorMessage}
-        onChangeDate={setReviewDate}
-        onSave={() => void saveAndContinueReview()}
-        onSkip={() => void skipCurrentReview()}
-        onCancel={cancelReview}
-      />
+      <CartCheckoutSheet />
     </>
   );
 }

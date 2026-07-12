@@ -1,17 +1,19 @@
-import { Stack, useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { useMemo } from 'react';
 import { Alert, FlatList, LayoutAnimation, StyleSheet, View } from 'react-native';
 
-import { PantryFilterMenu, type PantryListSortOption } from '@/components/pantry/pantry-filter-menu/pantry-filter-menu';
+import { PantryFilterMenu } from '@/components/pantry/pantry-filter-menu/pantry-filter-menu';
 import { PantryItemRow } from '@/components/pantry/pantry-item-row/pantry-item-row';
 import { EmptyNotice } from '@/components/ui/primitives';
+import { parsePantrySortOption } from '@/features/pantry/pantry-sort/pantry-sort-options';
 import { appColors } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
 
 export default function PantryScreen() {
   const {deleteItem, moveItemToCart, moveItemToPantry, pantryCarts, pantryItems, selectedPantry} = useAppContext();
   const router = useRouter();
-  const [sortOption, setSortOption] = useState<PantryListSortOption>('expiration');
+  const {sort} = useLocalSearchParams<{sort?: string | string[]}>();
+  const sortOption = parsePantrySortOption(sort);
 
   const visibleItems = useMemo(() => {
     const compareBySort = (left: (typeof pantryItems)[number], right: (typeof pantryItems)[number]) => {
@@ -103,7 +105,7 @@ export default function PantryScreen() {
     <>
       <Stack.Screen
         options={{
-          headerLeft: () => <PantryFilterMenu sortOption={sortOption} onSelectSort={setSortOption} />,
+          headerLeft: () => <PantryFilterMenu sortOption={sortOption} sheetHref="/pantry/sort" />,
         }}
       />
       <FlatList

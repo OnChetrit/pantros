@@ -1,8 +1,7 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
 
-import { createIconHeaderButton } from '@/components/navigation/native-header-items/native-header-items';
 import { EmptyNotice, NumberWheelInput } from '@/components/ui/primitives';
 import { useAppTheme } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
@@ -85,26 +84,23 @@ function CartQuantityFormSheetContent({
           title: item.name,
           headerBackVisible: false,
           headerLargeTitleEnabled: false,
-          unstable_headerLeftItems: () => [
-            createIconHeaderButton({
-              label: 'Close quantity editor',
-              icon: 'xmark',
-              onPress: handleClose,
-              tintColor: '#FFFFFF',
-            }),
-          ],
-          unstable_headerRightItems: () => [
-            createIconHeaderButton({
-              label: itemBusy ? 'Saving quantity' : 'Save quantity',
-              icon: 'checkmark',
-              onPress: () => void handleSave(),
-              disabled: saveDisabled,
-              tintColor: colors.tint,
-            }),
-          ],
         }}
       />
-      <View style={styles.screen}>
+      {process.env.EXPO_OS === 'ios' ? (
+        <>
+          <Stack.Toolbar placement="left">
+            <Stack.Toolbar.Button icon="xmark" onPress={handleClose} tintColor="#FFFFFF" />
+          </Stack.Toolbar>
+          <Stack.Toolbar placement="right">
+            <Stack.Toolbar.Button
+              icon="checkmark"
+              onPress={() => void handleSave()}
+              disabled={saveDisabled}
+            />
+          </Stack.Toolbar>
+        </>
+      ) : null}
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.screen}>
         <View style={styles.content}>
           <View style={[styles.wheelCard, {backgroundColor: colors.card, borderColor: colors.border}]}>
             <NumberWheelInput value={quantity} options={quantityOptions} onChange={setQuantity} disabled={itemBusy} />
@@ -114,7 +110,7 @@ function CartQuantityFormSheetContent({
         <View style={styles.footer}>
           {errorMessage ? <Text style={[styles.errorText, {color: colors.danger}]}>{errorMessage}</Text> : null}
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </>
   );
 }

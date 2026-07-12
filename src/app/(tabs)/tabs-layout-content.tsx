@@ -47,7 +47,7 @@ export function TabsLayoutContent() {
               selected: 'plus.magnifyingglass',
             }}
           />
-          <NativeTabs.Trigger.Label hidden>Search + Add</NativeTabs.Trigger.Label>
+          <NativeTabs.Trigger.Label>Search</NativeTabs.Trigger.Label>
         </NativeTabs.Trigger>
       </NativeTabs>
     </View>

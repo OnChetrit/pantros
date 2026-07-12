@@ -1,9 +1,8 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Alert, Platform, StyleSheet, Text, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { createIconHeaderButton } from '@/components/navigation/native-header-items/native-header-items';
 import { EmptyNotice } from '@/components/ui/primitives';
 import { ItemExpirationModePicker } from '@/features/items/item-expiration-mode-picker/item-expiration-mode-picker';
 import { useAppTheme } from '@/lib/theme';
@@ -131,28 +130,24 @@ function ExpirationReviewFormContent({
           title: item.name,
           headerBackVisible: false,
           headerLargeTitleEnabled: false,
-          sheetAllowedDetents: [0.48, 0.7],
-          unstable_headerLeftItems: () => [
-            createIconHeaderButton({
-              label: 'Close expiration editor',
-              icon: 'xmark',
-              onPress: handleClose,
-              tintColor: '#FFFFFF',
-            }),
-          ],
-          unstable_headerRightItems: () => [
-            createIconHeaderButton({
-              label: itemBusy ? 'Saving expiration date' : 'Save expiration date',
-              icon: 'checkmark',
-              onPress: () => void handleSave(),
-              disabled: saveDisabled,
-              tintColor: colors.tint,
-            }),
-          ],
         }}
       />
-      <View style={styles.screen}>
-        <View style={styles.content}>
+      {process.env.EXPO_OS === 'ios' ? (
+        <>
+          <Stack.Toolbar placement="left">
+            <Stack.Toolbar.Button icon="xmark" onPress={handleClose} tintColor="#FFFFFF" />
+          </Stack.Toolbar>
+          <Stack.Toolbar placement="right">
+            <Stack.Toolbar.Button icon="checkmark" onPress={() => void handleSave()} disabled={saveDisabled} />
+          </Stack.Toolbar>
+        </>
+      ) : null}
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.screen}>
+        <ScrollView
+          contentInsetAdjustmentBehavior="automatic"
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+        >
           <View style={[sharedStyles.previewCard, {backgroundColor: colors.card, borderColor: colors.border}]}>
             <Text style={[sharedStyles.previewLabel, {color: colors.muted}]}>Selected date</Text>
             <Text style={[sharedStyles.previewValue, {color: colors.text}]}>{formatExpiration(resolvedDate)}</Text>
@@ -186,14 +181,14 @@ function ExpirationReviewFormContent({
               />
             </View>
           )}
-        </View>
+        </ScrollView>
 
         <View style={styles.footer}>
           <ItemExpirationModePicker mode={mode} onChange={setMode} />
           {errorMessage ? <Text style={[styles.errorText, {color: colors.danger}]}>{errorMessage}</Text> : null}
           {!hasChanges ? <Text style={[styles.helperText, {color: colors.muted}]}>No changes yet.</Text> : null}
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </>
   );
 }
@@ -202,12 +197,12 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingTop: 90,
     paddingBottom: 20,
     gap: 16,
   },
   content: {
-    flex: 1,
+    flexGrow: 1,
+    paddingTop: 16,
     gap: 16,
   },
   footer: {

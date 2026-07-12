@@ -1,5 +1,5 @@
 import type { PantryItem } from '@/domain/models';
-import type { PantryListSortOption } from '@/components/pantry/pantry-filter-menu/pantry-filter-menu';
+import type { PantryListSortOption } from '@/features/pantry/pantry-sort/pantry-sort-options';
 
 export function sortCartItems(items: PantryItem[], sortOption: PantryListSortOption) {
   return [...items].sort((left, right) => {

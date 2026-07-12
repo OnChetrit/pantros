@@ -1,22 +1,22 @@
-import { Host, ListItem, Text } from '@expo/ui';
-import { List, Section, VStack } from '@expo/ui/swift-ui';
-import { font, foregroundStyle, listStyle } from '@expo/ui/swift-ui/modifiers';
-import { Stack, useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
-
-import { createIconHeaderButton } from '@/components/navigation/native-header-items/native-header-items';
 import { PantryItemNativeListRow } from '@/components/pantry/pantry-item-row/pantry-item-row';
 import { EmptyNotice } from '@/components/ui/primitives';
 import { matchPantryItems } from '@/lib/pantry-insights';
 import { useAppTheme } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
+import { Host, ListItem, Text } from '@expo/ui';
+import { List, Section, VStack } from '@expo/ui/swift-ui';
+import { font, foregroundStyle, listStyle } from '@expo/ui/swift-ui/modifiers';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect, useMemo } from 'react';
+import { Alert, StyleSheet, View } from 'react-native';
 
 export default function SearchScreen() {
   const {deleteItem, moveItemToCart, moveItemToPantry, pantryCarts, pantryItems, selectedPantry} = useAppContext();
   const {colors, isDark} = useAppTheme();
   const router = useRouter();
-  const [query, setQuery] = useState('');
+  const {entry, q} = useLocalSearchParams<{entry?: string | string[]; q?: string | string[]}>();
+  const query = Array.isArray(q) ? (q[0] ?? '') : (q ?? '');
+  const entryMode = Array.isArray(entry) ? entry[0] : entry;
 
   const trimmedQuery = query.trim();
   const results = useMemo(() => matchPantryItems(pantryItems, query), [pantryItems, query]);
@@ -45,6 +45,14 @@ export default function SearchScreen() {
     router.push('/items/scan');
   };
 
+  useEffect(() => {
+    if (entryMode !== 'manual') {
+      return;
+    }
+
+    router.setParams({entry: undefined, nonce: undefined});
+  }, [entryMode, router]);
+
   if (!selectedPantry) {
     return (
       <>
@@ -67,45 +75,25 @@ export default function SearchScreen() {
     <>
       <Stack.Screen
         options={{
-          title: 'Explore',
-          unstable_headerRightItems: () => [
-            createIconHeaderButton({
-              label: 'Scan barcode',
-              icon: 'barcode.viewfinder',
-              onPress: handleScanBarcode,
-              tintColor: colors.tint,
-              accessibilityHint: 'Open the barcode scanner to find or create an item',
-            }),
-            createIconHeaderButton({
-              label: 'Open account menu',
-              icon: 'person.crop.circle',
-              onPress: () => router.push('/account/menu'),
-              tintColor: colors.tint,
-            }),
-          ],
+          title: 'Search + Add',
         }}
       />
-      <Stack.SearchBar
-        autoCapitalize="none"
-        barTintColor={colors.card}
-        placeholder="Search by name or barcode"
-        placement="automatic"
-        textColor={colors.text}
-        tintColor={colors.tint}
-        hideWhenScrolling={false}
-        allowToolbarIntegration={false}
-        onCancelButtonPress={() => setQuery('')}
-        onChangeText={event => setQuery(event.nativeEvent.text)}
-        autoFocus
-      />
+      <Stack.Toolbar placement="right">
+        <Stack.Toolbar.Button icon="barcode.viewfinder" onPress={handleScanBarcode} />
+        <Stack.Toolbar.Button icon="person.crop.circle" onPress={() => router.push('/account/menu')} />
+      </Stack.Toolbar>
       <Host colorScheme={isDark ? 'dark' : 'light'} style={[styles.host, {backgroundColor: colors.background}]}>
         <List modifiers={[listStyle('insetGrouped')]}>
           <Section title={trimmedQuery ? 'Search Results' : 'All Items'}>
             {shouldShowCreateItem ? (
               <ListItem onPress={handleCreateItem}>
                 <VStack spacing={4}>
-                  <Text modifiers={[font({weight: 'semibold', size: 17}), foregroundStyle(colors.text)]}>{trimmedQuery}</Text>
-                  <Text modifiers={[font({size: 13}), foregroundStyle(colors.muted)]}>Create a new item with this name</Text>
+                  <Text modifiers={[font({weight: 'semibold', size: 17}), foregroundStyle(colors.text)]}>
+                    {trimmedQuery}
+                  </Text>
+                  <Text modifiers={[font({size: 13}), foregroundStyle(colors.muted)]}>
+                    Create a new item with this name
+                  </Text>
                 </VStack>
               </ListItem>
             ) : null}

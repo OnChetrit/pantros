@@ -58,6 +58,7 @@ export function RootLayoutContent() {
           <StatusBar style={isDark ? 'light' : 'dark'} />
           <Stack screenOptions={baseStackOptions}>
             <Stack.Screen name="index" options={{headerShown: false}} />
+            <Stack.Screen name="+not-found" options={{title: 'Not Found'}} />
             <Stack.Screen name="(auth)" options={{headerShown: false}} />
             <Stack.Screen name="(tabs)" options={{headerShown: false}} />
             <Stack.Screen name="(protected)" options={{headerShown: false}} />

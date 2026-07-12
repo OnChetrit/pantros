@@ -1,55 +1,78 @@
-import {
-  BottomSheet,
-  Button as SwiftUIButton,
-  Group,
-  HStack,
-  Host,
-  ProgressView,
-  RNHostView,
-  Spacer,
-  Text,
-  VStack,
-  ZStack,
-} from '@expo/ui/swift-ui';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Platform, Text as RNText, View } from 'react-native';
+import { Stack, useRouter } from 'expo-router';
+import { useEffect, useMemo, useState } from 'react';
+import { Alert, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import type { PantryItem } from '@/domain/models';
+import { EmptyNotice } from '@/components/ui/primitives';
+import { useCartCheckout } from '@/features/cart/cart-checkout-context/cart-checkout-context';
 import { ItemExpirationModePicker } from '@/features/items/item-expiration-mode-picker/item-expiration-mode-picker';
-import {
-  buttonBorderShape,
-  buttonStyle,
-  controlSize,
-  disabled,
-  font,
-  foregroundStyle,
-  frame,
-  interactiveDismissDisabled,
-  lineLimit,
-  multilineTextAlignment,
-  padding,
-  presentationDetents,
-  progressViewStyle,
-} from '@expo/ui/swift-ui/modifiers';
+import { useAppTheme } from '@/lib/theme';
+
 import { RelativePicker } from './cart-expiration-review-modal-relative-picker';
 import {
   addRelativeDate,
-  type AppThemeColors,
-  type CartExpirationReviewModalProps,
   dayOptions,
-  type ExpirationMode,
   formatExpiration,
   initialRelativeState,
   monthOptions,
   parseIsoDate,
+  styles as sharedStyles,
   startOfDay,
-  styles,
   toIsoDate,
   weekOptions,
+  type ExpirationMode,
 } from './cart-expiration-review-modal.shared';
 
-export function ReviewModalContent({
+export function CartExpirationReviewScreen() {
+  const {
+    checkoutProgress,
+    checkoutQueue,
+    currentReviewItem,
+    reviewDate,
+    saveAndContinueReview,
+    setReviewDate,
+    skipCurrentReview,
+    cancelReview,
+  } = useCartCheckout();
+  const {colors, isDark} = useAppTheme();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!currentReviewItem) {
+      router.back();
+    }
+  }, [currentReviewItem, router]);
+
+  if (!currentReviewItem) {
+    return (
+      <EmptyNotice
+        title="No item in review"
+        body="The selected cart item is no longer waiting for an expiration date."
+      />
+    );
+  }
+
+  const reviewStep = checkoutQueue.findIndex(item => item.id === currentReviewItem.id) + 1;
+
+  return (
+    <CartExpirationReviewContent
+      errorMessage={checkoutProgress.errorMessage}
+      isDark={isDark}
+      item={currentReviewItem}
+      onCancel={cancelReview}
+      onChangeDate={setReviewDate}
+      onSave={() => void saveAndContinueReview()}
+      onSkip={() => void skipCurrentReview()}
+      processing={checkoutProgress.processing}
+      reviewDate={reviewDate}
+      step={reviewStep}
+      totalSteps={checkoutQueue.length}
+      colors={colors}
+    />
+  );
+}
+
+function CartExpirationReviewContent({
   item,
   reviewDate,
   processing,
@@ -60,13 +83,23 @@ export function ReviewModalContent({
   onCancel,
   colors,
   isDark,
-}: Omit<CartExpirationReviewModalProps, 'visible' | 'item'> & {
-  item: PantryItem;
-  colors: AppThemeColors;
+  step,
+  totalSteps,
+}: {
+  item: NonNullable<ReturnType<typeof useCartCheckout>['currentReviewItem']>;
+  reviewDate: string;
+  processing: boolean;
+  errorMessage: string | null;
+  onChangeDate: (value: string) => void;
+  onSave: () => void;
+  onSkip: () => void;
+  onCancel: () => void;
+  colors: ReturnType<typeof useAppTheme>['colors'];
   isDark: boolean;
+  step: number;
+  totalSteps: number;
 }) {
-  const [presented, setPresented] = useState(true);
-  const allowDismissRef = useRef(false);
+  const router = useRouter();
   const [mode, setMode] = useState<ExpirationMode>('manual');
   const [manualDate, setManualDate] = useState(() => parseIsoDate(reviewDate) ?? startOfDay(new Date()));
   const [relativeDays, setRelativeDays] = useState(() => initialRelativeState(reviewDate).days);
@@ -87,171 +120,128 @@ export function ReviewModalContent({
       onChangeDate(resolvedDate);
     }
   }, [onChangeDate, resolvedDate, reviewDate]);
+
   const hasChanges = resolvedDate !== initialReviewDate;
 
-  const requestDismiss = useCallback(() => {
+  const handleClose = () => {
     if (processing) {
       return;
     }
 
     if (!hasChanges) {
-      allowDismissRef.current = true;
-      setPresented(false);
+      onCancel();
+      router.back();
       return;
     }
 
     Alert.alert('Discard changes?', 'Your expiration changes will be lost.', [
-      {text: 'Keep Editing', style: 'cancel', onPress: () => setPresented(true)},
+      {text: 'Keep Editing', style: 'cancel'},
       {
         text: 'Discard Changes',
         style: 'destructive',
         onPress: () => {
-          allowDismissRef.current = true;
-          setPresented(false);
+          onCancel();
+          router.back();
         },
       },
     ]);
-  }, [hasChanges, processing]);
+  };
 
-  const handlePresentedChange = useCallback(
-    (nextPresented: boolean) => {
-      if (!nextPresented) {
-        if (allowDismissRef.current) {
-          allowDismissRef.current = false;
-          setPresented(false);
-          return;
-        }
-
-        requestDismiss();
-      }
-    },
-    [requestDismiss]
-  );
   return (
-    <Host>
-      <BottomSheet isPresented={presented} onIsPresentedChange={handlePresentedChange} onDismiss={onCancel}>
-        <Group
-          modifiers={[
-            presentationDetents(['medium', 'large']),
-            interactiveDismissDisabled(processing),
-            padding({top: 12, leading: 16, trailing: 16, bottom: 20}),
-          ]}
-        >
-          <VStack spacing={18}>
-            <ZStack modifiers={[frame({maxWidth: 9999})]}>
-              <Text
-                modifiers={[
-                  font({weight: 'semibold', size: 17}),
-                  lineLimit(1),
-                  multilineTextAlignment('center'),
-                  frame({maxWidth: 9999}),
-                ]}
-              >
-                {item.name}
-              </Text>
+    <>
+      <Stack.Screen
+        options={{
+          title: item.name,
+          headerLargeTitle: false,
+        }}
+      />
+      {process.env.EXPO_OS === 'ios' ? (
+        <>
+          <Stack.Toolbar placement="left">
+            <Stack.Toolbar.Button icon="xmark" onPress={handleClose} disabled={processing} />
+          </Stack.Toolbar>
+          <Stack.Toolbar placement="right">
+            <Stack.Toolbar.Button disabled tintColor={colors.muted}>
+              {`${step}/${totalSteps}`}
+            </Stack.Toolbar.Button>
+            <Stack.Toolbar.Button icon="forward.fill" onPress={onSkip} disabled={processing} />
+            <Stack.Toolbar.Button onPress={onSave} disabled={!hasChanges || processing} variant="done">
+              Save
+            </Stack.Toolbar.Button>
+          </Stack.Toolbar>
+        </>
+      ) : null}
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={[styles.previewCard, {backgroundColor: colors.card, borderColor: colors.border}]}>
+          <Text selectable style={[sharedStyles.previewLabel, {color: colors.muted}]}>
+            Selected date
+          </Text>
+          <Text selectable style={[sharedStyles.previewValue, {color: colors.text}]}>
+            {formatExpiration(resolvedDate)}
+          </Text>
+        </View>
 
-              <HStack spacing={12} modifiers={[frame({maxWidth: 9999})]}>
-                <SwiftUIButton
-                  label=""
-                  systemImage="xmark"
-                  onPress={requestDismiss}
-                  modifiers={[
-                    controlSize('large'),
-                    buttonStyle('glass'),
-                    buttonBorderShape('circle'),
-                    disabled(processing),
-                    frame({width: 44, height: 44}),
-                  ]}
-                />
-                <Spacer />
-                <SwiftUIButton
-                  label=""
-                  systemImage="forward.fill"
-                  onPress={onSkip}
-                  modifiers={[
-                    controlSize('large'),
-                    buttonStyle('glass'),
-                    buttonBorderShape('circle'),
-                    disabled(processing),
-                    frame({width: 44, height: 44}),
-                  ]}
-                />
-                <ZStack modifiers={[frame({width: 44, height: 44})]}>
-                  <SwiftUIButton
-                    label=""
-                    systemImage={processing ? undefined : 'checkmark'}
-                    onPress={onSave}
-                    modifiers={[
-                      controlSize('large'),
-                      buttonStyle('glassProminent'),
-                      buttonBorderShape('circle'),
-                      disabled(!hasChanges || processing),
-                      frame({width: 44, height: 44}),
-                    ]}
-                  />
-                  {processing ? (
-                    <ProgressView modifiers={[progressViewStyle('circular'), controlSize('regular')]} />
-                  ) : null}
-                </ZStack>
-              </HStack>
-            </ZStack>
+        <ItemExpirationModePicker mode={mode} onChange={setMode} />
 
-            <RNHostView matchContents>
-              <View>
-                <View style={[styles.previewCard, {backgroundColor: colors.background, borderColor: colors.border}]}>
-                  <RNText style={[styles.previewLabel, {color: colors.muted}]}>Selected date</RNText>
-                  <RNText style={[styles.previewValue, {color: colors.text}]}>{formatExpiration(resolvedDate)}</RNText>
-                </View>
+        {mode === 'manual' ? (
+          <View style={[sharedStyles.dateCard, {backgroundColor: colors.card, borderColor: colors.border}]}>
+            <DateTimePicker
+              value={manualDate}
+              mode="date"
+              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+              onValueChange={(_, selectedDate) => {
+                if (selectedDate) {
+                  setManualDate(selectedDate);
+                }
+              }}
+              themeVariant={isDark ? 'dark' : 'light'}
+              accentColor={colors.tint}
+              textColor={colors.text}
+              style={sharedStyles.datePicker}
+            />
+          </View>
+        ) : (
+          <View style={sharedStyles.relativeInlineRow}>
+            <RelativePicker label="Days" value={relativeDays} options={dayOptions} onChange={setRelativeDays} />
+            <RelativePicker label="Weeks" value={relativeWeeks} options={weekOptions} onChange={setRelativeWeeks} />
+            <RelativePicker label="Months" value={relativeMonths} options={monthOptions} onChange={setRelativeMonths} />
+          </View>
+        )}
 
-                <ItemExpirationModePicker mode={mode} onChange={setMode} />
-
-                {mode === 'manual' ? (
-                  <View style={[styles.dateCard, {backgroundColor: colors.background, borderColor: colors.border}]}>
-                    <DateTimePicker
-                      value={manualDate}
-                      mode="date"
-                      display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                      onValueChange={(_, selectedDate) => {
-                        if (selectedDate) {
-                          setManualDate(selectedDate);
-                        }
-                      }}
-                      themeVariant={isDark ? 'dark' : 'light'}
-                      accentColor={colors.tint}
-                      textColor={colors.text}
-                      style={styles.datePicker}
-                    />
-                  </View>
-                ) : (
-                  <View style={styles.relativeInlineRow}>
-                    <RelativePicker label="Days" value={relativeDays} options={dayOptions} onChange={setRelativeDays} />
-                    <RelativePicker
-                      label="Weeks"
-                      value={relativeWeeks}
-                      options={weekOptions}
-                      onChange={setRelativeWeeks}
-                    />
-                    <RelativePicker
-                      label="Months"
-                      value={relativeMonths}
-                      options={monthOptions}
-                      onChange={setRelativeMonths}
-                    />
-                  </View>
-                )}
-
-                {errorMessage ? <RNText style={[styles.error, {color: colors.danger}]}>{errorMessage}</RNText> : null}
-              </View>
-            </RNHostView>
-
-            {!hasChanges ? (
-              <Text modifiers={[font({size: 13}), foregroundStyle('secondaryLabel')]}>
-                No changes yet.
-              </Text>
-            ) : null}
-          </VStack>
-        </Group>
-      </BottomSheet>
-    </Host>
+        {errorMessage ? (
+          <Text selectable style={[sharedStyles.error, {color: colors.danger}]}>
+            {errorMessage}
+          </Text>
+        ) : null}
+        {!hasChanges ? (
+          <Text selectable style={[styles.helperText, {color: colors.muted}]}>
+            No changes yet.
+          </Text>
+        ) : null}
+      </ScrollView>
+    </>
   );
 }
+
+const styles = StyleSheet.create({
+  content: {
+    padding: 20,
+    gap: 16,
+  },
+  previewCard: {
+    borderWidth: 1,
+    borderRadius: 18,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    gap: 4,
+  },
+  helperText: {
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '600',
+  },
+});

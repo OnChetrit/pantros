@@ -1,22 +1,19 @@
-import type { TextInputRef } from '@expo/ui';
-import { Stack, useRouter } from 'expo-router';
-import { useMemo, useRef, useState } from 'react';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { useMemo } from 'react';
 import { Alert, FlatList, StyleSheet, Text, View } from 'react-native';
 
-import { createIconHeaderButton } from '@/components/navigation/native-header-items/native-header-items';
 import { PantryItemRow } from '@/components/pantry/pantry-item-row/pantry-item-row';
 import { EmptyNotice, ListRow } from '@/components/ui/primitives';
 import { matchPantryItems } from '@/lib/pantry-insights';
-import { useAppTheme, useThemedStyles } from '@/lib/theme';
+import { useThemedStyles } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
 
 export default function SearchScreen() {
   const {deleteItem, moveItemToCart, moveItemToPantry, pantryCarts, pantryItems, selectedPantry} = useAppContext();
-  const {colors} = useAppTheme();
   const styles = useThemedStyles(createStyles);
   const router = useRouter();
-  const [query, setQuery] = useState('');
-  const searchInputRef = useRef<TextInputRef>(null);
+  const {q} = useLocalSearchParams<{q?: string | string[]}>();
+  const query = Array.isArray(q) ? q[0] ?? '' : q ?? '';
 
   const trimmedQuery = query.trim();
   const results = useMemo(() => matchPantryItems(pantryItems, query), [pantryItems, query]);
@@ -41,10 +38,6 @@ export default function SearchScreen() {
     router.push(`/items/new?name=${encodeURIComponent(trimmedQuery)}`);
   };
 
-  const handleScanBarcode = () => {
-    router.push('/items/scan');
-  };
-
   if (!selectedPantry) {
     return (
       <>
@@ -67,30 +60,8 @@ export default function SearchScreen() {
     <>
       <Stack.Screen
         options={{
-          title: 'Explore',
-          unstable_headerRightItems: () => [
-            createIconHeaderButton({icon: 'barcode', label: 'Barcode', onPress: handleScanBarcode}),
-          ],
-          // headerRight: () => (
-          //   <Host style={styles.headerActions} matchContents>
-          //     <Row alignment="center" spacing={10}>
-          //       <RNHostView matchContents>
-          //         <Pressable
-          //           accessibilityRole="button"
-          //           accessibilityLabel="Scan barcode"
-          //           accessibilityHint="Open the barcode scanner to find or create an item"
-          //           onPress={handleScanBarcode}
-          //           style={({pressed}) => [styles.headerIconButton, pressed ? styles.headerIconButtonPressed : null]}
-          //         >
-          //           <Ionicons name="barcode-outline" size={22} color={colors.tint} />
-          //         </Pressable>
-          //       </RNHostView>
-          //       <RNHostView matchContents>
-          //         <AvatarSidebarButton />
-          //       </RNHostView>
-          //     </Row>
-          //   </Host>
-          // ),
+          title: 'Search + Add',
+          headerRight: () => null,
         }}
       />
       <FlatList
@@ -104,14 +75,6 @@ export default function SearchScreen() {
         ListHeaderComponent={
           <View style={styles.searchSection}>
             <Text style={styles.eyebrow}>{trimmedQuery ? 'Search Results' : 'All Items'}</Text>
-            {/* <AppTextInput
-              value={query}
-              onChangeText={setQuery}
-              placeholder="Search by name or barcode"
-              autoCapitalize="none"
-              autoFocus
-              inputRef={searchInputRef}
-            /> */}
             <Text style={styles.searchMeta}>
               {trimmedQuery
                 ? `${visibleItems.length} ${visibleItems.length === 1 ? 'match' : 'matches'} in ${selectedPantry.name}`
@@ -167,16 +130,6 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
       backgroundColor: colors.background,
       padding: 20,
       justifyContent: 'center',
-    },
-    headerActions: {},
-    headerIconButton: {
-      minWidth: 36,
-      minHeight: 36,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    headerIconButtonPressed: {
-      opacity: 0.76,
     },
     searchSection: {
       paddingHorizontal: 16,

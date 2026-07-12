@@ -1,22 +1,17 @@
 import { ListItem } from '@expo/ui';
 import { Host, List, Section } from '@expo/ui/swift-ui';
 import { listStyle } from '@expo/ui/swift-ui/modifiers';
-import { Stack, useRouter } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect, useMemo } from 'react';
 import { LayoutAnimation, StyleSheet, View } from 'react-native';
 
-import {
-  createIconHeaderButton,
-  createTextHeaderButton,
-} from '@/components/navigation/native-header-items/native-header-items';
-import { PantryFilterMenu, type PantryListSortOption } from '@/components/pantry/pantry-filter-menu/pantry-filter-menu';
 import { PantryItemNativeListRow } from '@/components/pantry/pantry-item-row/pantry-item-row';
 import { EmptyNotice } from '@/components/ui/primitives';
 import { CartCheckoutSheet } from '@/features/cart/cart-checkout-bar/cart-checkout-bar';
 import { useCartCheckout } from '@/features/cart/cart-checkout-context/cart-checkout-context';
 import { CartCheckoutNotice } from '@/features/cart/cart-checkout-notice/cart-checkout-notice';
-import { CartExpirationReviewModal } from '@/features/cart/cart-expiration-review-modal/cart-expiration-review-modal';
 import { sortCartItems } from '@/features/cart/cart-items/cart-items';
+import { parsePantrySortOption } from '@/features/pantry/pantry-sort/pantry-sort-options';
 import { getCartItems } from '@/lib/pantry-insights';
 import { useAppTheme } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
@@ -25,29 +20,21 @@ export default function CartScreen() {
   const {deleteItem, moveItemToPantry, pantryItems, selectedPantry} = useAppContext();
   const {
     checkoutProgress,
-    checkoutQueue,
     clearCheckoutError,
     clearSelection,
-    currentReviewItem,
     dismissCompletionMessage,
     enterSelectionMode,
     exitSelectionMode,
     isSelectionMode,
-    reviewDate,
-    saveAndContinueReview,
     setVisibleItems,
     selectAll,
     selectedItemIds,
-    setReviewDate,
-    skipCurrentReview,
-    startCheckout,
     toggleItemSelection,
-    cancelReview,
   } = useCartCheckout();
   const {colors, isDark} = useAppTheme();
   const router = useRouter();
-  const [sortOption, setSortOption] = useState<PantryListSortOption>('expiration');
-  const [isSortMenuVisible, setIsSortMenuVisible] = useState(false);
+  const {sort} = useLocalSearchParams<{sort?: string | string[]}>();
+  const sortOption = parsePantrySortOption(sort);
 
   const itemsInCart = useMemo(() => sortCartItems(getCartItems(pantryItems), sortOption), [pantryItems, sortOption]);
   const unselectedItems = useMemo(
@@ -61,7 +48,6 @@ export default function CartScreen() {
 
   const selectedCount = selectedItemIds.length;
   const allSelected = itemsInCart.length > 0 && selectedCount === itemsInCart.length;
-  const reviewStep = currentReviewItem ? checkoutQueue.findIndex(item => item.id === currentReviewItem.id) + 1 : 0;
 
   useEffect(() => {
     setVisibleItems(itemsInCart);
@@ -91,70 +77,63 @@ export default function CartScreen() {
     <>
       <Stack.Screen
         options={{
-          unstable_headerLeftItems: () =>
-            isSelectionMode
-              ? [
-                  createTextHeaderButton({
-                    label: 'Cancel',
-                    onPress: exitSelectionMode,
-                    tintColor: colors.text,
-                  }),
-                ]
-              : [
-                  createIconHeaderButton({
-                    label: 'Open sort menu',
-                    icon: 'arrow.up.arrow.down',
-                    onPress: () => setIsSortMenuVisible(true),
-                    tintColor: colors.tint,
-                  }),
-                ],
           title: isSelectionMode ? `${selectedCount} selected` : 'Cart',
-          unstable_headerRightItems: () =>
-            isSelectionMode
-              ? [
-                  createTextHeaderButton({
-                    label: allSelected ? 'Clear' : 'Select All',
-                    onPress: () => {
-                      animateListLayout();
-                      if (allSelected) {
-                        clearSelection();
-                        return;
-                      }
-
-                      selectAll(itemsInCart.map(item => item.id));
-                    },
-                    tintColor: colors.tint,
-                  }),
-                ]
-              : [
-                  createTextHeaderButton({
-                    label: 'Select',
-                    onPress: () => enterSelectionMode(),
-                    disabled: itemsInCart.length === 0,
-                    tintColor: colors.tint,
-                  }),
-                  createIconHeaderButton({
-                    label: 'Open account menu',
-                    icon: 'person.crop.circle',
-                    onPress: () => router.push('/account/menu'),
-                    tintColor: colors.tint,
-                  }),
-                ],
         }}
       />
-      <PantryFilterMenu
-        hideTrigger
-        sortOption={sortOption}
-        onSelectSort={setSortOption}
-        visible={isSortMenuVisible}
-        onVisibilityChange={setIsSortMenuVisible}
-      />
+      <Stack.Toolbar placement="left">
+        <Stack.Toolbar.Button onPress={exitSelectionMode} hidden={!isSelectionMode}>
+          Cancel
+        </Stack.Toolbar.Button>
+        <Stack.Toolbar.Button
+          icon="arrow.up.arrow.down"
+          hidden={isSelectionMode}
+          onPress={() =>
+            router.push({
+              pathname: '/cart/sort',
+              params: {sort: sortOption},
+            })
+          }
+        />
+      </Stack.Toolbar>
+      <Stack.Toolbar placement="right">
+        <Stack.Toolbar.Button
+          hidden={!isSelectionMode}
+          variant="prominent"
+          onPress={() => {
+            animateListLayout();
+            if (allSelected) {
+              clearSelection();
+              return;
+            }
+
+            selectAll(itemsInCart.map(item => item.id));
+          }}
+        >
+          {allSelected ? 'Clear' : 'Select All'}
+        </Stack.Toolbar.Button>
+        <Stack.Toolbar.Button
+          onPress={() => enterSelectionMode()}
+          disabled={itemsInCart.length === 0}
+          hidden={isSelectionMode}
+        >
+          Select
+        </Stack.Toolbar.Button>
+        <Stack.Toolbar.Button
+          icon="person.crop.circle"
+          onPress={() => router.push('/account/menu')}
+          hidden={isSelectionMode}
+        />
+      </Stack.Toolbar>
       <Host colorScheme={isDark ? 'dark' : 'light'} style={[styles.host, {backgroundColor: colors.background}]}>
         <List modifiers={[listStyle('insetGrouped')]}>
           {checkoutProgress.errorMessage ? (
             <ListItem key="checkout-error">
               <View style={styles.noticeRow}>
-                <CartCheckoutNotice tone="error" message={checkoutProgress.errorMessage} onDismiss={clearCheckoutError} />
+                <CartCheckoutNotice
+                  tone="error"
+                  message={checkoutProgress.errorMessage}
+                  onDismiss={clearCheckoutError}
+                />
               </View>
             </ListItem>
           ) : null}
@@ -224,41 +203,7 @@ export default function CartScreen() {
           </Section>
         </List>
       </Host>
-      <CartCheckoutSheet
-        isPresented={isSelectionMode}
-        onDismiss={exitSelectionMode}
-        selectedCount={selectedCount}
-        totalCount={itemsInCart.length}
-        processing={checkoutProgress.processing}
-        onSubmit={() => void startCheckout()}
-        onSecondaryAction={() => {
-          animateListLayout();
-          if (allSelected) {
-            clearSelection();
-            return;
-          }
-
-          selectAll(itemsInCart.map(item => item.id));
-        }}
-        selectedItems={selectedItems}
-        onPressSelectedItem={itemId => {
-          animateListLayout();
-          toggleItemSelection(itemId);
-        }}
-      />
-      <CartExpirationReviewModal
-        visible={checkoutQueue.length > 0 && currentReviewItem !== null}
-        item={currentReviewItem}
-        step={reviewStep}
-        totalSteps={checkoutQueue.length}
-        reviewDate={reviewDate}
-        processing={checkoutProgress.processing}
-        errorMessage={checkoutProgress.errorMessage}
-        onChangeDate={setReviewDate}
-        onSave={() => void saveAndContinueReview()}
-        onSkip={() => void skipCurrentReview()}
-        onCancel={cancelReview}
-      />
+      <CartCheckoutSheet />
     </>
   );
 }
