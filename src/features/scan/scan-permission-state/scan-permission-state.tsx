@@ -1,11 +1,8 @@
-import { Host, RNHostView, Row } from '@expo/ui';
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useThemedStyles } from '@/lib/theme';
-
-import { ScanIconCircleButton } from '../scan-icon-circle-button/scan-icon-circle-button';
 
 export function ScanPermissionState({
   title,
@@ -15,7 +12,6 @@ export function ScanPermissionState({
   onAction,
   secondaryActionLabel,
   onSecondaryAction,
-  onClose,
   highlights = [],
 }: {
   title: string;
@@ -25,7 +21,6 @@ export function ScanPermissionState({
   onAction?: () => void;
   secondaryActionLabel?: string;
   onSecondaryAction?: () => void;
-  onClose?: () => void;
   highlights?: string[];
 }) {
   const insets = useSafeAreaInsets();
@@ -33,14 +28,6 @@ export function ScanPermissionState({
 
   return (
     <View style={[styles.permissionScreen, {paddingTop: insets.top + 12, paddingBottom: insets.bottom + 20}]}>
-      <Host style={styles.permissionTopBar} matchContents>
-        <Row alignment="center">
-          <RNHostView matchContents>
-            {onClose ? <ScanIconCircleButton icon="close" label="Close scanner" onPress={onClose} /> : <View style={styles.topBarSpacer} />}
-          </RNHostView>
-        </Row>
-      </Host>
-
       <View style={styles.permissionContent}>
         <View style={styles.permissionIconOuter}>
           <View style={styles.permissionIconInner}>
@@ -56,16 +43,12 @@ export function ScanPermissionState({
         {highlights.length > 0 ? (
           <View style={styles.highlightList}>
             {highlights.map(highlight => (
-              <Host key={highlight} style={styles.highlightRow}>
-                <Row alignment="center" spacing={10}>
-                  <RNHostView matchContents>
-                    <Ionicons name="checkmark-circle" size={18} color={styles.iconTint.color} />
-                  </RNHostView>
-                  <RNHostView matchContents>
-                    <Text style={styles.highlightText}>{highlight}</Text>
-                  </RNHostView>
-                </Row>
-              </Host>
+              <View key={highlight} style={styles.highlightRow}>
+                <View style={styles.highlightRowContent}>
+                  <Ionicons name="checkmark-circle" size={18} color={styles.iconTint.color} />
+                  <Text style={styles.highlightText}>{highlight}</Text>
+                </View>
+              </View>
             ))}
           </View>
         ) : null}
@@ -82,16 +65,10 @@ export function ScanPermissionState({
               pressed ? styles.buttonPressed : null,
             ]}
           >
-            <Host style={styles.permissionActionButton} matchContents>
-              <Row alignment="center" spacing={10}>
-                <RNHostView matchContents>
-                  <Ionicons name="camera-outline" size={20} color={styles.primaryButtonText.color} />
-                </RNHostView>
-                <RNHostView matchContents>
-                  <Text style={styles.primaryButtonText}>{actionLabel}</Text>
-                </RNHostView>
-              </Row>
-            </Host>
+            <View style={styles.permissionActionButtonContent}>
+              <Ionicons name="camera-outline" size={20} color={styles.primaryButtonText.color} />
+              <Text style={styles.primaryButtonText}>{actionLabel}</Text>
+            </View>
           </Pressable>
         ) : null}
         {secondaryActionLabel && onSecondaryAction ? (
@@ -104,16 +81,10 @@ export function ScanPermissionState({
               pressed ? styles.buttonPressed : null,
             ]}
           >
-            <Host style={styles.permissionActionButton} matchContents>
-              <Row alignment="center" spacing={10}>
-                <RNHostView matchContents>
-                  <Ionicons name="search-outline" size={20} color={styles.secondaryButtonText.color} />
-                </RNHostView>
-                <RNHostView matchContents>
-                  <Text style={styles.secondaryButtonText}>{secondaryActionLabel}</Text>
-                </RNHostView>
-              </Row>
-            </Host>
+            <View style={styles.permissionActionButtonContent}>
+              <Ionicons name="search-outline" size={20} color={styles.secondaryButtonText.color} />
+              <Text style={styles.secondaryButtonText}>{secondaryActionLabel}</Text>
+            </View>
           </Pressable>
         ) : null}
       </View>
@@ -129,13 +100,6 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
       gap: 24,
       paddingHorizontal: 20,
       backgroundColor: colors.background,
-    },
-    permissionTopBar: {
-      minHeight: 44,
-    },
-    topBarSpacer: {
-      width: 44,
-      height: 44,
     },
     permissionContent: {
       flex: 1,
@@ -197,6 +161,11 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
       borderWidth: 1,
       borderColor: colors.border,
     },
+    highlightRowContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+    },
     highlightText: {
       flex: 1,
       color: colors.text,
@@ -213,6 +182,13 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
       minHeight: 52,
       borderRadius: 18,
       paddingHorizontal: 18,
+      justifyContent: 'center',
+    },
+    permissionActionButtonContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 10,
     },
     permissionActionButtonPrimary: {
       backgroundColor: colors.tint,

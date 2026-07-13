@@ -1,13 +1,14 @@
 import { Stack } from 'expo-router';
 import { KeyboardAvoidingView, StyleSheet } from 'react-native';
 
-import { useThemedStyles } from '@/lib/theme';
+import { useAppTheme, useThemedStyles } from '@/lib/theme';
 
 import { ItemFormBody, type ItemFormScreenProps, useItemFormController } from './item-form-screen.shared';
 
 export function ItemFormScreen(props: ItemFormScreenProps) {
   const styles = useThemedStyles(createStyles);
   const controller = useItemFormController(props);
+  const {colors} = useAppTheme();
 
   return (
     <KeyboardAvoidingView behavior="padding" style={styles.screen}>
@@ -23,7 +24,7 @@ export function ItemFormScreen(props: ItemFormScreenProps) {
         <Stack.Toolbar.Button
           icon="xmark"
           onPress={() => controller.router.back()}
-          tintColor="#0a84ff"
+          tintColor={colors.tint}
           hidden={Boolean(controller.item)}
         />
       </Stack.Toolbar>
@@ -31,7 +32,8 @@ export function ItemFormScreen(props: ItemFormScreenProps) {
         <Stack.Toolbar.Button
           onPress={controller.selectedPantry ? () => void controller.handleSave() : controller.handleMissingPantry}
           disabled={controller.itemBusy || (Boolean(controller.selectedPantry) && !controller.canSave)}
-          tintColor="#0a84ff"
+          tintColor={colors.tint}
+          style={{color: colors.textInverse}}
           variant="done"
         >
           {controller.item ? 'Save' : 'Add'}
@@ -50,13 +52,8 @@ export function ItemFormScreen(props: ItemFormScreenProps) {
         onChangeExpirationDate={controller.setExpirationDate}
         onChangeIsInCart={controller.setIsInCart}
         onChangeName={controller.setName}
-        onDecrementQuantity={() => {
-          const nextValue = Math.max(1, controller.parsedQuantity ?? 1) - 1;
-          controller.setQuantity(String(Math.max(1, nextValue)));
-        }}
-        onIncrementQuantity={() => {
-          controller.setQuantity(String((controller.parsedQuantity ?? 1) + 1));
-        }}
+        onChangeQuantity={value => controller.setQuantity(String(Math.max(1, value)))}
+        onOpenBarcodeScanner={controller.openBarcodeScanner}
         onOpenImageSourcePicker={controller.openImageSourcePicker}
         onSelectDuplicate={candidateId => controller.router.replace(`/items/${candidateId}`)}
         parsedQuantity={controller.parsedQuantity}

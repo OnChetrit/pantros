@@ -1,3 +1,4 @@
+import { AppButton } from '@/components/ui/primitives';
 import { PantryItemNativeListRow } from '@/components/pantry/pantry-item-row/pantry-item-row';
 import { parsePantrySortOption } from '@/features/pantry/pantry-sort/pantry-sort-options';
 import { useAppTheme } from '@/lib/theme';
@@ -109,6 +110,9 @@ export default function PantryScreen() {
                 Add your first item to start tracking what&apos;s on hand and what needs to be bought next.
               </Text>
             </View>
+            <View style={styles.emptyStateAction}>
+              <AppButton label="Add Item" onPress={() => router.push('/items/new')} />
+            </View>
           </View>
         </View>
       ) : (
@@ -189,6 +193,10 @@ const styles = StyleSheet.create({
     maxWidth: 320,
     gap: 8,
     alignItems: 'center',
+  },
+  emptyStateAction: {
+    width: '100%',
+    maxWidth: 240,
   },
   emptyStateTitle: {
     fontSize: 22,

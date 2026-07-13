@@ -1,11 +1,12 @@
 import * as ImagePicker from 'expo-image-picker';
-import { useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
-import { Alert } from 'react-native';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useMemo, useState } from 'react';
+import { Alert, Keyboard } from 'react-native';
 
 import type { PantryItem, PantryItemInput } from '@/domain/models';
 import { matchPantryItems } from '@/lib/pantry-insights';
 import { useItemState } from '@/state/item-state';
+import { consumePendingScannedBarcode } from '@/state/barcode-scan-state';
 import { useWorkspaceState } from '@/state/workspace-state';
 
 import { buildItemInput, hasItemInputChanges, isValidIsoDate } from '../item-form/item-form.utils';
@@ -158,6 +159,25 @@ export function useItemFormController({initialBarcode, item, initialName}: ItemF
     ]);
   };
 
+  const openBarcodeScanner = useCallback(() => {
+    Keyboard.dismiss();
+
+    setTimeout(() => {
+      router.push('/items/scan?mode=form');
+    }, 180);
+  }, [router]);
+
+  useFocusEffect(
+    useCallback(() => {
+      const scannedBarcode = consumePendingScannedBarcode();
+
+      if (scannedBarcode) {
+        setBarcode(scannedBarcode);
+        setFormError(null);
+      }
+    }, [])
+  );
+
   const handleSave = async () => {
     if (!selectedPantryId) {
       setFormError('Select or create a pantry before adding items.');
@@ -220,6 +240,7 @@ export function useItemFormController({initialBarcode, item, initialName}: ItemF
     barcode,
     expirationDate,
     item,
+    openBarcodeScanner,
     openImageSourcePicker,
   };
 }

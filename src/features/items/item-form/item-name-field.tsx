@@ -26,7 +26,7 @@ export function ItemNameField({
   return (
     <View style={styles.fieldGroup}>
       <ItemFormFieldLabel>Name</ItemFormFieldLabel>
-      <AppTextInput value={name} onChangeText={onChangeName} placeholder="" />
+      <AppTextInput value={name} onChangeText={onChangeName} placeholder="" size="large" autoFocus />
       {duplicateCandidates.length > 0 ? (
         <View style={styles.suggestionList}>
           {duplicateCandidates.map(candidate => {

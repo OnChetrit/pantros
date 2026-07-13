@@ -1,10 +1,11 @@
 import { ContextMenu, HStack, Spacer, Button as SwiftUIButton, SwipeActions, Text, VStack } from '@expo/ui/swift-ui';
-import { background, font, foregroundStyle, frame, onTapGesture, shapes } from '@expo/ui/swift-ui/modifiers';
+import { background, font, foregroundStyle, frame, onTapGesture, shapes, tint } from '@expo/ui/swift-ui/modifiers';
 import { Alert } from 'react-native';
 
 import { triggerMediumImpact } from '@/lib/haptics';
 import { formatExpirationLabel } from '@/lib/pantry-insights';
 
+import { useAppTheme } from '@/lib/theme';
 import { getCartActionSystemImage, type PantryItemRowProps } from '../pantry-item-row/pantry-item-row.shared';
 
 type PantryItemSwipeRowProps = PantryItemRowProps & {
@@ -28,6 +29,7 @@ export function PantryItemSwipeRow({
 }: PantryItemSwipeRowProps) {
   const hasLeftAction = Boolean(onLeftAction && leftActionLabel);
   const isCart = displayMode === 'cart';
+  const {colors} = useAppTheme();
 
   const handleWithHaptics = (callback?: () => void) => {
     void triggerMediumImpact();
@@ -51,9 +53,7 @@ export function PantryItemSwipeRow({
     <HStack
       alignment="center"
       spacing={12}
-      modifiers={[
-        onTapGesture(isSelectionMode ? (onToggleSelection ?? onPress) : onPress),
-      ]}
+      modifiers={[onTapGesture(isSelectionMode ? (onToggleSelection ?? onPress) : onPress)]}
     >
       <Text
         modifiers={[
@@ -141,6 +141,7 @@ export function PantryItemSwipeRow({
           <SwiftUIButton
             label=""
             role="cancel"
+            modifiers={[tint(colors.tint)]}
             systemImage={isCart ? 'number.circle' : 'clock'}
             onPress={() => handleWithHaptics(isCart ? onReviewQuantity : onReviewExpiration)}
           />
@@ -148,7 +149,7 @@ export function PantryItemSwipeRow({
       ) : null}
 
       <SwipeActions.Actions edge="trailing" allowsFullSwipe={false}>
-        <SwiftUIButton label="" role="destructive" systemImage="trash" onPress={confirmDelete} />
+        <SwiftUIButton modifiers={[tint(colors.danger)]} label="" systemImage="trash" onPress={confirmDelete} />
       </SwipeActions.Actions>
     </SwipeActions>
   );

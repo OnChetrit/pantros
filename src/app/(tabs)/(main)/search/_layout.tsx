@@ -1,11 +1,10 @@
-import { Stack, useRouter } from 'expo-router';
+import { Stack } from 'expo-router';
 import { Platform } from 'react-native';
 
 import { AndroidAvatarSidebarButton } from '@/components/navigation/android-avatar-sidebar-button/android-avatar-sidebar-button';
 import { useAppTheme } from '@/lib/theme';
 
 export default function SearchLayout() {
-  const router = useRouter();
   const {colors} = useAppTheme();
 
   return (
@@ -28,28 +27,6 @@ export default function SearchLayout() {
         name="index"
         options={{
           title: 'Explore',
-          headerSearchBarOptions: {
-            placeholder: 'Search by name or barcode',
-            autoCapitalize: 'none',
-            hideWhenScrolling: false,
-            placement: 'automatic',
-            autoFocus: true,
-            onChangeText: event => {
-              const text = event.nativeEvent.text;
-              router.setParams({
-                q: text.length > 0 ? text : undefined,
-                entry: undefined,
-                nonce: undefined,
-              });
-            },
-            onCancelButtonPress: () => {
-              router.setParams({
-                q: undefined,
-                entry: undefined,
-                nonce: undefined,
-              });
-            },
-          },
         }}
       />
     </Stack>

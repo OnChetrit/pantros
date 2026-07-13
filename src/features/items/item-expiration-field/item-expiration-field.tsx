@@ -1,11 +1,11 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { Picker as NativePicker } from '@react-native-picker/picker';
 import { useEffect, useMemo, useState } from 'react';
 import { Platform, StyleSheet, Switch, Text, View } from 'react-native';
 
 import { useAppTheme, useThemedStyles } from '@/lib/theme';
 
 import { ItemExpirationModePicker } from '../item-expiration-mode-picker/item-expiration-mode-picker';
+import { ItemRelativePicker } from './item-relative-picker';
 
 type ExpirationMode = 'manual' | 'relative';
 
@@ -162,57 +162,9 @@ export function ItemExpirationField({value, onChange}: {value: string; onChange:
       {isEnabled && mode === 'relative' ? (
         <View style={styles.controlBlock}>
           <View style={styles.relativeRow}>
-            <View style={styles.relativePicker}>
-              <Text style={styles.relativeLabel}>Days</Text>
-              <NativePicker
-                selectedValue={relativeDays}
-                onValueChange={value => {
-                  if (typeof value === 'number') {
-                    setRelativeDays(value);
-                  }
-                }}
-                itemStyle={styles.pickerItem}
-                style={styles.picker}
-              >
-                {dayOptions.map(amount => (
-                  <NativePicker.Item key={amount} label={String(amount)} value={amount} />
-                ))}
-              </NativePicker>
-            </View>
-            <View style={styles.relativePicker}>
-              <Text style={styles.relativeLabel}>Weeks</Text>
-              <NativePicker
-                selectedValue={relativeWeeks}
-                onValueChange={value => {
-                  if (typeof value === 'number') {
-                    setRelativeWeeks(value);
-                  }
-                }}
-                itemStyle={styles.pickerItem}
-                style={styles.picker}
-              >
-                {weekOptions.map(amount => (
-                  <NativePicker.Item key={amount} label={String(amount)} value={amount} />
-                ))}
-              </NativePicker>
-            </View>
-            <View style={styles.relativePicker}>
-              <Text style={styles.relativeLabel}>Months</Text>
-              <NativePicker
-                selectedValue={relativeMonths}
-                onValueChange={value => {
-                  if (typeof value === 'number') {
-                    setRelativeMonths(value);
-                  }
-                }}
-                itemStyle={styles.pickerItem}
-                style={styles.picker}
-              >
-                {monthOptions.map(amount => (
-                  <NativePicker.Item key={amount} label={String(amount)} value={amount} />
-                ))}
-              </NativePicker>
-            </View>
+            <ItemRelativePicker label="D" value={relativeDays} options={dayOptions} onChange={setRelativeDays} />
+            <ItemRelativePicker label="W" value={relativeWeeks} options={weekOptions} onChange={setRelativeWeeks} />
+            <ItemRelativePicker label="M" value={relativeMonths} options={monthOptions} onChange={setRelativeMonths} />
           </View>
         </View>
       ) : null}
@@ -267,45 +219,24 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
       gap: 12,
     },
     datePickerCard: {
+      width: '100%',
+      alignItems: 'stretch',
       borderRadius: 18,
       overflow: 'hidden',
       backgroundColor: colors.input,
       borderWidth: 1,
       borderColor: colors.border,
-      paddingHorizontal: 6,
-      paddingVertical: 2,
+      paddingHorizontal: 0,
+      paddingVertical: 8,
     },
     datePicker: {
+      width: '100%',
       alignSelf: 'stretch',
+      marginLeft: 0,
+      marginRight: 0,
     },
     relativeRow: {
       flexDirection: 'row',
       gap: 10,
-    },
-    relativePicker: {
-      flex: 1,
-      minHeight: 156,
-      borderRadius: 18,
-      overflow: 'hidden',
-      backgroundColor: colors.input,
-      borderWidth: 1,
-      borderColor: colors.border,
-      justifyContent: 'center',
-    },
-    relativeLabel: {
-      color: colors.muted,
-      fontSize: 12,
-      fontWeight: '700',
-      textTransform: 'uppercase',
-      letterSpacing: 0.5,
-      paddingHorizontal: 14,
-      paddingTop: 12,
-    },
-    picker: {
-      color: colors.text,
-    },
-    pickerItem: {
-      color: colors.text,
-      fontSize: 18,
     },
   });

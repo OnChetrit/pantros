@@ -1,7 +1,7 @@
-import {Redirect, Stack} from 'expo-router';
-import {Platform} from 'react-native';
+import { Redirect, Stack } from 'expo-router';
+import { Platform } from 'react-native';
 
-import {FORM_SHEET_DETENT} from '@/components/sheets/sheet-presets/sheet-presets';
+import { FORM_SHEET_DETENT } from '@/components/sheets/sheet-presets/sheet-presets';
 import { CartCheckoutProvider } from '@/features/cart/cart-checkout-context/cart-checkout-context';
 import { useAuthState } from '@/state/auth-state';
 import { useWorkspaceState } from '@/state/workspace-state';
@@ -26,8 +26,6 @@ export default function TabsLayout() {
           name="items/scan"
           options={{
             headerShown: false,
-            presentation: 'fullScreenModal',
-            animation: 'fade',
           }}
         />
         <Stack.Screen

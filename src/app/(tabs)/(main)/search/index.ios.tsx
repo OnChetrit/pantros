@@ -6,8 +6,9 @@ import { useAppContext } from '@/state/app-context';
 import { ListItem } from '@expo/ui';
 import { Host, HStack, List, Section, Spacer, Text } from '@expo/ui/swift-ui';
 import { font, foregroundStyle, listStyle } from '@expo/ui/swift-ui/modifiers';
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useMemo } from 'react';
+import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
+import type { SearchBarCommands } from 'react-native-screens';
 import { Alert, Image, LayoutAnimation, StyleSheet, Text as RNText, View } from 'react-native';
 
 const searchEmptyIllustration = require('../../../../../assets/images/search-empty-state-transparent.png');
@@ -16,6 +17,7 @@ export default function SearchScreen() {
   const {deleteItem, moveItemToCart, moveItemToPantry, pantryCarts, pantryItems, selectedPantry} = useAppContext();
   const {colors, isDark} = useAppTheme();
   const router = useRouter();
+  const searchBarRef = useRef<SearchBarCommands | null>(null);
   const {entry, q} = useLocalSearchParams<{entry?: string | string[]; q?: string | string[]}>();
   const query = Array.isArray(q) ? (q[0] ?? '') : (q ?? '');
   const entryMode = Array.isArray(entry) ? entry[0] : entry;
@@ -70,12 +72,45 @@ export default function SearchScreen() {
     router.setParams({entry: undefined, nonce: undefined});
   }, [entryMode, router]);
 
+  useFocusEffect(
+    useCallback(() => {
+      const focusFrame = requestAnimationFrame(() => {
+        searchBarRef.current?.setText(query);
+        searchBarRef.current?.focus();
+      });
+
+      return () => cancelAnimationFrame(focusFrame);
+    }, [query])
+  );
+
   if (!selectedPantry) {
     return (
       <>
         <Stack.Screen
           options={{
             title: 'Explore',
+            headerSearchBarOptions: {
+              ref: searchBarRef,
+              placeholder: 'Search by name or barcode',
+              autoCapitalize: 'none',
+              hideWhenScrolling: false,
+              placement: 'automatic',
+              onChangeText: event => {
+                const text = event.nativeEvent.text;
+                router.setParams({
+                  q: text.length > 0 ? text : undefined,
+                  entry: undefined,
+                  nonce: undefined,
+                });
+              },
+              onCancelButtonPress: () => {
+                router.setParams({
+                  q: undefined,
+                  entry: undefined,
+                  nonce: undefined,
+                });
+              },
+            },
           }}
         />
         <View style={styles.emptyScreen}>
@@ -93,6 +128,28 @@ export default function SearchScreen() {
       <Stack.Screen
         options={{
           title: 'Explore',
+          headerSearchBarOptions: {
+            ref: searchBarRef,
+            placeholder: 'Search by name or barcode',
+            autoCapitalize: 'none',
+            hideWhenScrolling: false,
+            placement: 'automatic',
+            onChangeText: event => {
+              const text = event.nativeEvent.text;
+              router.setParams({
+                q: text.length > 0 ? text : undefined,
+                entry: undefined,
+                nonce: undefined,
+              });
+            },
+            onCancelButtonPress: () => {
+              router.setParams({
+                q: undefined,
+                entry: undefined,
+                nonce: undefined,
+              });
+            },
+          },
         }}
       />
       <Stack.Toolbar placement="right">

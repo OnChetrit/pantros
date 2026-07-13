@@ -25,8 +25,8 @@ export function ItemFormBody({
   onChangeExpirationDate,
   onChangeIsInCart,
   onChangeName,
-  onDecrementQuantity,
-  onIncrementQuantity,
+  onChangeQuantity,
+  onOpenBarcodeScanner,
   onOpenImageSourcePicker,
   onSelectDuplicate,
   parsedQuantity,
@@ -44,8 +44,8 @@ export function ItemFormBody({
   onChangeExpirationDate: (value: string) => void;
   onChangeIsInCart: (value: boolean) => void;
   onChangeName: (value: string) => void;
-  onDecrementQuantity: () => void;
-  onIncrementQuantity: () => void;
+  onChangeQuantity: (value: number) => void;
+  onOpenBarcodeScanner: () => void;
   onOpenImageSourcePicker: () => void;
   onSelectDuplicate: (candidateId: string) => void;
   parsedQuantity: number | null;
@@ -84,13 +84,12 @@ export function ItemFormBody({
           onChangeName={onChangeName}
           onSelectDuplicate={onSelectDuplicate}
         />
-        <ItemBarcodeField barcode={barcode} onChangeBarcode={onChangeBarcode} />
+        <ItemBarcodeField barcode={barcode} onChangeBarcode={onChangeBarcode} onOpenScanner={onOpenBarcodeScanner} />
         <ItemCartSection
           isInCart={isInCart}
           quantity={parsedQuantity ?? 1}
           onToggle={onChangeIsInCart}
-          onDecrement={onDecrementQuantity}
-          onIncrement={onIncrementQuantity}
+          onChangeQuantity={onChangeQuantity}
         />
       </View>
 

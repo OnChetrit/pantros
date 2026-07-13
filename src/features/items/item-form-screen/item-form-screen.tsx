@@ -45,13 +45,8 @@ export function ItemFormScreen(props: ItemFormScreenProps) {
         onChangeExpirationDate={controller.setExpirationDate}
         onChangeIsInCart={controller.setIsInCart}
         onChangeName={controller.setName}
-        onDecrementQuantity={() => {
-          const nextValue = Math.max(1, controller.parsedQuantity ?? 1) - 1;
-          controller.setQuantity(String(Math.max(1, nextValue)));
-        }}
-        onIncrementQuantity={() => {
-          controller.setQuantity(String((controller.parsedQuantity ?? 1) + 1));
-        }}
+        onChangeQuantity={value => controller.setQuantity(String(Math.max(1, value)))}
+        onOpenBarcodeScanner={controller.openBarcodeScanner}
         onOpenImageSourcePicker={controller.openImageSourcePicker}
         onSelectDuplicate={candidateId => controller.router.replace(`/items/${candidateId}`)}
         parsedQuantity={controller.parsedQuantity}

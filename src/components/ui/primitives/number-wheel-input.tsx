@@ -1,5 +1,5 @@
 import { Picker as NativePicker } from '@react-native-picker/picker';
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { useAppTheme } from '@/lib/theme';
 
@@ -9,17 +9,9 @@ type NumberWheelInputProps = {
   onChange: (value: number) => void;
   suffix?: string;
   disabled?: boolean;
-  compact?: boolean;
 };
 
-export function NumberWheelInput({
-  value,
-  options,
-  onChange,
-  suffix,
-  disabled = false,
-  compact = false,
-}: NumberWheelInputProps) {
+export function NumberWheelInput({value, options, onChange, suffix, disabled = false}: NumberWheelInputProps) {
   const {colors} = useAppTheme();
 
   return (
@@ -33,14 +25,8 @@ export function NumberWheelInput({
               onChange(nextValue);
             }
           }}
-          itemStyle={[
-            compact ? styles.pickerItemCompact : styles.pickerItem,
-            {color: disabled ? colors.muted : colors.text},
-          ]}
-          style={[
-            compact ? styles.pickerCompact : styles.picker,
-            {color: disabled ? colors.muted : colors.text, opacity: disabled ? 0.5 : 1},
-          ]}
+          itemStyle={[styles.pickerItem, {color: disabled ? colors.muted : colors.text}]}
+          style={[styles.picker, {color: disabled ? colors.muted : colors.text, opacity: disabled ? 0.5 : 1}]}
         >
           {options.map(option => (
             <NativePicker.Item key={option} label={String(option)} value={option} />
@@ -54,7 +40,8 @@ export function NumberWheelInput({
 
 const styles = StyleSheet.create({
   container: {
-    minHeight: 120,
+    overflow: 'hidden',
+    minHeight: 76,
     justifyContent: 'center',
   },
   row: {
@@ -63,18 +50,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   picker: {
-    flex: 1,
-    height: 140,
-  },
-  pickerCompact: {
-    flex: 1,
-    height: 110,
+    width: 74,
+    height: 74,
+    marginTop: -6,
+    marginBottom: -6,
+    justifyContent: 'center',
   },
   pickerItem: {
-    fontSize: 28,
-  },
-  pickerItemCompact: {
-    fontSize: 24,
+    fontSize: 16,
   },
   suffixText: {
     fontSize: 13,

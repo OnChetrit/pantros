@@ -69,7 +69,10 @@ export default function SearchScreen() {
         data={visibleItems}
         keyExtractor={item => item.id}
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[
+          styles.content,
+          visibleItems.length > 0 || shouldShowCreateItem ? styles.filledContent : null,
+        ]}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
         ListHeaderComponent={
@@ -123,7 +126,14 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
       backgroundColor: colors.background,
     },
     content: {
+      paddingHorizontal: 12,
       paddingBottom: 40,
+    },
+    filledContent: {
+      marginHorizontal: 12,
+      borderRadius: 26,
+      backgroundColor: colors.card,
+      overflow: 'hidden',
     },
     emptyScreen: {
       flex: 1,

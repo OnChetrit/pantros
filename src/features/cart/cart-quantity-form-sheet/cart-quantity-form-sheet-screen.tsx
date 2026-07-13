@@ -92,19 +92,13 @@ function CartQuantityFormSheetContent({
             <Stack.Toolbar.Button icon="xmark" onPress={handleClose} tintColor="#FFFFFF" />
           </Stack.Toolbar>
           <Stack.Toolbar placement="right">
-            <Stack.Toolbar.Button
-              icon="checkmark"
-              onPress={() => void handleSave()}
-              disabled={saveDisabled}
-            />
+            <Stack.Toolbar.Button icon="checkmark" onPress={() => void handleSave()} disabled={saveDisabled} />
           </Stack.Toolbar>
         </>
       ) : null}
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.screen}>
-        <View style={styles.content}>
-          <View style={[styles.wheelCard, {backgroundColor: colors.card, borderColor: colors.border}]}>
-            <NumberWheelInput value={quantity} options={quantityOptions} onChange={setQuantity} disabled={itemBusy} />
-          </View>
+        <View style={[styles.wheelCard, {backgroundColor: colors.card, borderColor: colors.border}]}>
+          <NumberWheelInput value={quantity} options={quantityOptions} onChange={setQuantity} disabled={itemBusy} />
         </View>
 
         <View style={styles.footer}>

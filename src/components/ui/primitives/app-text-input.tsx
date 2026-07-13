@@ -1,6 +1,5 @@
-import type { TextInputRef } from '@expo/ui';
-import { Host, TextInput } from '@expo/ui';
-import type { Ref } from 'react';
+import type { ReactNode, Ref } from 'react';
+import { TextInput, View, type TextInput as RNTextInput } from 'react-native';
 
 import { useAppTheme, useThemedStyles } from '@/lib/theme';
 
@@ -13,7 +12,9 @@ type AppTextInputProps = {
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
   autoCorrect?: boolean;
   autoFocus?: boolean;
-  inputRef?: Ref<TextInputRef>;
+  inputRef?: Ref<RNTextInput>;
+  size?: 'default' | 'large';
+  rightAccessory?: ReactNode;
 };
 
 export function AppTextInput({
@@ -24,24 +25,28 @@ export function AppTextInput({
   autoCorrect = false,
   autoFocus = false,
   inputRef,
+  size = 'default',
+  rightAccessory,
 }: AppTextInputProps) {
   const {colors} = useAppTheme();
   const styles = useThemedStyles(createStyles);
+  const inputStyle =
+    size === 'large' ? {...styles.input, ...styles.inputLarge} : styles.input;
 
   return (
-    <Host style={[styles.inputShell, styles.inputRow]}>
+    <View style={styles.inputShell}>
       <TextInput
-        key={`app-text-input-${placeholder}-${value}`}
         ref={inputRef}
-        defaultValue={value}
+        value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
         placeholderTextColor={colors.muted}
         autoCapitalize={autoCapitalize}
         autoCorrect={autoCorrect}
         autoFocus={autoFocus}
-        style={styles.input}
+        style={rightAccessory ? [inputStyle, {paddingRight: size === 'large' ? 52 : 48}] : inputStyle}
       />
-    </Host>
+      {rightAccessory ? <View style={styles.inputRightSlot}>{rightAccessory}</View> : null}
+    </View>
   );
 }

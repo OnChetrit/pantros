@@ -14,7 +14,7 @@ import { CartHeaderAction } from '@/features/cart/cart-header-action/cart-header
 import { sortCartItems } from '@/features/cart/cart-items/cart-items';
 import { parsePantrySortOption } from '@/features/pantry/pantry-sort/pantry-sort-options';
 import { getCartItems } from '@/lib/pantry-insights';
-import { appColors } from '@/lib/theme';
+import { useThemedStyles } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -23,6 +23,7 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 
 export default function CartScreen() {
   const { deleteItem, moveItemToPantry, pantryItems, selectedPantry } = useAppContext();
+  const styles = useThemedStyles(createStyles);
   const {
     checkoutProgress,
     clearCheckoutError,
@@ -210,48 +211,48 @@ export default function CartScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: appColors.background,
-  },
-  list: {
-    flex: 1,
-  },
-  content: {
-    paddingHorizontal: 12,
-    gap: 12,
-  },
-  filledContent: {
-    marginHorizontal: 12,
-    paddingHorizontal: 0,
-    borderRadius: 26,
-    backgroundColor: appColors.card,
-    overflow: 'hidden',
-  },
-  emptyScreen: {
-    flex: 1,
-    backgroundColor: appColors.background,
-    padding: 20,
-    justifyContent: 'center',
-  },
-  listEmpty: {
-    paddingHorizontal: 16,
-    paddingTop: 6,
-  },
-  headerActions: {
-  },
-  selectedGroup: {
-    marginTop: 8,
-    paddingTop: 10,
-    opacity: 0.62,
-  },
-  selectedGroupHeader: {
-    paddingHorizontal: 16,
-    paddingBottom: 8,
-  },
-  selectedGroupDivider: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: appColors.border,
-  },
-});
+const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
+  StyleSheet.create({
+    screen: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    list: {
+      flex: 1,
+    },
+    content: {
+      paddingHorizontal: 12,
+      gap: 12,
+    },
+    filledContent: {
+      marginHorizontal: 12,
+      paddingHorizontal: 0,
+      borderRadius: 26,
+      backgroundColor: colors.card,
+      overflow: 'hidden',
+    },
+    emptyScreen: {
+      flex: 1,
+      backgroundColor: colors.background,
+      padding: 20,
+      justifyContent: 'center',
+    },
+    listEmpty: {
+      paddingHorizontal: 16,
+      paddingTop: 6,
+    },
+    headerActions: {},
+    selectedGroup: {
+      marginTop: 8,
+      paddingTop: 10,
+      opacity: 0.62,
+    },
+    selectedGroupHeader: {
+      paddingHorizontal: 16,
+      paddingBottom: 8,
+    },
+    selectedGroupDivider: {
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: colors.border,
+    },
+  });

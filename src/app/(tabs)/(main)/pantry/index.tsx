@@ -4,13 +4,14 @@ import { Alert, FlatList, LayoutAnimation, StyleSheet, View } from 'react-native
 
 import { PantryFilterMenu } from '@/components/pantry/pantry-filter-menu/pantry-filter-menu';
 import { PantryItemRow } from '@/components/pantry/pantry-item-row/pantry-item-row';
-import { EmptyNotice } from '@/components/ui/primitives';
+import { AppButton, EmptyNotice } from '@/components/ui/primitives';
 import { parsePantrySortOption } from '@/features/pantry/pantry-sort/pantry-sort-options';
-import { appColors } from '@/lib/theme';
+import { useThemedStyles } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
 
 export default function PantryScreen() {
   const {deleteItem, moveItemToCart, moveItemToPantry, pantryCarts, pantryItems, selectedPantry} = useAppContext();
+  const styles = useThemedStyles(createStyles);
   const router = useRouter();
   const {sort} = useLocalSearchParams<{sort?: string | string[]}>();
   const sortOption = parsePantrySortOption(sort);
@@ -120,6 +121,9 @@ export default function PantryScreen() {
               title="No pantry items yet"
               body="Add your first inventory item to start using the pantry as a real iOS-style list with quick actions."
             />
+            <View style={styles.emptyAction}>
+              <AppButton label="Add Item" onPress={() => router.push('/items/new')} />
+            </View>
           </View>
         }
         renderItem={({item, index}) => {
@@ -130,29 +134,34 @@ export default function PantryScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: appColors.background,
-  },
-  content: {
-    paddingHorizontal: 12,
-    paddingBottom: 40,
-  },
-  emptyScreen: {
-    flex: 1,
-    backgroundColor: appColors.background,
-    padding: 20,
-    justifyContent: 'center',
-  },
-  listEmpty: {
-    paddingHorizontal: 16,
-    paddingTop: 6,
-  },
-  filledContent: {
-    marginHorizontal: 12,
-    borderRadius: 26,
-    backgroundColor: appColors.card,
-    overflow: 'hidden',
-  },
-});
+const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
+  StyleSheet.create({
+    screen: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    content: {
+      paddingHorizontal: 12,
+      paddingBottom: 40,
+    },
+    emptyScreen: {
+      flex: 1,
+      backgroundColor: colors.background,
+      padding: 20,
+      justifyContent: 'center',
+    },
+    listEmpty: {
+      paddingHorizontal: 16,
+      paddingTop: 6,
+      gap: 12,
+    },
+    emptyAction: {
+      paddingHorizontal: 4,
+    },
+    filledContent: {
+      marginHorizontal: 12,
+      borderRadius: 26,
+      backgroundColor: colors.card,
+      overflow: 'hidden',
+    },
+  });
