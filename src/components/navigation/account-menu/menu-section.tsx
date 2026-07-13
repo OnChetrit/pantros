@@ -4,7 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useThemedStyles } from '@/lib/theme';
 
 type MenuSectionProps = {
-  title: string;
+  title?: string;
   children: ReactNode;
 };
 
@@ -13,7 +13,7 @@ export function MenuSection({ title, children }: MenuSectionProps) {
 
   return (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>{title}</Text>
+      {title ? <Text style={styles.sectionTitle}>{title}</Text> : null}
       <View style={styles.sectionCard}>{children}</View>
     </View>
   );

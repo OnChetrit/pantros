@@ -11,7 +11,7 @@ export function AppearanceSection({
   onChangeThemePreference: (preference: ThemePreference) => void;
 }) {
   return (
-    <MenuSection title="Appearance">
+    <MenuSection>
       <ThemePreferenceSelector value={themePreference} onChange={onChangeThemePreference} />
     </MenuSection>
   );
