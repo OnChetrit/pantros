@@ -1,4 +1,4 @@
-import { Picker as NativePicker } from '@react-native-picker/picker';
+import { Picker } from '@react-native-picker/picker';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { useAppTheme } from '@/lib/theme';
@@ -17,7 +17,7 @@ export function NumberWheelInput({value, options, onChange, suffix, disabled = f
   return (
     <View style={styles.container}>
       <View style={styles.row}>
-        <NativePicker
+        <Picker
           selectedValue={value}
           enabled={!disabled}
           onValueChange={nextValue => {
@@ -29,9 +29,9 @@ export function NumberWheelInput({value, options, onChange, suffix, disabled = f
           style={[styles.picker, {color: disabled ? colors.muted : colors.text, opacity: disabled ? 0.5 : 1}]}
         >
           {options.map(option => (
-            <NativePicker.Item key={option} label={String(option)} value={option} />
+            <Picker.Item key={option} label={String(option)} value={option} />
           ))}
-        </NativePicker>
+        </Picker>
         {suffix ? <Text style={[styles.suffixText, {color: colors.muted}]}>{suffix}</Text> : null}
       </View>
     </View>

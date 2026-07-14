@@ -1,12 +1,12 @@
 import {
   BottomSheet,
+  Button,
   HStack,
   Host,
   ProgressView,
   RNHostView,
   Spacer,
-  Text as SwiftText,
-  Button as SwiftUIButton,
+  Text,
   VStack,
   ZStack,
 } from '@expo/ui/swift-ui';
@@ -23,7 +23,7 @@ import {
   progressViewStyle,
 } from '@expo/ui/swift-ui/modifiers';
 import { useMemo } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import * as ReactNative from 'react-native';
 import Animated, { Easing, FadeInDown, FadeOutDown, LinearTransition } from 'react-native-reanimated';
 
 import { useCartCheckout } from '@/features/cart/cart-checkout-context/cart-checkout-context';
@@ -92,8 +92,8 @@ export function CartCheckoutSheet() {
           />
 
           <RNHostView>
-            <View style={styles.scrollHost}>
-              <ScrollView
+            <ReactNative.View style={styles.scrollHost}>
+              <ReactNative.ScrollView
                 style={styles.scrollView}
                 contentContainerStyle={styles.grid}
                 contentInsetAdjustmentBehavior="never"
@@ -107,7 +107,7 @@ export function CartCheckoutSheet() {
                     layout={CARD_LAYOUT_TRANSITION}
                     style={styles.cardWrap}
                   >
-                    <Pressable
+                    <ReactNative.Pressable
                       accessibilityRole="button"
                       onPress={() => toggleItemSelection(item.id)}
                       disabled={checkoutProgress.processing}
@@ -121,17 +121,17 @@ export function CartCheckoutSheet() {
                         checkoutProgress.processing ? styles.disabledCard : null,
                       ]}
                     >
-                      <Text numberOfLines={2} selectable style={[styles.cardTitle, {color: colors.text}]}>
+                      <ReactNative.Text numberOfLines={2} selectable style={[styles.cardTitle, {color: colors.text}]}>
                         {item.name}
-                      </Text>
-                      <Text selectable style={[styles.cardMeta, {color: colors.muted}]}>
+                      </ReactNative.Text>
+                      <ReactNative.Text selectable style={[styles.cardMeta, {color: colors.muted}]}>
                         {item.quantity}
-                      </Text>
-                    </Pressable>
+                      </ReactNative.Text>
+                    </ReactNative.Pressable>
                   </Animated.View>
                 ))}
-              </ScrollView>
-            </View>
+              </ReactNative.ScrollView>
+            </ReactNative.View>
           </RNHostView>
         </VStack>
       </BottomSheet>
@@ -161,18 +161,18 @@ function SheetHeader({
   return (
     <VStack spacing={14}>
       <HStack spacing={12}>
-        <SwiftUIButton
+        <Button
           label="Cancel"
           // systemImage="xmark"
           onPress={onClose}
           modifiers={[controlSize('large'), buttonStyle('glass'), buttonBorderShape('automatic'), disabled(processing)]}
         />
         <Spacer />
-        <SwiftText modifiers={[font({weight: 'semibold', size: 22})]}>Shopping</SwiftText>
+        <Text modifiers={[font({weight: 'semibold', size: 22})]}>Shopping</Text>
         <Spacer />
 
         <ZStack>
-          <SwiftUIButton
+          <Button
             label={processing ? '' : 'Finish'}
             onPress={onPrimaryAction}
             modifiers={[
@@ -193,7 +193,7 @@ function SheetHeader({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = ReactNative.StyleSheet.create({
   scrollHost: {
     height: 252,
   },

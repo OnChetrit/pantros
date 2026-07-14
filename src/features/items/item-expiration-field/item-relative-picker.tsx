@@ -1,4 +1,4 @@
-import { Picker as NativePicker } from '@react-native-picker/picker';
+import { Picker } from '@react-native-picker/picker';
 import { StyleSheet, Text } from 'react-native';
 
 import { useThemedStyles } from '@/lib/theme';
@@ -18,7 +18,7 @@ export function ItemRelativePicker({label, value, options, onChange}: ItemRelati
   return (
     <Host matchContents>
       <HStack alignment="center">
-        <NativePicker
+        <Picker
           selectedValue={value}
           onValueChange={nextValue => {
             if (typeof nextValue === 'number') {
@@ -29,9 +29,9 @@ export function ItemRelativePicker({label, value, options, onChange}: ItemRelati
           style={styles.picker}
         >
           {options.map(option => (
-            <NativePicker.Item key={option} label={String(option)} value={option} />
+            <Picker.Item key={option} label={String(option)} value={option} />
           ))}
-        </NativePicker>
+        </Picker>
         <Text style={styles.relativeLabel}>{label}</Text>
       </HStack>
     </Host>

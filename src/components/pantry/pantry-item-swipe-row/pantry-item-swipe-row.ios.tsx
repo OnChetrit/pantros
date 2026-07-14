@@ -1,4 +1,4 @@
-import { ContextMenu, HStack, Spacer, Button as SwiftUIButton, SwipeActions, Text, VStack } from '@expo/ui/swift-ui';
+import { Button, ContextMenu, HStack, Spacer, SwipeActions, Text, VStack } from '@expo/ui/swift-ui';
 import { background, font, foregroundStyle, frame, onTapGesture, shapes, tint } from '@expo/ui/swift-ui/modifiers';
 import { Alert } from 'react-native';
 
@@ -97,31 +97,31 @@ export function PantryItemSwipeRow({
       <ContextMenu.Trigger>{rowContent}</ContextMenu.Trigger>
 
       <ContextMenu.Items>
-        <SwiftUIButton label="Edit item" systemImage="pencil" onPress={() => handleWithHaptics(onEdit)} />
+        <Button label="Edit item" systemImage="pencil" onPress={() => handleWithHaptics(onEdit)} />
 
         {!isSelectionMode && onStartSelection ? (
-          <SwiftUIButton
+          <Button
             label="Select"
             systemImage="checkmark.circle"
             onPress={() => handleWithHaptics(onStartSelection)}
           />
         ) : null}
 
-        <SwiftUIButton
+        <Button
           label={isCart ? 'Update quantity' : 'Review expiration'}
           systemImage={isCart ? 'number.circle' : 'clock'}
           onPress={() => handleWithHaptics(isCart ? onReviewQuantity : onReviewExpiration)}
         />
 
         {hasLeftAction ? (
-          <SwiftUIButton
+          <Button
             label={leftActionLabel}
             systemImage={getCartActionSystemImage(item)}
             onPress={() => handleWithHaptics(onLeftAction)}
           />
         ) : null}
 
-        <SwiftUIButton label="Delete item" role="destructive" systemImage="trash" onPress={confirmDelete} />
+        <Button label="Delete item" role="destructive" systemImage="trash" onPress={confirmDelete} />
       </ContextMenu.Items>
     </ContextMenu>
   );
@@ -132,14 +132,14 @@ export function PantryItemSwipeRow({
 
       {hasLeftAction ? (
         <SwipeActions.Actions edge="leading" allowsFullSwipe>
-          <SwiftUIButton
+          <Button
             label=""
             systemImage={getCartActionSystemImage(item)}
             onPress={() => handleWithHaptics(onLeftAction)}
             modifiers={[tint(colors.warning)]}
           />
 
-          <SwiftUIButton
+          <Button
             label=""
             role="cancel"
             modifiers={[tint(colors.tint)]}
@@ -150,7 +150,7 @@ export function PantryItemSwipeRow({
       ) : null}
 
       <SwipeActions.Actions edge="trailing" allowsFullSwipe={false}>
-        <SwiftUIButton modifiers={[tint(colors.danger)]} label="" systemImage="trash" onPress={confirmDelete} />
+        <Button modifiers={[tint(colors.danger)]} label="" systemImage="trash" onPress={confirmDelete} />
       </SwipeActions.Actions>
     </SwipeActions>
   );

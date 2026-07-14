@@ -9,7 +9,7 @@ import { font, foregroundStyle, listStyle } from '@expo/ui/swift-ui/modifiers';
 import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { SearchBarCommands } from 'react-native-screens';
-import { Alert, Image, LayoutAnimation, StyleSheet, Text as RNText, View } from 'react-native';
+import * as ReactNative from 'react-native';
 
 const searchEmptyIllustration = require('../../../../../assets/images/search-empty-state-transparent.png');
 
@@ -29,12 +29,12 @@ export default function SearchScreen() {
   const primaryCart = pantryCarts.find(cart => cart.isPrimary) ?? pantryCarts[0] ?? null;
 
   const animateListLayout = () => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    ReactNative.LayoutAnimation.configureNext(ReactNative.LayoutAnimation.Presets.easeInEaseOut);
   };
 
   const handleAddToCart = async (itemId: string) => {
     if (!primaryCart) {
-      Alert.alert('No cart available', 'Create a cart before sending items to purchase.');
+      ReactNative.Alert.alert('No cart available', 'Create a cart before sending items to purchase.');
       return;
     }
 
@@ -113,12 +113,12 @@ export default function SearchScreen() {
             },
           }}
         />
-        <View style={styles.emptyScreen}>
+        <ReactNative.View style={styles.emptyScreen}>
           <EmptyNotice
             title="No pantry workspace yet"
             body="Select a pantry first so search can run against the active inventory."
           />
-        </View>
+        </ReactNative.View>
       </>
     );
   }
@@ -157,21 +157,21 @@ export default function SearchScreen() {
         <Stack.Toolbar.Button icon="person.crop.circle" onPress={() => router.push('/account/menu')} />
       </Stack.Toolbar>
       {visibleItems.length === 0 && !shouldShowCreateItem ? (
-        <View style={[styles.emptyStateScreen, {backgroundColor: colors.background}]}>
-          <View style={styles.emptyStateContent}>
-            <Image source={searchEmptyIllustration} style={styles.illustration} resizeMode="contain" />
-            <View style={styles.emptyStateCopy}>
-              <RNText style={[styles.emptyStateTitle, {color: colors.text}]}>
+        <ReactNative.View style={[styles.emptyStateScreen, {backgroundColor: colors.background}]}>
+          <ReactNative.View style={styles.emptyStateContent}>
+            <ReactNative.Image source={searchEmptyIllustration} style={styles.illustration} resizeMode="contain" />
+            <ReactNative.View style={styles.emptyStateCopy}>
+              <ReactNative.Text style={[styles.emptyStateTitle, {color: colors.text}]}>
                 {trimmedQuery ? 'No matches yet' : 'Search the pantry'}
-              </RNText>
-              <RNText style={[styles.emptyStateBody, {color: colors.muted}]}>
+              </ReactNative.Text>
+              <ReactNative.Text style={[styles.emptyStateBody, {color: colors.muted}]}>
                 {trimmedQuery
                   ? 'Try a broader item name or scan a barcode to look again.'
                   : 'Search by name or barcode to quickly find what is already in your pantry.'}
-              </RNText>
-            </View>
-          </View>
-        </View>
+              </ReactNative.Text>
+            </ReactNative.View>
+          </ReactNative.View>
+        </ReactNative.View>
       ) : (
         <Host colorScheme={isDark ? 'dark' : 'light'} style={[styles.host, {backgroundColor: colors.background}]}>
           <List modifiers={[listStyle('insetGrouped')]}>
@@ -212,7 +212,7 @@ export default function SearchScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = ReactNative.StyleSheet.create({
   host: {
     flex: 1,
   },
