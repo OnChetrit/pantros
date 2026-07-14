@@ -16,7 +16,6 @@ export function RemindersSection({
   showAndroidTimePicker,
   onOpenAndroidTimePicker,
   onReminderTimeChange,
-  onSaveReminderTime,
   onToggleCartReminders,
   notificationError,
 }: {
@@ -26,7 +25,6 @@ export function RemindersSection({
   showAndroidTimePicker: boolean;
   onOpenAndroidTimePicker: () => void;
   onReminderTimeChange: (value: Date) => void;
-  onSaveReminderTime: () => void;
   onToggleCartReminders: (enabled: boolean) => void;
   notificationError: string | null;
 }) {
@@ -87,16 +85,6 @@ export function RemindersSection({
           }}
         />
       ) : null}
-      <Pressable
-        disabled={!notificationPreferences || notificationsBusy}
-        onPress={onSaveReminderTime}
-        style={({pressed}) => [
-          styles.inlineActionButton,
-          pressed || !notificationPreferences || notificationsBusy ? styles.inlineActionButtonPressed : null,
-        ]}
-      >
-        <Text style={styles.inlineActionButtonText}>{notificationsBusy ? 'Saving…' : 'Save reminder time'}</Text>
-      </Pressable>
       {notificationError ? <Text style={styles.notificationError}>{notificationError}</Text> : null}
     </MenuSection>
   );

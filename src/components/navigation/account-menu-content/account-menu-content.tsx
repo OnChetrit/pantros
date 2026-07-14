@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
+import * as Device from 'expo-device';
 import { useMemo, useState } from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
+import { Platform, ScrollView, StyleSheet } from 'react-native';
 
 import { useAppTheme, useThemedStyles } from '@/lib/theme';
 import {
@@ -46,6 +47,7 @@ export function AccountMenuContent({
   );
   const notificationsBusy = notificationBusy || notificationActionBusy;
   const reminderTime = reminderTimeOverride ?? parseReminderTime(notificationPreferences?.cartReminderTime ?? '18:00');
+  const showRemindersSection = !(Platform.OS === 'ios' && !Device.isDevice);
 
   const handleNavigate = (destination: AccountMenuDestination) => {
     if (onNavigate) {
@@ -92,7 +94,7 @@ export function AccountMenuContent({
     }
   };
 
-  const saveReminderTime = async () => {
+  const saveReminderTime = async (nextReminderTime: Date) => {
     if (!notificationPreferences) {
       return;
     }
@@ -103,9 +105,10 @@ export function AccountMenuContent({
     try {
       await saveNotificationPreferences({
         ...notificationPreferences,
-        cartReminderTime: formatReminderTime(reminderTime),
+        cartReminderTime: formatReminderTime(nextReminderTime),
         timeZone: getDeviceTimeZone(),
       });
+      setReminderTimeOverride(null);
     } catch (error) {
       setNotificationError(
         error instanceof Error ? error.message : 'Unable to save the reminder time.'
@@ -133,22 +136,24 @@ export function AccountMenuContent({
         themePreference={themePreference}
         onChangeThemePreference={preference => void setThemePreference?.(preference)}
       />
-      <RemindersSection
-        notificationPreferences={notificationPreferences}
-        notificationsBusy={notificationsBusy}
-        reminderTime={reminderTime}
-        showAndroidTimePicker={showAndroidTimePicker}
-        onOpenAndroidTimePicker={() => setShowAndroidTimePicker(true)}
-        onReminderTimeChange={date => {
-          setShowAndroidTimePicker(false);
-          setReminderTimeOverride(date);
-        }}
-        onSaveReminderTime={() => void saveReminderTime()}
-        onToggleCartReminders={enabled => {
-          void saveCartReminderSettings(enabled);
-        }}
-        notificationError={notificationError}
-      />
+      {showRemindersSection ? (
+        <RemindersSection
+          notificationPreferences={notificationPreferences}
+          notificationsBusy={notificationsBusy}
+          reminderTime={reminderTime}
+          showAndroidTimePicker={showAndroidTimePicker}
+          onOpenAndroidTimePicker={() => setShowAndroidTimePicker(true)}
+          onReminderTimeChange={date => {
+            setShowAndroidTimePicker(false);
+            setReminderTimeOverride(date);
+            void saveReminderTime(date);
+          }}
+          onToggleCartReminders={enabled => {
+            void saveCartReminderSettings(enabled);
+          }}
+          notificationError={notificationError}
+        />
+      ) : null}
       <SupportSection onNavigate={handleNavigate} />
       <AccountActionsSection onNavigate={handleNavigate} onSignOut={handleSignOut} />
     </ScrollView>

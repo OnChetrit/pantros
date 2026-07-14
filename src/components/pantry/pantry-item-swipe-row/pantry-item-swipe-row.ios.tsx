@@ -136,6 +136,7 @@ export function PantryItemSwipeRow({
             label=""
             systemImage={getCartActionSystemImage(item)}
             onPress={() => handleWithHaptics(onLeftAction)}
+            modifiers={[tint(colors.warning)]}
           />
 
           <SwiftUIButton
