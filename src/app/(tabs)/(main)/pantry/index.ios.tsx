@@ -1,6 +1,6 @@
-import { AppButton } from '@/components/ui/primitives';
 import { PantryItemNativeListRow } from '@/components/pantry/pantry-item-row/pantry-item-row';
-import { parsePantrySortOption } from '@/features/pantry/pantry-sort/pantry-sort-options';
+import { AppButton } from '@/components/ui/primitives';
+import { parsePantrySortOption, SORT_OPTIONS } from '@/features/pantry/pantry-sort/pantry-sort-options';
 import { useAppTheme } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
 import { Host, List, Section } from '@expo/ui/swift-ui';
@@ -76,7 +76,8 @@ export default function PantryScreen() {
         <View style={styles.emptyStateCopy}>
           <Text style={[styles.emptyStateTitle, {color: colors.text}]}>No pantry workspace yet</Text>
           <Text style={[styles.emptyStateBody, {color: colors.muted}]}>
-            The app is authenticated and loaded correctly, but there is no pantry membership yet. The next workspace step is pantry creation and join-by-code flows.
+            The app is authenticated and loaded correctly, but there is no pantry membership yet. The next workspace
+            step is pantry creation and join-by-code flows.
           </Text>
         </View>
       </View>
@@ -87,15 +88,22 @@ export default function PantryScreen() {
     <>
       <Stack.Screen options={{}} />
       <Stack.Toolbar placement="left">
-        <Stack.Toolbar.Button
-          icon="arrow.up.arrow.down"
-          onPress={() =>
-            router.push({
-              pathname: '/pantry/sort',
-              params: {sort: sortOption},
-            })
-          }
-        />
+        <Stack.Toolbar.Menu icon="arrow.up.arrow.down" title="Sort">
+          {SORT_OPTIONS.map(option => (
+            <Stack.Toolbar.MenuAction
+              key={option.key}
+              isOn={option.key === sortOption}
+              onPress={() =>
+                router.replace({
+                  pathname: '/pantry',
+                  params: {sort: option.key},
+                })
+              }
+            >
+              {option.label}
+            </Stack.Toolbar.MenuAction>
+          ))}
+        </Stack.Toolbar.Menu>
       </Stack.Toolbar>
       <Stack.Toolbar placement="right">
         <Stack.Toolbar.Button icon="person.crop.circle" onPress={() => router.push('/account/menu')} />

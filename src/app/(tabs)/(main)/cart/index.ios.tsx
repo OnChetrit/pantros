@@ -11,7 +11,7 @@ import { CartCheckoutSheet } from '@/features/cart/cart-checkout-bar/cart-checko
 import { useCartCheckout } from '@/features/cart/cart-checkout-context/cart-checkout-context';
 import { CartCheckoutNotice } from '@/features/cart/cart-checkout-notice/cart-checkout-notice';
 import { sortCartItems } from '@/features/cart/cart-items/cart-items';
-import { parsePantrySortOption } from '@/features/pantry/pantry-sort/pantry-sort-options';
+import { parsePantrySortOption, SORT_OPTIONS } from '@/features/pantry/pantry-sort/pantry-sort-options';
 import { getCartItems } from '@/lib/pantry-insights';
 import { useAppTheme } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
@@ -92,16 +92,24 @@ export default function CartScreen() {
         <Stack.Toolbar.Button onPress={exitSelectionMode} hidden={!isSelectionMode}>
           Cancel
         </Stack.Toolbar.Button>
-        <Stack.Toolbar.Button
-          icon="arrow.up.arrow.down"
-          hidden={isSelectionMode}
-          onPress={() =>
-            router.push({
-              pathname: '/cart/sort',
-              params: {sort: sortOption},
-            })
-          }
-        />
+        {isSelectionMode ? null : (
+          <Stack.Toolbar.Menu icon="arrow.up.arrow.down" title="Sort">
+            {SORT_OPTIONS.map(option => (
+              <Stack.Toolbar.MenuAction
+                key={option.key}
+                isOn={option.key === sortOption}
+                onPress={() =>
+                  router.replace({
+                    pathname: '/cart',
+                    params: {sort: option.key},
+                  })
+                }
+              >
+                {option.label}
+              </Stack.Toolbar.MenuAction>
+            ))}
+          </Stack.Toolbar.Menu>
+        )}
       </Stack.Toolbar>
       <Stack.Toolbar placement="right">
         <Stack.Toolbar.Button
@@ -196,48 +204,48 @@ export default function CartScreen() {
               </ListItem>
             ) : null}
             <Section title="">
-              {itemsInCart.length > 0 ? (
-                unselectedItems.map((item, index) => (
-                  <PantryItemNativeListRow
-                    key={item.id}
-                    item={item}
-                    displayMode="cart"
-                    isLast={index === unselectedItems.length - 1 && selectedItems.length === 0}
-                    onPress={() => {
-                      if (isSelectionMode) {
+              {itemsInCart.length > 0
+                ? unselectedItems.map((item, index) => (
+                    <PantryItemNativeListRow
+                      key={item.id}
+                      item={item}
+                      displayMode="cart"
+                      isLast={index === unselectedItems.length - 1 && selectedItems.length === 0}
+                      onPress={() => {
+                        if (isSelectionMode) {
+                          animateListLayout();
+                          toggleItemSelection(item.id);
+                          return;
+                        }
+
+                        router.push(`/items/${item.id}`);
+                      }}
+                      onEdit={() => router.push(`/items/${item.id}`)}
+                      onReviewQuantity={
+                        isSelectionMode
+                          ? undefined
+                          : () =>
+                              router.push({
+                                pathname: '/cart/quantity',
+                                params: {itemId: item.id},
+                              })
+                      }
+                      leftActionLabel={isSelectionMode ? undefined : 'Move to Pantry'}
+                      onLeftAction={isSelectionMode ? undefined : () => void handleMoveToPantry(item.id)}
+                      onDelete={() => void handleDelete(item.id)}
+                      isSelectionMode={isSelectionMode}
+                      isSelected={selectedItemIds.includes(item.id)}
+                      onToggleSelection={() => {
                         animateListLayout();
                         toggleItemSelection(item.id);
-                        return;
-                      }
-
-                      router.push(`/items/${item.id}`);
-                    }}
-                    onEdit={() => router.push(`/items/${item.id}`)}
-                    onReviewQuantity={
-                      isSelectionMode
-                        ? undefined
-                        : () =>
-                            router.push({
-                              pathname: '/cart/quantity',
-                              params: {itemId: item.id},
-                            })
-                    }
-                    leftActionLabel={isSelectionMode ? undefined : 'Move to Pantry'}
-                    onLeftAction={isSelectionMode ? undefined : () => void handleMoveToPantry(item.id)}
-                    onDelete={() => void handleDelete(item.id)}
-                    isSelectionMode={isSelectionMode}
-                    isSelected={selectedItemIds.includes(item.id)}
-                    onToggleSelection={() => {
-                      animateListLayout();
-                      toggleItemSelection(item.id);
-                    }}
-                    onStartSelection={() => {
-                      animateListLayout();
-                      enterSelectionMode(item.id);
-                    }}
-                  />
-                ))
-              ) : null}
+                      }}
+                      onStartSelection={() => {
+                        animateListLayout();
+                        enterSelectionMode(item.id);
+                      }}
+                    />
+                  ))
+                : null}
             </Section>
           </List>
         </Host>
