@@ -1,6 +1,6 @@
 import { Host, RNHostView, Row } from '@expo/ui';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { FlatList, LayoutAnimation, Platform, StyleSheet, UIManager, View } from 'react-native';
 
 import { AvatarSidebarButton } from '@/components/navigation/avatar-sidebar/avatar-sidebar';
@@ -32,7 +32,6 @@ export default function CartScreen() {
     enterSelectionMode,
     exitSelectionMode,
     isSelectionMode,
-    setVisibleItems,
     selectAll,
     selectedItemIds,
     toggleItemSelection,
@@ -55,10 +54,6 @@ export default function CartScreen() {
 
   const selectedCount = selectedItemIds.length;
   const allSelected = itemsInCart.length > 0 && selectedCount === itemsInCart.length;
-
-  useEffect(() => {
-    setVisibleItems(itemsInCart);
-  }, [itemsInCart, setVisibleItems]);
 
   const animateSelectionLayout = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);

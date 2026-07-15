@@ -34,10 +34,12 @@ type AppContextValue = {
   addItem: (input: PantryItemInput) => Promise<ReturnType<typeof useWorkspaceState>['items'][number]>;
   updateItem: ReturnType<typeof useItemState>['updateItem'];
   moveItemToCart: ReturnType<typeof useItemState>['moveItemToCart'];
+  moveItemsToCart: ReturnType<typeof useItemState>['moveItemsToCart'];
   moveItemToPantry: ReturnType<typeof useItemState>['moveItemToPantry'];
   moveItemsToPantry: ReturnType<typeof useItemState>['moveItemsToPantry'];
   completeCartItemWithExpiration: ReturnType<typeof useItemState>['completeCartItemWithExpiration'];
   deleteItem: ReturnType<typeof useItemState>['deleteItem'];
+  deleteItems: ReturnType<typeof useItemState>['deleteItems'];
   saveNotificationPreferences: (preferences: NotificationPreferences) => Promise<NotificationPreferences>;
   signIn: ReturnType<typeof useAuthState>['signIn'];
   signUp: ReturnType<typeof useAuthState>['signUp'];
@@ -91,10 +93,12 @@ function AppContextBridge({children}: PropsWithChildren) {
       addItem: items.addItem,
       updateItem: items.updateItem,
       moveItemToCart: items.moveItemToCart,
+      moveItemsToCart: items.moveItemsToCart,
       moveItemToPantry: items.moveItemToPantry,
       moveItemsToPantry: items.moveItemsToPantry,
       completeCartItemWithExpiration: items.completeCartItemWithExpiration,
       deleteItem: items.deleteItem,
+      deleteItems: items.deleteItems,
       saveNotificationPreferences: notifications.saveNotificationPreferences,
       signIn: auth.signIn,
       signUp: auth.signUp,

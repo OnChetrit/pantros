@@ -2,7 +2,7 @@ import { ListItem } from '@expo/ui';
 import { Host, List, Section } from '@expo/ui/swift-ui';
 import { listStyle } from '@expo/ui/swift-ui/modifiers';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { Image, LayoutAnimation, StyleSheet, Text, View } from 'react-native';
 
 import { PantryItemNativeListRow } from '@/components/pantry/pantry-item-row/pantry-item-row';
@@ -29,7 +29,6 @@ export default function CartScreen() {
     enterSelectionMode,
     exitSelectionMode,
     isSelectionMode,
-    setVisibleItems,
     selectAll,
     selectedItemIds,
     toggleItemSelection,
@@ -51,10 +50,6 @@ export default function CartScreen() {
 
   const selectedCount = selectedItemIds.length;
   const allSelected = itemsInCart.length > 0 && selectedCount === itemsInCart.length;
-
-  useEffect(() => {
-    setVisibleItems(itemsInCart);
-  }, [itemsInCart, setVisibleItems]);
 
   const animateListLayout = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);

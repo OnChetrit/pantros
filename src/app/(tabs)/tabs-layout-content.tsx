@@ -2,6 +2,7 @@ import { NativeTabs } from 'expo-router/unstable-native-tabs';
 import { StyleSheet, View } from 'react-native';
 
 import { appColors } from '@/components/ui/primitives';
+import { TabBarVisibilityProvider, useTabBarVisibility } from '@/features/navigation/tab-bar-visibility-context/tab-bar-visibility-context';
 import { useAppTheme } from '@/lib/theme';
 
 const styles = StyleSheet.create({
@@ -12,13 +13,23 @@ const styles = StyleSheet.create({
 });
 
 export function TabsLayoutContent() {
+  return (
+    <TabBarVisibilityProvider>
+      <TabsLayoutNavigator />
+    </TabBarVisibilityProvider>
+  );
+}
+
+function TabsLayoutNavigator() {
   const {colors} = useAppTheme();
+  const {isTabBarHidden} = useTabBarVisibility();
 
   return (
     <View style={styles.root}>
       <NativeTabs
         backgroundColor={colors.card}
         disableTransparentOnScrollEdge
+        hidden={isTabBarHidden}
         shadowColor={colors.border}
         tintColor={colors.tint}
         labelStyle={{
