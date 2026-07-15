@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import type { PropsWithChildren } from 'react';
 
 import type { PantryItem } from '@/domain/models';
@@ -20,13 +20,12 @@ type CartCheckoutContextValue = {
   checkoutProgress: CheckoutProgress;
   reviewDate: string;
   currentReviewItem: PantryItem | null;
-  setVisibleItems: (items: PantryItem[]) => void;
   enterSelectionMode: (itemId?: string) => void;
   exitSelectionMode: () => void;
   toggleItemSelection: (itemId: string) => void;
   selectAll: (itemIds: string[]) => void;
   clearSelection: () => void;
-  startCheckout: () => Promise<void>;
+  startCheckout: (visibleItems: PantryItem[]) => Promise<void>;
   setReviewDate: (value: string) => void;
   saveAndContinueReview: () => Promise<void>;
   skipCurrentReview: () => Promise<void>;
@@ -82,7 +81,6 @@ export function CartCheckoutProvider({ children }: PropsWithChildren) {
   const {selectedPantry} = useWorkspaceState();
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedItemIds, setSelectedItemIds] = useState<string[]>([]);
-  const [visibleItems, setVisibleItems] = useState<PantryItem[]>([]);
   const [checkoutQueue, setCheckoutQueue] = useState<PantryItem[]>([]);
   const [queueIndex, setQueueIndex] = useState(0);
   const [reviewDate, setReviewDate] = useState('');
@@ -96,21 +94,6 @@ export function CartCheckoutProvider({ children }: PropsWithChildren) {
 
   const currentReviewItem = checkoutQueue[queueIndex] ?? null;
   const defaultExpirationDays = selectedPantry?.settings.defaultExpirationDays ?? null;
-
-  useEffect(() => {
-    if (!currentReviewItem) {
-      return;
-    }
-
-    setReviewDate(resolveReviewDate(currentReviewItem, defaultExpirationDays));
-  }, [currentReviewItem, defaultExpirationDays]);
-
-  useEffect(() => {
-    const visibleIds = new Set(visibleItems.map((item) => item.id));
-
-    setSelectedItemIds((current) => current.filter((itemId) => visibleIds.has(itemId)));
-    setIsSelectionMode((current) => (visibleIds.size === 0 ? false : current));
-  }, [visibleItems]);
 
   const resetSelection = useCallback(() => {
     setIsSelectionMode(false);
@@ -165,7 +148,7 @@ export function CartCheckoutProvider({ children }: PropsWithChildren) {
     }));
   }, []);
 
-  const startCheckout = useCallback(async () => {
+  const startCheckout = useCallback(async (visibleItems: PantryItem[]) => {
     const orderedSelection = visibleItems.filter((item) => selectedItemIds.includes(item.id));
 
     if (orderedSelection.length === 0) {
@@ -194,6 +177,7 @@ export function CartCheckoutProvider({ children }: PropsWithChildren) {
       if (queuedItems.length > 0) {
         setCheckoutQueue(queuedItems);
         setQueueIndex(0);
+        setReviewDate(resolveReviewDate(queuedItems[0] ?? null, defaultExpirationDays));
         resetSelection();
         setCheckoutProgress({
           totalCount: orderedSelection.length,
@@ -230,7 +214,7 @@ export function CartCheckoutProvider({ children }: PropsWithChildren) {
         completionMessage: completedCount > 0 ? buildCompletionMessage(completedCount) : null,
       });
     }
-  }, [moveItemsToPantry, resetSelection, selectedItemIds, visibleItems]);
+  }, [defaultExpirationDays, moveItemsToPantry, resetSelection, selectedItemIds]);
 
   const finishReviewStep = useCallback((completedCount: number) => {
     const isLastItem = queueIndex >= checkoutQueue.length - 1;
@@ -238,6 +222,7 @@ export function CartCheckoutProvider({ children }: PropsWithChildren) {
     if (isLastItem) {
       setCheckoutQueue([]);
       setQueueIndex(0);
+      setReviewDate('');
       setCheckoutProgress((current) => ({
         ...current,
         completedCount,
@@ -248,14 +233,16 @@ export function CartCheckoutProvider({ children }: PropsWithChildren) {
       return;
     }
 
-    setQueueIndex((current) => current + 1);
+    const nextQueueIndex = queueIndex + 1;
+    setQueueIndex(nextQueueIndex);
+    setReviewDate(resolveReviewDate(checkoutQueue[nextQueueIndex] ?? null, defaultExpirationDays));
     setCheckoutProgress((current) => ({
       ...current,
       completedCount,
       processing: false,
       errorMessage: null,
     }));
-  }, [checkoutQueue.length, queueIndex]);
+  }, [checkoutQueue, defaultExpirationDays, queueIndex]);
 
   const runReviewStep = useCallback(async (expirationDate: string | null) => {
     if (!currentReviewItem) {
@@ -294,6 +281,7 @@ export function CartCheckoutProvider({ children }: PropsWithChildren) {
 
     setCheckoutQueue([]);
     setQueueIndex(0);
+    setReviewDate('');
     setCheckoutProgress((current) => ({
       ...current,
       processing: false,
@@ -314,7 +302,6 @@ export function CartCheckoutProvider({ children }: PropsWithChildren) {
     checkoutProgress,
     reviewDate,
     currentReviewItem,
-    setVisibleItems,
     enterSelectionMode,
     exitSelectionMode,
     toggleItemSelection,
@@ -339,7 +326,6 @@ export function CartCheckoutProvider({ children }: PropsWithChildren) {
     isSelectionMode,
     reviewDate,
     saveAndContinueReview,
-    setVisibleItems,
     selectAll,
     selectedItemIds,
     skipCurrentReview,

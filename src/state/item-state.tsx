@@ -18,6 +18,7 @@ type ItemStateContextValue = {
   addItem: (input: PantryItemInput) => Promise<PantryItem>;
   updateItem: (itemId: string, input: PantryItemInput) => Promise<PantryItem>;
   moveItemToCart: (itemId: string, cartId: string | null) => Promise<PantryItem>;
+  moveItemsToCart: (itemIds: string[], cartId: string | null) => Promise<PantryItem[]>;
   moveItemToPantry: (itemId: string) => Promise<PantryItem>;
   moveItemsToPantry: (itemIds: string[]) => Promise<PantryItem[]>;
   completeCartItemWithExpiration: (
@@ -25,6 +26,7 @@ type ItemStateContextValue = {
     expirationDate: string | null
   ) => Promise<PantryItem>;
   deleteItem: (itemId: string) => Promise<void>;
+  deleteItems: (itemIds: string[]) => Promise<void>;
 };
 
 const ItemStateContext = createContext<ItemStateContextValue | undefined>(undefined);
@@ -132,6 +134,40 @@ export function ItemStateProvider({children}: PropsWithChildren) {
     }
   }, [setItems]);
 
+  const deleteItems = useCallback(async (itemIds: string[]) => {
+    if (itemIds.length === 0) {
+      return;
+    }
+
+    setItemBusy(true);
+    setErrorMessage(null);
+
+    const previousItems = items;
+
+    setItems((currentItems) => currentItems.filter((item) => !itemIds.includes(item.id)));
+
+    const completedItemIds: string[] = [];
+
+    try {
+      for (const itemId of itemIds) {
+        await deletePantryItem(itemId);
+        completedItemIds.push(itemId);
+      }
+    } catch (error) {
+      setItems(previousItems);
+
+      const failedItemId = itemIds.find((itemId) => !completedItemIds.includes(itemId)) ?? null;
+      const message = error instanceof Error ? error.message : 'Unable to delete selected items.';
+      setErrorMessage(message);
+      throw new PartialItemActionError(message, {
+        completedItemIds,
+        failedItemId,
+      });
+    } finally {
+      setItemBusy(false);
+    }
+  }, [items, setItems]);
+
   const moveItemToPantry = useCallback(async (itemId: string) => {
     setItemBusy(true);
     setErrorMessage(null);
@@ -163,6 +199,69 @@ export function ItemStateProvider({children}: PropsWithChildren) {
       const message = error instanceof Error ? error.message : 'Unable to move item back to pantry.';
       setErrorMessage(message);
       throw error;
+    } finally {
+      setItemBusy(false);
+    }
+  }, [items, setItems]);
+
+  const moveItemsToCart = useCallback(async (itemIds: string[], cartId: string | null) => {
+    if (itemIds.length === 0) {
+      return [];
+    }
+
+    setItemBusy(true);
+    setErrorMessage(null);
+
+    const previousItems = new Map(
+      itemIds
+        .map((itemId) => {
+          const item = items.find((candidate) => candidate.id === itemId);
+          return item ? [itemId, item] : null;
+        })
+        .filter(Boolean) as [string, PantryItem][]
+    );
+
+    setItems((currentItems) =>
+      currentItems.map((item) =>
+        previousItems.has(item.id)
+          ? {
+              ...item,
+              isInCart: true,
+              cartId,
+            }
+          : item
+      )
+    );
+
+    const completedItems: PantryItem[] = [];
+
+    try {
+      for (const itemId of itemIds) {
+        const savedItem = await movePantryItemToCart(itemId, cartId);
+        completedItems.push(savedItem);
+        setItems((currentItems) => currentItems.map((item) => (item.id === itemId ? savedItem : item)));
+      }
+
+      return completedItems;
+    } catch (error) {
+      const failedItemId = itemIds.find((itemId) => !completedItems.some((item) => item.id === itemId)) ?? null;
+
+      if (failedItemId) {
+        const previousItem = previousItems.get(failedItemId);
+
+        if (previousItem) {
+          setItems((currentItems) =>
+            currentItems.map((item) => (item.id === failedItemId ? previousItem : item))
+          );
+        }
+      }
+
+      const message = error instanceof Error ? error.message : 'Unable to move selected items to cart.';
+      setErrorMessage(message);
+      throw new PartialItemActionError(message, {
+        completedItemIds: completedItems.map((item) => item.id),
+        failedItemId,
+      });
     } finally {
       setItemBusy(false);
     }
@@ -280,18 +379,22 @@ export function ItemStateProvider({children}: PropsWithChildren) {
       addItem,
       updateItem,
       moveItemToCart,
+      moveItemsToCart,
       moveItemToPantry,
       moveItemsToPantry,
       completeCartItemWithExpiration,
       deleteItem,
+      deleteItems,
     }),
     [
       addItem,
       completeCartItemWithExpiration,
       deleteItem,
+      deleteItems,
       errorMessage,
       itemBusy,
       moveItemToCart,
+      moveItemsToCart,
       moveItemToPantry,
       moveItemsToPantry,
       updateItem,

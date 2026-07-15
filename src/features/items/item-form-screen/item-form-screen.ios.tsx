@@ -33,7 +33,6 @@ export function ItemFormScreen(props: ItemFormScreenProps) {
           onPress={controller.selectedPantry ? () => void controller.handleSave() : controller.handleMissingPantry}
           disabled={controller.itemBusy || (Boolean(controller.selectedPantry) && !controller.canSave)}
           tintColor={colors.tint}
-          style={{color: colors.textInverse}}
           variant="done"
         >
           {controller.item ? 'Save' : 'Add'}

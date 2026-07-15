@@ -83,7 +83,7 @@ export function CartCheckoutSheet() {
             selectedCount={selectedItems.length}
             totalCount={itemsInCart.length}
             onClose={exitSelectionMode}
-            onPrimaryAction={() => void startCheckout()}
+            onPrimaryAction={() => void startCheckout(itemsInCart)}
             onSecondaryAction={() => {
               if (allSelected) {
                 clearSelection();
