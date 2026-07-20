@@ -1,4 +1,4 @@
-import { Button, ContextMenu, HStack, Spacer, SwipeActions, Text, VStack } from '@expo/ui/swift-ui';
+import { Button, ContextMenu, Divider, HStack, Spacer, SwipeActions, Text, VStack } from '@expo/ui/swift-ui';
 import { background, font, foregroundStyle, frame, onTapGesture, shapes, tint } from '@expo/ui/swift-ui/modifiers';
 import { Alert } from 'react-native';
 
@@ -100,11 +100,7 @@ export function PantryItemSwipeRow({
         <Button label="Edit item" systemImage="pencil" onPress={() => handleWithHaptics(onEdit)} />
 
         {!isSelectionMode && onStartSelection ? (
-          <Button
-            label="Select"
-            systemImage="checkmark.circle"
-            onPress={() => handleWithHaptics(onStartSelection)}
-          />
+          <Button label="Select" systemImage="checkmark.circle" onPress={() => handleWithHaptics(onStartSelection)} />
         ) : null}
 
         <Button
@@ -120,7 +116,7 @@ export function PantryItemSwipeRow({
             onPress={() => handleWithHaptics(onLeftAction)}
           />
         ) : null}
-
+        <Divider />
         <Button label="Delete item" role="destructive" systemImage="trash" onPress={confirmDelete} />
       </ContextMenu.Items>
     </ContextMenu>

@@ -8,7 +8,7 @@ type MenuSectionProps = {
   children: ReactNode;
 };
 
-export function MenuSection({ title, children }: MenuSectionProps) {
+export function MenuSection({title, children}: MenuSectionProps) {
   const styles = useThemedStyles(createStyles);
 
   return (

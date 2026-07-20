@@ -16,7 +16,7 @@ export function ItemRelativePicker({label, value, options, onChange}: ItemRelati
   const styles = useThemedStyles(createStyles);
 
   return (
-    <Host matchContents>
+    <Host style={styles.relativePicker}>
       <HStack alignment="center">
         <Picker
           selectedValue={value}
@@ -41,13 +41,7 @@ export function ItemRelativePicker({label, value, options, onChange}: ItemRelati
 const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
   StyleSheet.create({
     relativePicker: {
-      flex: 1,
-      minHeight: 156,
       borderRadius: 18,
-      overflow: 'hidden',
-      backgroundColor: colors.input,
-      borderWidth: 1,
-      borderColor: colors.border,
       justifyContent: 'center',
     },
     relativeLabel: {
@@ -60,6 +54,7 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
       paddingTop: 12,
     },
     picker: {
+      flex: 1,
       color: colors.text,
     },
     pickerItem: {

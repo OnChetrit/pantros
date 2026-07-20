@@ -306,7 +306,7 @@ export default function PantryScreen() {
         </View>
       ) : (
         <Host colorScheme={isDark ? 'dark' : 'light'} style={[styles.host, {backgroundColor: colors.background}]}>
-          <List modifiers={[listStyle('insetGrouped')]}>
+          <List modifiers={[listStyle('plain')]}>
             <Section title="">
               {visibleItems.map((item, index) => {
                 const leftActionLabel = item.isInCart ? 'Move to Pantry' : 'Add to Cart';

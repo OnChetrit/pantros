@@ -173,7 +173,7 @@ export default function CartScreen() {
         </View>
       ) : (
         <Host colorScheme={isDark ? 'dark' : 'light'} style={[styles.host, {backgroundColor: colors.background}]}>
-          <List modifiers={[listStyle('insetGrouped')]}>
+          <List modifiers={[listStyle('plain')]}>
             {checkoutProgress.errorMessage ? (
               <ListItem key="checkout-error">
                 <View style={styles.noticeRow}>

@@ -8,8 +8,8 @@ import { Host, HStack, List, Section, Spacer, Text } from '@expo/ui/swift-ui';
 import { font, foregroundStyle, listStyle } from '@expo/ui/swift-ui/modifiers';
 import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import type { SearchBarCommands } from 'react-native-screens';
 import * as ReactNative from 'react-native';
+import type { SearchBarCommands } from 'react-native-screens';
 
 const searchEmptyIllustration = require('../../../../../assets/images/search-empty-state-transparent.png');
 
@@ -174,7 +174,7 @@ export default function SearchScreen() {
         </ReactNative.View>
       ) : (
         <Host colorScheme={isDark ? 'dark' : 'light'} style={[styles.host, {backgroundColor: colors.background}]}>
-          <List modifiers={[listStyle('insetGrouped')]}>
+          <List modifiers={[listStyle('plain')]}>
             <Section title={trimmedQuery ? 'Search Results' : 'All Items'}>
               {shouldShowCreateItem ? (
                 <ListItem onPress={handleCreateItem}>

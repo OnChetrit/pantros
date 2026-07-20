@@ -1,4 +1,5 @@
 import { NumberWheelInput } from '@/components/ui/primitives';
+import { StyleSheet, View } from 'react-native';
 
 type RelativePickerProps = {
   label: string;
@@ -8,5 +9,16 @@ type RelativePickerProps = {
 };
 
 export function RelativePicker({value, options, onChange}: RelativePickerProps) {
-  return <NumberWheelInput value={value} options={options} onChange={onChange} />;
+  return (
+    <View style={styles.container}>
+      <NumberWheelInput value={value} options={options} onChange={onChange} />
+    </View>
+  );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    minWidth: 0,
+  },
+});
