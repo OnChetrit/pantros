@@ -5,7 +5,7 @@ import { useAppTheme } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
 import { ListItem } from '@expo/ui';
 import { Host, HStack, List, Section, Spacer, Text } from '@expo/ui/swift-ui';
-import { font, foregroundStyle, listStyle } from '@expo/ui/swift-ui/modifiers';
+import { font, foregroundStyle, listStyle, scrollContentBackground } from '@expo/ui/swift-ui/modifiers';
 import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import * as ReactNative from 'react-native';
@@ -157,7 +157,7 @@ export default function SearchScreen() {
         <Stack.Toolbar.Button icon="person.crop.circle" onPress={() => router.push('/account/menu')} />
       </Stack.Toolbar>
       {visibleItems.length === 0 && !shouldShowCreateItem ? (
-        <ReactNative.View style={[styles.emptyStateScreen, {backgroundColor: colors.background}]}>
+        <ReactNative.View style={[styles.emptyStateScreen, {backgroundColor: colors.card}]}>
           <ReactNative.View style={styles.emptyStateContent}>
             <ReactNative.Image source={searchEmptyIllustration} style={styles.illustration} resizeMode="contain" />
             <ReactNative.View style={styles.emptyStateCopy}>
@@ -173,8 +173,8 @@ export default function SearchScreen() {
           </ReactNative.View>
         </ReactNative.View>
       ) : (
-        <Host colorScheme={isDark ? 'dark' : 'light'} style={[styles.host, {backgroundColor: colors.background}]}>
-          <List modifiers={[listStyle('plain')]}>
+        <Host colorScheme={isDark ? 'dark' : 'light'} style={[styles.host, {backgroundColor: colors.card}]}>
+          <List modifiers={[listStyle('grouped'), scrollContentBackground('visible')]}>
             <Section title={trimmedQuery ? 'Search Results' : 'All Items'}>
               {shouldShowCreateItem ? (
                 <ListItem onPress={handleCreateItem}>

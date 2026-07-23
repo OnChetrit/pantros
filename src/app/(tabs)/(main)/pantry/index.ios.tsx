@@ -5,7 +5,7 @@ import { parsePantrySortOption, SORT_OPTIONS } from '@/features/pantry/pantry-so
 import { useAppTheme } from '@/lib/theme';
 import { PartialItemActionError, useAppContext } from '@/state/app-context';
 import { Host, List, Section } from '@expo/ui/swift-ui';
-import { listStyle } from '@expo/ui/swift-ui/modifiers';
+import { environment, listStyle, scrollContentBackground, tint } from '@expo/ui/swift-ui/modifiers';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Alert, Image, LayoutAnimation, StyleSheet, Text, View } from 'react-native';
@@ -30,6 +30,7 @@ export default function PantryScreen() {
   const sortOption = parsePantrySortOption(sort);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedItemIds, setSelectedItemIds] = useState<string[]>([]);
+  const [manualItemOrder, setManualItemOrder] = useState<string[] | null>(null);
 
   const visibleItems = useMemo(() => {
     const compareBySort = (left: (typeof pantryItems)[number], right: (typeof pantryItems)[number]) => {
@@ -63,8 +64,20 @@ export default function PantryScreen() {
       return leftTime - rightTime;
     };
 
-    return [...pantryItems].sort(compareBySort);
-  }, [pantryItems, sortOption]);
+    const sortedItems = [...pantryItems].sort(compareBySort);
+
+    if (!manualItemOrder) {
+      return sortedItems;
+    }
+
+    const itemsById = new Map(sortedItems.map(item => [item.id, item]));
+    const orderedItems = manualItemOrder
+      .map(itemId => itemsById.get(itemId))
+      .filter((item): item is (typeof sortedItems)[number] => Boolean(item));
+    const orderedItemIds = new Set(orderedItems.map(item => item.id));
+
+    return [...orderedItems, ...sortedItems.filter(item => !orderedItemIds.has(item.id))];
+  }, [manualItemOrder, pantryItems, sortOption]);
 
   const primaryCart = pantryCarts.find(cart => cart.isPrimary) ?? pantryCarts[0] ?? null;
   const allSelectableItems = useMemo(() => visibleItems.filter(item => !item.isInCart), [visibleItems]);
@@ -74,7 +87,7 @@ export default function PantryScreen() {
     [selectableItemIds, selectedItemIds]
   );
   const selectedCount = selectedSelectableItemIds.length;
-  const selectionModeActive = isSelectionMode && allSelectableItems.length > 0;
+  const selectionModeActive = isSelectionMode;
   const allSelected = allSelectableItems.length > 0 && selectedCount === allSelectableItems.length;
 
   const animateListLayout = () => {
@@ -110,27 +123,11 @@ export default function PantryScreen() {
     setSelectedItemIds(itemId ? [itemId] : []);
   };
 
-  const toggleSelection = (itemId: string) => {
-    const isSelected = selectedSelectableItemIds.includes(itemId);
-
-    if (isSelected && selectedCount === 1) {
-      animateListLayout();
-      exitSelectionMode();
-      return;
-    }
-
-    setSelectedItemIds(current =>
-      current.includes(itemId) ? current.filter(selectedId => selectedId !== itemId) : [...current, itemId]
-    );
-  };
-
   const handleSelectAll = () => {
     animateListLayout();
 
     if (allSelected) {
-      setTabBarHidden(false);
       setSelectedItemIds([]);
-      setIsSelectionMode(false);
       return;
     }
 
@@ -233,10 +230,13 @@ export default function PantryScreen() {
               key={option.key}
               isOn={option.key === sortOption}
               onPress={() =>
-                router.replace({
-                  pathname: '/pantry',
-                  params: {sort: option.key},
-                })
+                (() => {
+                  setManualItemOrder(null);
+                  router.replace({
+                    pathname: '/pantry',
+                    params: {sort: option.key},
+                  });
+                })()
               }
             >
               {option.label}
@@ -290,7 +290,7 @@ export default function PantryScreen() {
         </Stack.Toolbar>
       ) : null}
       {visibleItems.length === 0 ? (
-        <View style={[styles.emptyStateScreen, {backgroundColor: colors.background}]}>
+        <View style={[styles.emptyStateScreen, {backgroundColor: colors.card}]}>
           <View style={styles.emptyStateContent}>
             <Image source={pantryEmptyIllustration} style={styles.illustration} resizeMode="contain" />
             <View style={styles.emptyStateCopy}>
@@ -305,8 +305,28 @@ export default function PantryScreen() {
           </View>
         </View>
       ) : (
-        <Host colorScheme={isDark ? 'dark' : 'light'} style={[styles.host, {backgroundColor: colors.background}]}>
-          <List modifiers={[listStyle('plain')]}>
+        <Host colorScheme={isDark ? 'dark' : 'light'} style={[styles.host, {backgroundColor: colors.card}]}>
+          <List
+            modifiers={[
+              listStyle('plain'),
+              scrollContentBackground('visible'),
+              tint(colors.card),
+              environment({key: 'editMode', value: selectionModeActive ? 'active' : 'inactive'}),
+            ]}
+            selection={selectionModeActive ? selectedSelectableItemIds : undefined}
+            onSelectionChange={selection => {
+              const nextSelectedItemIds = selection.filter(
+                (itemId): itemId is string => typeof itemId === 'string' && selectableItemIds.has(itemId)
+              );
+
+              if (nextSelectedItemIds.length === 0) {
+                setSelectedItemIds([]);
+                return;
+              }
+
+              setSelectedItemIds(nextSelectedItemIds);
+            }}
+          >
             <Section title="">
               {visibleItems.map((item, index) => {
                 const leftActionLabel = item.isInCart ? 'Move to Pantry' : 'Add to Cart';
@@ -326,8 +346,6 @@ export default function PantryScreen() {
                     isLast={index === visibleItems.length - 1}
                     onPress={() => {
                       if (selectionModeActive && !item.isInCart) {
-                        animateListLayout();
-                        toggleSelection(item.id);
                         return;
                       }
 
@@ -357,7 +375,6 @@ export default function PantryScreen() {
                     onDelete={() => void handleDelete()}
                     isSelectionMode={selectionModeActive}
                     isSelected={selectedSelectableItemIds.includes(item.id)}
-                    onToggleSelection={item.isInCart ? undefined : () => toggleSelection(item.id)}
                     onStartSelection={item.isInCart ? undefined : () => enterSelectionMode(item.id)}
                   />
                 );

@@ -1,6 +1,6 @@
 import { ListItem } from '@expo/ui';
 import { Host, List, Section } from '@expo/ui/swift-ui';
-import { listStyle } from '@expo/ui/swift-ui/modifiers';
+import { listStyle, scrollContentBackground } from '@expo/ui/swift-ui/modifiers';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { Image, LayoutAnimation, StyleSheet, Text, View } from 'react-native';
@@ -134,7 +134,7 @@ export default function CartScreen() {
         />
       </Stack.Toolbar>
       {itemsInCart.length === 0 ? (
-        <View style={[styles.emptyStateScreen, {backgroundColor: colors.background}]}>
+        <View style={[styles.emptyStateScreen, {backgroundColor: colors.card}]}>
           <View style={styles.emptyStateContent}>
             <Image source={emptyCartIllustration} style={styles.illustration} resizeMode="contain" />
             <View style={styles.emptyStateCopy}>
@@ -146,7 +146,7 @@ export default function CartScreen() {
           </View>
         </View>
       ) : itemsInCart.length > 0 && unselectedItems.length === 0 ? (
-        <View style={[styles.allSelectedScreen, {backgroundColor: colors.background}]}>
+        <View style={[styles.allSelectedScreen, {backgroundColor: colors.card}]}>
           {checkoutProgress.errorMessage ? (
             <View style={styles.noticeRow}>
               <CartCheckoutNotice tone="error" message={checkoutProgress.errorMessage} onDismiss={clearCheckoutError} />
@@ -172,8 +172,8 @@ export default function CartScreen() {
           </View>
         </View>
       ) : (
-        <Host colorScheme={isDark ? 'dark' : 'light'} style={[styles.host, {backgroundColor: colors.background}]}>
-          <List modifiers={[listStyle('plain')]}>
+        <Host colorScheme={isDark ? 'dark' : 'light'} style={[styles.host, {backgroundColor: colors.card}]}>
+          <List modifiers={[listStyle('plain'), scrollContentBackground('visible')]}>
             {checkoutProgress.errorMessage ? (
               <ListItem key="checkout-error">
                 <View style={styles.noticeRow}>
