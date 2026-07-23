@@ -134,7 +134,7 @@ export default function CartScreen() {
         />
       </Stack.Toolbar>
       {itemsInCart.length === 0 ? (
-        <View style={[styles.emptyStateScreen, {backgroundColor: colors.card}]}>
+        <View style={[styles.emptyStateScreen]}>
           <View style={styles.emptyStateContent}>
             <Image source={emptyCartIllustration} style={styles.illustration} resizeMode="contain" />
             <View style={styles.emptyStateCopy}>

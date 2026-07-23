@@ -10,7 +10,7 @@ import { useThemedStyles } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
 
 export default function PantryScreen() {
-  const {deleteItem, moveItemToCart, moveItemToPantry, pantryCarts, pantryItems, selectedPantry} = useAppContext();
+  const {deleteItem, moveItemToCart, pantryCarts, pantryItems, selectedPantry} = useAppContext();
   const styles = useThemedStyles(createStyles);
   const router = useRouter();
   const {sort} = useLocalSearchParams<{sort?: string | string[]}>();
@@ -18,10 +18,6 @@ export default function PantryScreen() {
 
   const visibleItems = useMemo(() => {
     const compareBySort = (left: (typeof pantryItems)[number], right: (typeof pantryItems)[number]) => {
-      if (left.isInCart !== right.isInCart) {
-        return left.isInCart ? 1 : -1;
-      }
-
       if (sortOption === 'name') {
         return left.name.localeCompare(right.name);
       }
@@ -48,7 +44,7 @@ export default function PantryScreen() {
       return leftTime - rightTime;
     };
 
-    return [...pantryItems].sort(compareBySort);
+    return pantryItems.filter(item => !item.isInCart).sort(compareBySort);
   }, [pantryItems, sortOption]);
 
   const primaryCart = pantryCarts.find(cart => cart.isPrimary) ?? pantryCarts[0] ?? null;
@@ -61,11 +57,6 @@ export default function PantryScreen() {
 
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     await moveItemToCart(itemId, primaryCart.id);
-  };
-
-  const handleMoveToPantry = async (itemId: string) => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    await moveItemToPantry(itemId);
   };
 
   if (!selectedPantry) {
@@ -82,21 +73,17 @@ export default function PantryScreen() {
   const renderItemRow = (
     item: (typeof pantryItems)[number],
     index: number,
-    total: number,
-    displayMode: 'pantry' | 'cart'
+    total: number
   ) => {
-    const leftActionLabel = item.isInCart ? 'Move to Pantry' : 'Add to Cart';
-    const onLeftAction = item.isInCart ? () => void handleMoveToPantry(item.id) : () => void handleAddToCart(item.id);
-
     return (
       <PantryItemRow
         item={item}
-        displayMode={item.isInCart ? 'cart' : displayMode}
+        displayMode="pantry"
         isLast={index === total - 1}
         onPress={() => router.push(`/items/${item.id}`)}
         onEdit={() => router.push(`/items/${item.id}`)}
-        leftActionLabel={leftActionLabel}
-        onLeftAction={onLeftAction}
+        leftActionLabel="Add to Cart"
+        onLeftAction={() => void handleAddToCart(item.id)}
         onDelete={() => void deleteItem(item.id)}
       />
     );
@@ -127,7 +114,7 @@ export default function PantryScreen() {
           </View>
         }
         renderItem={({item, index}) => {
-          return renderItemRow(item, index, visibleItems.length, 'pantry');
+          return renderItemRow(item, index, visibleItems.length);
         }}
       />
     </>

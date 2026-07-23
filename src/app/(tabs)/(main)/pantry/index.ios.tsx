@@ -18,7 +18,6 @@ export default function PantryScreen() {
     deleteItems,
     moveItemToCart,
     moveItemsToCart,
-    moveItemToPantry,
     pantryCarts,
     pantryItems,
     selectedPantry,
@@ -34,10 +33,6 @@ export default function PantryScreen() {
 
   const visibleItems = useMemo(() => {
     const compareBySort = (left: (typeof pantryItems)[number], right: (typeof pantryItems)[number]) => {
-      if (left.isInCart !== right.isInCart) {
-        return left.isInCart ? 1 : -1;
-      }
-
       if (sortOption === 'name') {
         return left.name.localeCompare(right.name);
       }
@@ -64,7 +59,7 @@ export default function PantryScreen() {
       return leftTime - rightTime;
     };
 
-    const sortedItems = [...pantryItems].sort(compareBySort);
+    const sortedItems = pantryItems.filter(item => !item.isInCart).sort(compareBySort);
 
     if (!manualItemOrder) {
       return sortedItems;
@@ -80,7 +75,7 @@ export default function PantryScreen() {
   }, [manualItemOrder, pantryItems, sortOption]);
 
   const primaryCart = pantryCarts.find(cart => cart.isPrimary) ?? pantryCarts[0] ?? null;
-  const allSelectableItems = useMemo(() => visibleItems.filter(item => !item.isInCart), [visibleItems]);
+  const allSelectableItems = visibleItems;
   const selectableItemIds = useMemo(() => new Set(allSelectableItems.map(item => item.id)), [allSelectableItems]);
   const selectedSelectableItemIds = useMemo(
     () => selectedItemIds.filter(itemId => selectableItemIds.has(itemId)),
@@ -102,11 +97,6 @@ export default function PantryScreen() {
 
     animateListLayout();
     await moveItemToCart(itemId, primaryCart.id);
-  };
-
-  const handleMoveToPantry = async (itemId: string) => {
-    animateListLayout();
-    await moveItemToPantry(itemId);
   };
 
   const exitSelectionMode = () => {
@@ -329,10 +319,6 @@ export default function PantryScreen() {
           >
             <Section title="">
               {visibleItems.map((item, index) => {
-                const leftActionLabel = item.isInCart ? 'Move to Pantry' : 'Add to Cart';
-                const onLeftAction = item.isInCart
-                  ? () => void handleMoveToPantry(item.id)
-                  : () => void handleAddToCart(item.id);
                 const handleDelete = async () => {
                   LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
                   await deleteItem(item.id);
@@ -342,10 +328,10 @@ export default function PantryScreen() {
                   <PantryItemNativeListRow
                     key={item.id}
                     item={item}
-                    displayMode={item.isInCart ? 'cart' : 'pantry'}
+                    displayMode="pantry"
                     isLast={index === visibleItems.length - 1}
                     onPress={() => {
-                      if (selectionModeActive && !item.isInCart) {
+                      if (selectionModeActive) {
                         return;
                       }
 
@@ -353,7 +339,7 @@ export default function PantryScreen() {
                     }}
                     onEdit={() => router.push(`/items/${item.id}`)}
                     onReviewExpiration={
-                      item.isInCart || selectionModeActive
+                      selectionModeActive
                         ? undefined
                         : () =>
                             router.push({
@@ -361,21 +347,12 @@ export default function PantryScreen() {
                               params: {itemId: item.id},
                             })
                     }
-                    onReviewQuantity={
-                      item.isInCart && !selectionModeActive
-                        ? () =>
-                            router.push({
-                              pathname: '/pantry/quantity',
-                              params: {itemId: item.id},
-                            })
-                        : undefined
-                    }
-                    leftActionLabel={selectionModeActive ? undefined : leftActionLabel}
-                    onLeftAction={selectionModeActive ? undefined : onLeftAction}
+                    leftActionLabel={selectionModeActive ? undefined : 'Add to Cart'}
+                    onLeftAction={selectionModeActive ? undefined : () => void handleAddToCart(item.id)}
                     onDelete={() => void handleDelete()}
                     isSelectionMode={selectionModeActive}
                     isSelected={selectedSelectableItemIds.includes(item.id)}
-                    onStartSelection={item.isInCart ? undefined : () => enterSelectionMode(item.id)}
+                    onStartSelection={() => enterSelectionMode(item.id)}
                   />
                 );
               })}
