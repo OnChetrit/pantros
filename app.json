@@ -13,8 +13,7 @@
       "deploymentTarget": "16.4",
       "usesAppleSignIn": true,
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false,
-        "UIDesignRequiresCompatibility": true
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
