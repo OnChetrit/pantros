@@ -1,5 +1,5 @@
 import { Button, Host, Text } from '@expo/ui';
-import { StyleSheet, View } from 'react-native';
+import { Text as ReactNativeText, StyleSheet, View } from 'react-native';
 
 import { useAppTheme } from '@/lib/theme';
 
@@ -32,9 +32,9 @@ export function CartCheckoutBar({
     <View style={[styles.shell]}>
       <View style={styles.headerRow}>
         <View style={styles.summaryWrap}>
-          <Text style={titleStyle as never} numberOfLines={1}>
+          <ReactNativeText style={titleStyle as never} numberOfLines={1}>
             Shopping Complete
-          </Text>
+          </ReactNativeText>
         </View>
         <View
           style={[
@@ -45,31 +45,29 @@ export function CartCheckoutBar({
             },
           ]}
         >
-          <Text style={countValueStyle as never}>{String(selectedCount)}</Text>
+          <ReactNativeText style={countValueStyle as never}>{String(selectedCount)}</ReactNativeText>
         </View>
       </View>
       <View style={[styles.actions, sheet ? styles.actionsSheet : null]}>
         <Host>
-        <Button
-          disabled={processing}
-          onPress={onSecondaryAction}
-          variant="outlined"
-          style={secondaryButtonStyle as never}
-        >
-          <Text textStyle={secondaryTextStyle as never}>{secondaryLabel}</Text>
-        </Button>
+          <Button
+            disabled={processing}
+            onPress={onSecondaryAction}
+            variant="outlined"
+            style={secondaryButtonStyle as never}
+          >
+            <Text textStyle={secondaryTextStyle as never}>{secondaryLabel}</Text>
+          </Button>
         </Host>
         <Host>
-        <Button
-          disabled={!hasSelection || processing}
-          onPress={onSubmit}
-          variant="filled"
-          style={primaryButtonStyle as never}
-        >
-          <Text textStyle={primaryTextStyle as never}>
-            {processing ? 'Moving…' : 'Finish'}
-          </Text>
-        </Button>
+          <Button
+            disabled={!hasSelection || processing}
+            onPress={onSubmit}
+            variant="filled"
+            style={primaryButtonStyle as never}
+          >
+            <Text textStyle={primaryTextStyle as never}>{processing ? 'Moving…' : 'Finish'}</Text>
+          </Button>
         </Host>
       </View>
     </View>

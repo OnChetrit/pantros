@@ -27,7 +27,6 @@ export default function CartScreen() {
     clearSelection,
     dismissCompletionMessage,
     enterSelectionMode,
-    exitSelectionMode,
     isSelectionMode,
     selectAll,
     selectedItemIds,
@@ -65,6 +64,8 @@ export default function CartScreen() {
     await deleteItem(itemId);
   };
 
+  console.log('checkoutProgress', checkoutProgress);
+
   if (!selectedPantry) {
     return (
       <View style={styles.emptyScreen}>
@@ -84,9 +85,6 @@ export default function CartScreen() {
         }}
       />
       <Stack.Toolbar placement="left">
-        <Stack.Toolbar.Button onPress={exitSelectionMode} hidden={!isSelectionMode}>
-          Cancel
-        </Stack.Toolbar.Button>
         <Stack.Toolbar.Menu icon="arrow.up.arrow.down" title="Sort" hidden={isSelectionMode}>
           {SORT_OPTIONS.map(option => (
             <Stack.Toolbar.MenuAction
@@ -107,7 +105,6 @@ export default function CartScreen() {
       <Stack.Toolbar placement="right">
         <Stack.Toolbar.Button
           hidden={!isSelectionMode}
-          variant="prominent"
           onPress={() => {
             animateListLayout();
             if (allSelected) {
@@ -185,7 +182,7 @@ export default function CartScreen() {
                 </View>
               </ListItem>
             ) : null}
-            {checkoutProgress.completionMessage ? (
+            {/* {checkoutProgress.completionMessage ? (
               <ListItem key="checkout-success">
                 <View style={styles.noticeRow}>
                   <CartCheckoutNotice
@@ -195,7 +192,7 @@ export default function CartScreen() {
                   />
                 </View>
               </ListItem>
-            ) : null}
+            ) : null} */}
             <Section title="">
               {itemsInCart.length > 0
                 ? unselectedItems.map((item, index) => (

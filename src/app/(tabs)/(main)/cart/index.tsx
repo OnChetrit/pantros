@@ -30,7 +30,6 @@ export default function CartScreen() {
     clearSelection,
     dismissCompletionMessage,
     enterSelectionMode,
-    exitSelectionMode,
     isSelectionMode,
     selectAll,
     selectedItemIds,
@@ -75,9 +74,7 @@ export default function CartScreen() {
       <Stack.Screen
         options={{
           headerLeft: () =>
-            isSelectionMode ? (
-              <CartHeaderAction label="Cancel" onPress={exitSelectionMode} />
-            ) : (
+            isSelectionMode ? null : (
               <PantryFilterMenu sortOption={sortOption} sheetHref="/cart/sort" />
             ),
           title: isSelectionMode ? `${selectedCount} selected` : 'Cart',
@@ -85,7 +82,6 @@ export default function CartScreen() {
             isSelectionMode ? (
               <CartHeaderAction
                 label={allSelected ? 'Clear' : 'Select All'}
-                emphasized
                 onPress={() => (allSelected ? clearSelection() : selectAll(itemsInCart.map((item) => item.id)))}
               />
             ) : (

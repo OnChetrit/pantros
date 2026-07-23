@@ -211,9 +211,6 @@ export default function PantryScreen() {
         }}
       />
       <Stack.Toolbar placement="left">
-        <Stack.Toolbar.Button onPress={exitSelectionMode} hidden={!selectionModeActive}>
-          Cancel
-        </Stack.Toolbar.Button>
         <Stack.Toolbar.Menu icon="arrow.up.arrow.down" title="Sort" hidden={selectionModeActive}>
           {SORT_OPTIONS.map(option => (
             <Stack.Toolbar.MenuAction
@@ -239,7 +236,6 @@ export default function PantryScreen() {
           onPress={handleSelectAll}
           hidden={!selectionModeActive}
           disabled={allSelectableItems.length === 0}
-          variant="prominent"
         >
           {allSelected ? 'Clear' : 'Select All'}
         </Stack.Toolbar.Button>

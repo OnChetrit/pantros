@@ -1,5 +1,15 @@
 import { Button, ContextMenu, Divider, HStack, Spacer, SwipeActions, Text, VStack } from '@expo/ui/swift-ui';
-import { background, font, foregroundStyle, frame, onTapGesture, shapes, tag, tint } from '@expo/ui/swift-ui/modifiers';
+import {
+  background,
+  contentShape,
+  font,
+  foregroundStyle,
+  frame,
+  onTapGesture,
+  shapes,
+  tag,
+  tint,
+} from '@expo/ui/swift-ui/modifiers';
 import { Alert } from 'react-native';
 
 import { triggerMediumImpact } from '@/lib/haptics';
@@ -58,8 +68,11 @@ export function PantryItemSwipeRow({
       spacing={12}
       modifiers={
         isSelectionMode && nativeListItem && !onToggleSelection
-          ? undefined
-          : [onTapGesture(isSelectionMode ? (onToggleSelection ?? onPress) : onPress)]
+          ? [contentShape(shapes.rectangle())]
+          : [
+              contentShape(shapes.rectangle()),
+              onTapGesture(isSelectionMode ? (onToggleSelection ?? onPress) : onPress),
+            ]
       }
     >
       <Text
