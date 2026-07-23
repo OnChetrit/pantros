@@ -14,7 +14,17 @@ import type { SearchBarCommands } from 'react-native-screens';
 const searchEmptyIllustration = require('../../../../../assets/images/search-empty-state-transparent.png');
 
 export default function SearchScreen() {
-  const {deleteItem, moveItemToCart, moveItemToPantry, pantryCarts, pantryItems, selectedPantry} = useAppContext();
+  const {
+    addItem,
+    deleteItem,
+    itemBusy,
+    moveItemToCart,
+    moveItemToPantry,
+    pantryCarts,
+    pantryItems,
+    selectedPantry,
+    selectedPantryId,
+  } = useAppContext();
   const {colors, isDark} = useAppTheme();
   const router = useRouter();
   const searchBarRef = useRef<SearchBarCommands | null>(null);
@@ -58,6 +68,43 @@ export default function SearchScreen() {
     }
 
     router.push(`/items/new?name=${encodeURIComponent(trimmedQuery)}`);
+  };
+
+  const handleSearchSubmit = async (submittedQuery: string) => {
+    const submittedTrimmedQuery = submittedQuery.trim();
+
+    if (!submittedTrimmedQuery || !selectedPantryId || itemBusy) {
+      return;
+    }
+
+    const submittedResults = matchPantryItems(pantryItems, submittedQuery);
+
+    if (submittedResults.exactMatch) {
+      const firstExistingItem = submittedResults.visibleResults[0] ?? submittedResults.exactMatch;
+      router.push(`/items/${firstExistingItem.id}`);
+      return;
+    }
+
+    try {
+      await addItem({
+        pantryId: selectedPantryId,
+        name: submittedTrimmedQuery,
+        barcode: null,
+        image: null,
+        expirationDate: null,
+        isInCart: false,
+        cartId: null,
+        quantity: 1,
+      });
+      searchBarRef.current?.setText('');
+      router.setParams({
+        q: undefined,
+        entry: undefined,
+        nonce: undefined,
+      });
+    } catch (error) {
+      ReactNative.Alert.alert('Unable to create item', error instanceof Error ? error.message : 'Try again in a moment.');
+    }
   };
 
   const handleScanBarcode = () => {
@@ -110,6 +157,9 @@ export default function SearchScreen() {
                   nonce: undefined,
                 });
               },
+              onSearchButtonPress: event => {
+                void handleSearchSubmit(event.nativeEvent.text);
+              },
             },
           }}
         />
@@ -148,6 +198,9 @@ export default function SearchScreen() {
                 entry: undefined,
                 nonce: undefined,
               });
+            },
+            onSearchButtonPress: event => {
+              void handleSearchSubmit(event.nativeEvent.text);
             },
           },
         }}
@@ -193,7 +246,7 @@ export default function SearchScreen() {
                 <PantryItemNativeListRow
                   key={item.id}
                   item={item}
-                  displayMode="pantry"
+                  displayMode={item.isInCart ? 'cart' : 'pantry'}
                   isLast={index === visibleItems.length - 1}
                   onPress={() => router.push(`/items/${item.id}`)}
                   onEdit={() => router.push(`/items/${item.id}`)}
