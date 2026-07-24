@@ -230,6 +230,9 @@ export default function PantryScreen() {
             </Stack.Toolbar.MenuAction>
           ))}
         </Stack.Toolbar.Menu>
+        <Stack.Toolbar.Button onPress={exitSelectionMode} hidden={!selectionModeActive}>
+          Cancel
+        </Stack.Toolbar.Button>
       </Stack.Toolbar>
       <Stack.Toolbar placement="right">
         <Stack.Toolbar.Button
