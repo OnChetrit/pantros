@@ -18,12 +18,19 @@
     "statusBar.background": "#8fc79e",
     "statusBar.foreground": "#15202b",
     "statusBarItem.hoverBackground": "#6db681",
-    "statusBarItem.remoteBackground": "#8fc79e",
+    "statusBarItem.remoteBackground": "#7e6ab5",
     "statusBarItem.remoteForeground": "#15202b",
     "titleBar.activeBackground": "#8fc79e",
     "titleBar.activeForeground": "#15202b",
     "titleBar.inactiveBackground": "#8fc79e99",
-    "titleBar.inactiveForeground": "#15202b99"
+    "titleBar.inactiveForeground": "#15202b99",
+    "activityBarTop.activeBackground": "#b1d8bb",
+    "activityBarTop.background": "#b1d8bb",
+    "activityBarTop.foreground": "#15202b",
+    "activityBarTop.inactiveForeground": "#15202b99",
+    "commandCenter.foreground": "#15202b",
+    "statusBar.debuggingBackground": "#8fc79e",
+    "statusBar.debuggingForeground": "#15202b"
   },
   "peacock.color": "8fc79e",
   "github.copilot.chat.commitMessageGeneration.instructions": [
