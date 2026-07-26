@@ -64,8 +64,6 @@ export default function CartScreen() {
     await deleteItem(itemId);
   };
 
-  console.log('checkoutProgress', checkoutProgress);
-
   if (!selectedPantry) {
     return (
       <View style={styles.emptyScreen}>

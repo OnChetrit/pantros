@@ -51,7 +51,10 @@ export default function CartLayout() {
           animation: 'slide_from_bottom',
           gestureDirection: 'vertical',
           headerTransparent: Platform.OS === 'ios',
-          contentStyle: Platform.OS === 'ios' ? {backgroundColor: 'transparent'} : undefined,
+          contentStyle:
+            Platform.OS === 'ios'
+              ? {backgroundColor: Number(Platform.Version) >= 26 ? 'transparent' : colors.background}
+              : undefined,
         }}
       />
       <Stack.Screen
@@ -66,7 +69,10 @@ export default function CartLayout() {
           animation: 'slide_from_bottom',
           gestureDirection: 'vertical',
           headerTransparent: Platform.OS === 'ios',
-          contentStyle: Platform.OS === 'ios' ? {backgroundColor: 'transparent'} : undefined,
+          contentStyle:
+            Platform.OS === 'ios'
+              ? {backgroundColor: Number(Platform.Version) >= 26 ? 'transparent' : colors.background}
+              : undefined,
         }}
       />
     </Stack>

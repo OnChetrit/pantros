@@ -50,14 +50,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   picker: {
-    width: 74,
-    height: 74,
-    marginTop: -6,
-    marginBottom: -6,
+    width: 85,
+    height: 85,
     justifyContent: 'center',
   },
   pickerItem: {
     fontSize: 16,
+    fontWeight: 'bold',
   },
   suffixText: {
     fontSize: 13,

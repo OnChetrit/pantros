@@ -104,6 +104,20 @@ export const styles = StyleSheet.create({
     paddingVertical: 12,
     gap: 4,
   },
+  previewRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  previewDate: {
+    flex: 1,
+    minWidth: 0,
+  },
+  previewRelative: {
+    flex: 1.8,
+    minWidth: 0,
+    minHeight: 96,
+  },
   previewLabel: {
     fontSize: 12,
     lineHeight: 16,
@@ -117,18 +131,19 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
   },
   dateCard: {
-    flex: 1,
     alignItems: 'stretch',
     width: '100%',
+    height: 180,
     borderWidth: 1,
     borderRadius: 20,
-    paddingVertical: 8,
+    paddingVertical: 0,
     overflow: 'hidden',
     display: 'flex',
     justifyContent: 'center',
   },
   datePicker: {
     width: '100%',
+    height: 180,
     alignSelf: 'stretch',
     display: 'flex',
     justifyContent: 'center',
@@ -138,7 +153,6 @@ export const styles = StyleSheet.create({
     gap: 10,
   },
   relativeInlineRow: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,

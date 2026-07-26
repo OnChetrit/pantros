@@ -22,7 +22,7 @@ export function ItemCartSection({isInCart, quantity, onToggle, onChangeQuantity}
     <>
       <View style={styles.fieldGroup}>
         <Host style={styles.fieldHeader}>
-          <Row alignment="center" spacing={12}>
+          <Row alignment="center">
             <ItemFormFieldLabel>Add To Cart</ItemFormFieldLabel>
             <Spacer flexible />
             <Switch value={isInCart} onValueChange={onToggle} />
@@ -44,7 +44,6 @@ export function ItemCartSection({isInCart, quantity, onToggle, onChangeQuantity}
               />
             </View>
           </View>
-          {/* <View style={styles.quantitySide} /> */}
         </View>
       ) : null}
     </>
@@ -54,6 +53,7 @@ export function ItemCartSection({isInCart, quantity, onToggle, onChangeQuantity}
 const createStyles = (colors: import('@/lib/theme').AppThemeColors) => {
   return StyleSheet.create({
     fieldGroup: {
+      marginTop: 8,
       gap: 6,
     },
     fieldHeader: {
@@ -62,17 +62,14 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) => {
     quantityRow: {
       flexDirection: 'row',
       alignItems: 'center',
+      justifyContent: 'space-between',
       gap: 12,
     },
     quantitySide: {
       flex: 1,
-      // alignItems: 'flex-start',
-      // justifyContent: 'center',
     },
     quantityCenter: {
-      flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: 'flex-end',
     },
     wheelCard: {
       width: 76,

@@ -12,9 +12,7 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
   StyleSheet.create({
     label: {
       color: colors.text,
-      fontSize: 13,
       fontWeight: '700',
       textTransform: 'uppercase',
-      letterSpacing: 0.4,
     },
   });

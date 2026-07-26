@@ -60,7 +60,7 @@ export function PantryItemSwipeRow({
     ]);
   };
 
-  const contextMenuItemModifiers = [foregroundStyle(colors.text)];
+  const contextMenuItemModifiers = [foregroundStyle(colors.text), tint(colors.text)];
 
   const rowContent = (
     <HStack
@@ -69,10 +69,7 @@ export function PantryItemSwipeRow({
       modifiers={
         isSelectionMode && nativeListItem && !onToggleSelection
           ? [contentShape(shapes.rectangle())]
-          : [
-              contentShape(shapes.rectangle()),
-              onTapGesture(isSelectionMode ? (onToggleSelection ?? onPress) : onPress),
-            ]
+          : [contentShape(shapes.rectangle()), onTapGesture(isSelectionMode ? (onToggleSelection ?? onPress) : onPress)]
       }
     >
       <Text
@@ -154,7 +151,7 @@ export function PantryItemSwipeRow({
           role="destructive"
           systemImage="trash"
           onPress={confirmDelete}
-          modifiers={contextMenuItemModifiers}
+          modifiers={[tint(colors.danger)]}
         />
       </ContextMenu.Items>
     </ContextMenu>

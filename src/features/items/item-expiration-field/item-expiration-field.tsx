@@ -1,11 +1,11 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useEffect, useMemo, useState } from 'react';
-import { Platform, StyleSheet, Switch, Text, View } from 'react-native';
+import { StyleSheet, Switch, Text, View } from 'react-native';
 
 import { useAppTheme, useThemedStyles } from '@/lib/theme';
 
 import { ItemExpirationModePicker } from '../item-expiration-mode-picker/item-expiration-mode-picker';
-import { ItemRelativePicker } from './item-relative-picker';
+import { RelativeDatePickerRow } from './item-relative-picker';
 
 type ExpirationMode = 'manual' | 'relative';
 
@@ -133,8 +133,26 @@ export function ItemExpirationField({value, onChange}: {value: string; onChange:
       </View>
       {isEnabled ? (
         <View style={styles.previewCard}>
-          <Text style={styles.previewLabel}>Selected date</Text>
-          <Text style={styles.previewValue}>{previewLabel}</Text>
+          <View style={styles.previewRow}>
+            <View style={styles.previewDate}>
+              <Text style={styles.previewValue}>{previewLabel}</Text>
+            </View>
+            {mode === 'relative' ? (
+              <View style={styles.previewRelative}>
+                <RelativeDatePickerRow
+                  days={relativeDays}
+                  weeks={relativeWeeks}
+                  months={relativeMonths}
+                  dayOptions={dayOptions}
+                  weekOptions={weekOptions}
+                  monthOptions={monthOptions}
+                  onChangeDays={setRelativeDays}
+                  onChangeWeeks={setRelativeWeeks}
+                  onChangeMonths={setRelativeMonths}
+                />
+              </View>
+            ) : null}
+          </View>
         </View>
       ) : null}
 
@@ -145,7 +163,7 @@ export function ItemExpirationField({value, onChange}: {value: string; onChange:
           <DateTimePicker
             value={manualDate}
             mode="date"
-            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            display={'default'}
             onValueChange={(_, selectedDate) => {
               if (selectedDate) {
                 setManualDate(selectedDate);
@@ -156,16 +174,6 @@ export function ItemExpirationField({value, onChange}: {value: string; onChange:
             textColor={colors.text}
             style={styles.datePicker}
           />
-        </View>
-      ) : null}
-
-      {isEnabled && mode === 'relative' ? (
-        <View style={styles.controlBlock}>
-          <View style={styles.relativeRow}>
-            <ItemRelativePicker label="D" value={relativeDays} options={dayOptions} onChange={setRelativeDays} />
-            <ItemRelativePicker label="W" value={relativeWeeks} options={weekOptions} onChange={setRelativeWeeks} />
-            <ItemRelativePicker label="M" value={relativeMonths} options={monthOptions} onChange={setRelativeMonths} />
-          </View>
         </View>
       ) : null}
     </View>
@@ -204,6 +212,20 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
       borderColor: colors.border,
       gap: 4,
     },
+    previewRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+    },
+    previewDate: {
+      flex: 1,
+      minWidth: 0,
+    },
+    previewRelative: {
+      flex: 1.8,
+      minWidth: 0,
+      minHeight: 96,
+    },
     previewLabel: {
       color: colors.muted,
       fontSize: 12,
@@ -234,9 +256,5 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
       alignSelf: 'stretch',
       marginLeft: 0,
       marginRight: 0,
-    },
-    relativeRow: {
-      flexDirection: 'row',
-      gap: 10,
     },
   });
