@@ -1,10 +1,7 @@
-import { Picker } from '@react-native-picker/picker';
 import { StyleSheet, View } from 'react-native';
 
-import { useAppTheme, useThemedStyles } from '@/lib/theme';
-import { Host } from '@expo/ui';
-import { Text as SwiftUIText, VStack } from '@expo/ui/swift-ui';
-import { font, foregroundStyle, textCase } from '@expo/ui/swift-ui/modifiers';
+import { NumberWheelInput } from '@/components/ui/primitives';
+import { useThemedStyles } from '@/lib/theme';
 
 type ItemRelativePickerProps = {
   label: string;
@@ -27,32 +24,12 @@ export type RelativeDatePickerRowProps = {
 
 export function ItemRelativePicker({label, value, options, onChange}: ItemRelativePickerProps) {
   const styles = useThemedStyles(createStyles);
-  const {colors} = useAppTheme();
+  const suffix = label.substring(0, 1);
 
   return (
-    <Host style={styles.relativePicker}>
-      <VStack alignment="center">
-        <SwiftUIText
-          modifiers={[font({weight: 'bold', size: 14}), foregroundStyle(colors.muted), textCase('uppercase')]}
-        >
-          {label.substring(0, 1)}
-        </SwiftUIText>
-        <Picker
-          selectedValue={value}
-          onValueChange={nextValue => {
-            if (typeof nextValue === 'number') {
-              onChange(nextValue);
-            }
-          }}
-          itemStyle={styles.pickerItem}
-          style={styles.picker}
-        >
-          {options.map(option => (
-            <Picker.Item key={option} label={String(option)} value={option} />
-          ))}
-        </Picker>
-      </VStack>
-    </Host>
+    <View style={styles.relativePicker}>
+      <NumberWheelInput value={value} options={options} onChange={onChange} suffix={suffix} pickerWidth={56} />
+    </View>
   );
 }
 
@@ -76,20 +53,35 @@ export function RelativeDatePickerRow({
   );
 }
 
+export function formatRelativeDuration(days: number, weeks: number, months: number) {
+  const totalDays = months * 30 + weeks * 7 + days;
+
+  if (totalDays < 7) {
+    return `${Math.max(0, totalDays)}D`;
+  }
+
+  if (totalDays < 30) {
+    return `${Math.floor(totalDays / 7)}W`;
+  }
+
+  return `${Math.floor(totalDays / 30)}M`;
+}
+
+export function relativeDurationInDays(days: number, weeks: number, months: number) {
+  return months * 30 + weeks * 7 + days;
+}
+
 const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
   StyleSheet.create({
     relativePicker: {
       flex: 1,
       minWidth: 0,
+      // height: 80,
       borderRadius: 18,
-    },
-    picker: {
-      flex: 1,
-      color: colors.text,
-    },
-    pickerItem: {
-      color: colors.text,
-      fontSize: 18,
+      backgroundColor: colors.input,
+      borderWidth: 1,
+      borderColor: colors.border,
+      overflow: 'hidden',
     },
   });
 

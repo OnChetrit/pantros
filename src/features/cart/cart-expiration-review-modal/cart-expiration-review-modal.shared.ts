@@ -116,7 +116,6 @@ export const styles = StyleSheet.create({
   previewRelative: {
     flex: 1.8,
     minWidth: 0,
-    minHeight: 96,
   },
   previewLabel: {
     fontSize: 12,
@@ -133,17 +132,15 @@ export const styles = StyleSheet.create({
   dateCard: {
     alignItems: 'stretch',
     width: '100%',
-    height: 180,
     borderWidth: 1,
     borderRadius: 20,
-    paddingVertical: 0,
+    paddingVertical: 16,
     overflow: 'hidden',
     display: 'flex',
     justifyContent: 'center',
   },
   datePicker: {
     width: '100%',
-    height: 180,
     alignSelf: 'stretch',
     display: 'flex',
     justifyContent: 'center',

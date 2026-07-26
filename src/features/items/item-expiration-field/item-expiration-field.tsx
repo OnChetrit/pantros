@@ -5,7 +5,11 @@ import { StyleSheet, Switch, Text, View } from 'react-native';
 import { useAppTheme, useThemedStyles } from '@/lib/theme';
 
 import { ItemExpirationModePicker } from '../item-expiration-mode-picker/item-expiration-mode-picker';
-import { RelativeDatePickerRow } from './item-relative-picker';
+import {
+  formatRelativeDuration,
+  relativeDurationInDays,
+  RelativeDatePickerRow,
+} from './item-relative-picker';
 
 type ExpirationMode = 'manual' | 'relative';
 
@@ -104,6 +108,17 @@ export function ItemExpirationField({value, onChange}: {value: string; onChange:
   }, [onChange, resolvedDate]);
 
   const previewLabel = resolvedDate ? formatDisplayDate(resolvedDate) : 'No expiration date';
+  const previewRelativeState =
+    mode === 'relative'
+      ? {days: relativeDays, weeks: relativeWeeks, months: relativeMonths}
+      : initialRelativeState(resolvedDate);
+  const previewRelative = formatRelativeDuration(
+    previewRelativeState.days,
+    previewRelativeState.weeks,
+    previewRelativeState.months,
+  );
+  const isCloseExpiration =
+    relativeDurationInDays(previewRelativeState.days, previewRelativeState.weeks, previewRelativeState.months) < 7;
 
   const enableMode = (nextMode: ExpirationMode) => {
     setIsEnabled(true);
@@ -134,24 +149,14 @@ export function ItemExpirationField({value, onChange}: {value: string; onChange:
       {isEnabled ? (
         <View style={styles.previewCard}>
           <View style={styles.previewRow}>
-            <View style={styles.previewDate}>
-              <Text style={styles.previewValue}>{previewLabel}</Text>
-            </View>
-            {mode === 'relative' ? (
-              <View style={styles.previewRelative}>
-                <RelativeDatePickerRow
-                  days={relativeDays}
-                  weeks={relativeWeeks}
-                  months={relativeMonths}
-                  dayOptions={dayOptions}
-                  weekOptions={weekOptions}
-                  monthOptions={monthOptions}
-                  onChangeDays={setRelativeDays}
-                  onChangeWeeks={setRelativeWeeks}
-                  onChangeMonths={setRelativeMonths}
-                />
-              </View>
-            ) : null}
+            <Text style={[styles.previewValue, {color: isCloseExpiration ? colors.warning : colors.tint}]}>
+              {previewLabel}
+            </Text>
+            <Text
+              style={[styles.previewRelative, {color: isCloseExpiration ? colors.danger : colors.accent}]}
+            >
+              {previewRelative}
+            </Text>
           </View>
         </View>
       ) : null}
@@ -163,7 +168,7 @@ export function ItemExpirationField({value, onChange}: {value: string; onChange:
           <DateTimePicker
             value={manualDate}
             mode="date"
-            display={'default'}
+            display="default"
             onValueChange={(_, selectedDate) => {
               if (selectedDate) {
                 setManualDate(selectedDate);
@@ -175,6 +180,20 @@ export function ItemExpirationField({value, onChange}: {value: string; onChange:
             style={styles.datePicker}
           />
         </View>
+      ) : null}
+
+      {isEnabled && mode === 'relative' ? (
+        <RelativeDatePickerRow
+          days={relativeDays}
+          weeks={relativeWeeks}
+          months={relativeMonths}
+          dayOptions={dayOptions}
+          weekOptions={weekOptions}
+          monthOptions={monthOptions}
+          onChangeDays={setRelativeDays}
+          onChangeWeeks={setRelativeWeeks}
+          onChangeMonths={setRelativeMonths}
+        />
       ) : null}
     </View>
   );
@@ -212,30 +231,21 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
       borderColor: colors.border,
       gap: 4,
     },
+    previewValue: {
+      fontSize: 16,
+      fontWeight: '800',
+      flexShrink: 1,
+    },
     previewRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 12,
-    },
-    previewDate: {
-      flex: 1,
-      minWidth: 0,
+      justifyContent: 'space-between',
+      gap: 16,
     },
     previewRelative: {
-      flex: 1.8,
-      minWidth: 0,
-      minHeight: 96,
-    },
-    previewLabel: {
-      color: colors.muted,
-      fontSize: 12,
-      textTransform: 'uppercase',
-      letterSpacing: 0.5,
-    },
-    previewValue: {
-      color: colors.text,
       fontSize: 16,
       fontWeight: '800',
+      flexShrink: 0,
     },
     controlBlock: {
       gap: 12,

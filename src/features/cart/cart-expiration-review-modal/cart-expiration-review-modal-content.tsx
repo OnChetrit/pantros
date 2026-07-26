@@ -1,15 +1,19 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Stack, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { EmptyNotice } from '@/components/ui/primitives';
-import { RelativeDatePickerRow } from '@/features/items/item-expiration-field/item-relative-picker';
 import { useCartCheckout } from '@/features/cart/cart-checkout-context/cart-checkout-context';
+import {
+  formatRelativeDuration,
+  RelativeDatePickerRow,
+  relativeDurationInDays,
+} from '@/features/items/item-expiration-field/item-relative-picker';
 import { ItemExpirationModePicker } from '@/features/items/item-expiration-mode-picker/item-expiration-mode-picker';
 import { useAppTheme } from '@/lib/theme';
 
+import { Spacer } from '@expo/ui';
 import {
   addRelativeDate,
   dayOptions,
@@ -101,7 +105,6 @@ function CartExpirationReviewContent({
   totalSteps: number;
 }) {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const [mode, setMode] = useState<ExpirationMode>('manual');
   const [manualDate, setManualDate] = useState(() => parseIsoDate(reviewDate) ?? startOfDay(new Date()));
   const [relativeDays, setRelativeDays] = useState(() => initialRelativeState(reviewDate).days);
@@ -124,6 +127,12 @@ function CartExpirationReviewContent({
   }, [onChangeDate, resolvedDate, reviewDate]);
 
   const hasChanges = resolvedDate !== initialReviewDate;
+  const previewRelativeState =
+    mode === 'relative'
+      ? {days: relativeDays, weeks: relativeWeeks, months: relativeMonths}
+      : initialRelativeState(resolvedDate);
+  const isCloseExpiration =
+    relativeDurationInDays(previewRelativeState.days, previewRelativeState.weeks, previewRelativeState.months) < 7;
 
   const handleClose = () => {
     if (processing) {
@@ -182,35 +191,37 @@ function CartExpirationReviewContent({
         >
           <View style={[styles.previewCard, {backgroundColor: colors.card, borderColor: colors.border}]}>
             <View style={styles.previewRow}>
-              <View style={styles.previewDate}>
-                <Text selectable style={[sharedStyles.previewValue, {color: colors.text}]}>
-                  {formatExpiration(resolvedDate)}
-                </Text>
-              </View>
-              {mode === 'relative' ? (
-                <View style={styles.previewRelative}>
-                  <RelativeDatePickerRow
-                    days={relativeDays}
-                    weeks={relativeWeeks}
-                    months={relativeMonths}
-                    dayOptions={dayOptions}
-                    weekOptions={weekOptions}
-                    monthOptions={monthOptions}
-                    onChangeDays={setRelativeDays}
-                    onChangeWeeks={setRelativeWeeks}
-                    onChangeMonths={setRelativeMonths}
-                  />
-                </View>
-              ) : null}
+              <Text
+                selectable
+                style={[
+                  sharedStyles.previewValue,
+                  {color: isCloseExpiration ? colors.warning : colors.tint, flexShrink: 1},
+                ]}
+              >
+                {formatExpiration(resolvedDate)}
+              </Text>
+              <Spacer />
+              <Text
+                selectable
+                style={[sharedStyles.previewRelative, {color: isCloseExpiration ? colors.danger : colors.accent}]}
+              >
+                {formatRelativeDuration(
+                  previewRelativeState.days,
+                  previewRelativeState.weeks,
+                  previewRelativeState.months
+                )}
+              </Text>
             </View>
           </View>
+
+          <ItemExpirationModePicker mode={mode} onChange={setMode} />
 
           {mode === 'manual' ? (
             <View style={[sharedStyles.dateCard, {backgroundColor: colors.card, borderColor: colors.border}]}>
               <DateTimePicker
                 value={manualDate}
                 mode="date"
-                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                display="default"
                 onValueChange={(_, selectedDate) => {
                   if (selectedDate) {
                     setManualDate(selectedDate);
@@ -222,6 +233,19 @@ function CartExpirationReviewContent({
                 style={sharedStyles.datePicker}
               />
             </View>
+          ) : null}
+          {mode === 'relative' ? (
+            <RelativeDatePickerRow
+              days={relativeDays}
+              weeks={relativeWeeks}
+              months={relativeMonths}
+              dayOptions={dayOptions}
+              weekOptions={weekOptions}
+              monthOptions={monthOptions}
+              onChangeDays={setRelativeDays}
+              onChangeWeeks={setRelativeWeeks}
+              onChangeMonths={setRelativeMonths}
+            />
           ) : null}
 
           {errorMessage ? (
@@ -235,9 +259,6 @@ function CartExpirationReviewContent({
             </Text>
           ) : null}
         </ScrollView>
-        <View style={[styles.footer, {paddingBottom: Math.max(insets.bottom, 16)}]}>
-          <ItemExpirationModePicker mode={mode} onChange={setMode} />
-        </View>
       </View>
     </>
   );
@@ -253,11 +274,8 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingTop: 20,
-    // paddingBottom: 16,
-    // gap: 12,
-  },
-  footer: {
-    paddingTop: 8,
+    paddingBottom: 16,
+    gap: 12,
   },
   previewCard: {
     borderWidth: 1,
@@ -269,16 +287,14 @@ const styles = StyleSheet.create({
   previewRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-  },
-  previewDate: {
-    flex: 1,
-    minWidth: 0,
+    justifyContent: 'space-between',
+    gap: 16,
   },
   previewRelative: {
-    flex: 1.8,
-    minWidth: 0,
-    minHeight: 96,
+    fontSize: 17,
+    lineHeight: 22,
+    fontWeight: '700',
+    flexShrink: 0,
   },
   helperText: {
     fontSize: 13,

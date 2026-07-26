@@ -5,7 +5,11 @@ import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, Vi
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyNotice } from '@/components/ui/primitives';
-import { RelativeDatePickerRow } from '@/features/items/item-expiration-field/item-relative-picker';
+import {
+  formatRelativeDuration,
+  relativeDurationInDays,
+  RelativeDatePickerRow,
+} from '@/features/items/item-expiration-field/item-relative-picker';
 import { ItemExpirationModePicker } from '@/features/items/item-expiration-mode-picker/item-expiration-mode-picker';
 import { useAppTheme } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
@@ -81,6 +85,10 @@ function ExpirationReviewFormContent({
   }, [manualDate, mode, relativeDays, relativeWeeks, relativeMonths]);
   const hasChanges = resolvedDate !== initialReviewDate;
   const saveDisabled = itemBusy || !hasChanges;
+  const previewRelativeState =
+    mode === 'relative' ? {days: relativeDays, weeks: relativeWeeks, months: relativeMonths} : initialRelativeState(resolvedDate);
+  const isCloseExpiration =
+    relativeDurationInDays(previewRelativeState.days, previewRelativeState.weeks, previewRelativeState.months) < 7;
 
   const handleClose = () => {
     if (itemBusy) {
@@ -151,37 +159,32 @@ function ExpirationReviewFormContent({
         <ScrollView
           style={styles.scroll}
           contentInsetAdjustmentBehavior="automatic"
-          contentContainerStyle={[styles.content, {paddingBottom: 16}]}
+          contentContainerStyle={[styles.content, {paddingBottom: Math.max(insets.bottom, 16)}]}
           keyboardShouldPersistTaps="handled"
         >
           <View style={[sharedStyles.previewCard, {backgroundColor: colors.card, borderColor: colors.border}]}>
             <View style={sharedStyles.previewRow}>
-              <View style={sharedStyles.previewDate}>
-                <Text style={[sharedStyles.previewValue, {color: colors.text}]}>{formatExpiration(resolvedDate)}</Text>
-              </View>
-              {mode === 'relative' ? (
-                <View style={sharedStyles.previewRelative}>
-                  <RelativeDatePickerRow
-                    days={relativeDays}
-                    weeks={relativeWeeks}
-                    months={relativeMonths}
-                    dayOptions={dayOptions}
-                    weekOptions={weekOptions}
-                    monthOptions={monthOptions}
-                    onChangeDays={setRelativeDays}
-                    onChangeWeeks={setRelativeWeeks}
-                    onChangeMonths={setRelativeMonths}
-                  />
-                </View>
-              ) : null}
+              <Text
+                style={[sharedStyles.previewValue, {color: isCloseExpiration ? colors.warning : colors.tint, flexShrink: 1}]}
+              >
+                {formatExpiration(resolvedDate)}
+              </Text>
+              <Text
+                style={[sharedStyles.previewRelative, {color: isCloseExpiration ? colors.danger : colors.accent}]}
+              >
+                {formatRelativeDuration(previewRelativeState.days, previewRelativeState.weeks, previewRelativeState.months)}
+              </Text>
             </View>
           </View>
+
+          <ItemExpirationModePicker mode={mode} onChange={setMode} />
+
           {mode === 'manual' ? (
             <View style={[sharedStyles.dateCard, {backgroundColor: colors.card, borderColor: colors.border}]}>
               <DateTimePicker
                 value={manualDate}
                 mode="date"
-                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                display="default"
                 onValueChange={(_, selectedDate) => {
                   if (selectedDate) {
                     setManualDate(selectedDate);
@@ -194,12 +197,22 @@ function ExpirationReviewFormContent({
               />
             </View>
           ) : null}
+          {mode === 'relative' ? (
+            <RelativeDatePickerRow
+              days={relativeDays}
+              weeks={relativeWeeks}
+              months={relativeMonths}
+              dayOptions={dayOptions}
+              weekOptions={weekOptions}
+              monthOptions={monthOptions}
+              onChangeDays={setRelativeDays}
+              onChangeWeeks={setRelativeWeeks}
+              onChangeMonths={setRelativeMonths}
+            />
+          ) : null}
           {errorMessage ? <Text style={[styles.errorText, {color: colors.danger}]}>{errorMessage}</Text> : null}
           {!hasChanges ? <Text style={[styles.helperText, {color: colors.muted}]}>No changes yet.</Text> : null}
         </ScrollView>
-        <View style={[styles.footer, {paddingBottom: Math.max(insets.bottom, 16)}]}>
-          <ItemExpirationModePicker mode={mode} onChange={setMode} />
-        </View>
       </KeyboardAvoidingView>
     </>
   );
@@ -216,9 +229,7 @@ const styles = StyleSheet.create({
   content: {
     paddingTop: 16,
     gap: 12,
-  },
-  footer: {
-    paddingTop: 8,
+    paddingBottom: 16,
   },
   errorText: {
     fontSize: 14,
