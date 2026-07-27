@@ -7,7 +7,7 @@ import { useThemedStyles } from '@/lib/theme';
 import { ItemExpirationField } from '../item-expiration-field/item-expiration-field';
 import { createStyles } from '../item-form-screen/item-form-screen.styles';
 import { ItemBarcodeField } from '../item-form/item-barcode-field';
-import { ItemCartSection } from '../item-form/item-cart-section';
+import { ItemCartSection } from '../item-cart-section/item-cart-section';
 import { ItemImagePicker } from '../item-form/item-image-picker';
 import { ItemNameField } from '../item-form/item-name-field';
 

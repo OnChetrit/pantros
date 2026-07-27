@@ -13,15 +13,8 @@ import { Alert, Image, LayoutAnimation, StyleSheet, Text, View } from 'react-nat
 const pantryEmptyIllustration = require('../../../../../assets/images/pantry-empty-state-transparent.png');
 
 export default function PantryScreen() {
-  const {
-    deleteItem,
-    deleteItems,
-    moveItemToCart,
-    moveItemsToCart,
-    pantryCarts,
-    pantryItems,
-    selectedPantry,
-  } = useAppContext();
+  const {deleteItem, deleteItems, moveItemToCart, moveItemsToCart, pantryCarts, pantryItems, selectedPantry} =
+    useAppContext();
   const {colors, isDark} = useAppTheme();
   const {setTabBarHidden} = useTabBarVisibility();
   const router = useRouter();
@@ -279,7 +272,7 @@ export default function PantryScreen() {
         </Stack.Toolbar>
       ) : null}
       {visibleItems.length === 0 ? (
-        <View style={[styles.emptyStateScreen, {backgroundColor: colors.card}]}>
+        <View style={[styles.emptyStateScreen]}>
           <View style={styles.emptyStateContent}>
             <Image source={pantryEmptyIllustration} style={styles.illustration} resizeMode="contain" />
             <View style={styles.emptyStateCopy}>

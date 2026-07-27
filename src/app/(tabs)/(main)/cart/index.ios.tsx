@@ -141,7 +141,7 @@ export default function CartScreen() {
           </View>
         </View>
       ) : itemsInCart.length > 0 && unselectedItems.length === 0 ? (
-        <View style={[styles.allSelectedScreen, {backgroundColor: colors.card}]}>
+        <View style={[styles.allSelectedScreen]}>
           {checkoutProgress.errorMessage ? (
             <View style={styles.noticeRow}>
               <CartCheckoutNotice tone="error" message={checkoutProgress.errorMessage} onDismiss={clearCheckoutError} />
@@ -167,7 +167,7 @@ export default function CartScreen() {
           </View>
         </View>
       ) : (
-        <Host colorScheme={isDark ? 'dark' : 'light'} style={[styles.host, {backgroundColor: colors.card}]}>
+        <Host colorScheme={isDark ? 'dark' : 'light'} style={[styles.host]}>
           <List modifiers={[listStyle('plain'), scrollContentBackground('visible')]}>
             {checkoutProgress.errorMessage ? (
               <ListItem key="checkout-error">

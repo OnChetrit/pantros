@@ -44,11 +44,11 @@ function TabsLayoutNavigator() {
         }}
       >
         <NativeTabs.Trigger name="pantry">
-          <NativeTabs.Trigger.Icon sf="house.fill" />
+          <NativeTabs.Trigger.Icon sf="house.fill" md="home" />
           <NativeTabs.Trigger.Label>Pantry</NativeTabs.Trigger.Label>
         </NativeTabs.Trigger>
         <NativeTabs.Trigger name="cart">
-          <NativeTabs.Trigger.Icon sf="cart.fill" />
+          <NativeTabs.Trigger.Icon sf="cart.fill" md="shopping_cart" />
           <NativeTabs.Trigger.Label>Cart</NativeTabs.Trigger.Label>
         </NativeTabs.Trigger>
         <NativeTabs.Trigger name="search" role="search">
@@ -57,6 +57,7 @@ function TabsLayoutNavigator() {
               default: 'plus.magnifyingglass',
               selected: 'plus.magnifyingglass',
             }}
+            md="search"
           />
           <NativeTabs.Trigger.Label>Search</NativeTabs.Trigger.Label>
         </NativeTabs.Trigger>

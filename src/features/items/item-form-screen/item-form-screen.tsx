@@ -15,44 +15,46 @@ export function ItemFormScreen(props: ItemFormScreenProps) {
   const controller = useItemFormController(props);
 
   return (
-    <KeyboardAvoidingView style={styles.screen}>
+    <>
       <Stack.Screen
         options={{
           title: controller.title,
-          presentation: 'formSheet',
+          headerShown: true,
           headerTitleAlign: 'center',
           headerBackVisible: true,
           headerRight: () => (
             <ItemFormSaveButton
               canSave={controller.canSave}
               itemBusy={controller.itemBusy}
-              label={controller.item ? 'Save item' : 'Add item'}
+              label={controller.item ? 'Save' : 'Add'}
               onPress={controller.selectedPantry ? () => void controller.handleSave() : controller.handleMissingPantry}
             />
           ),
         }}
       />
-      <ItemFormBody
-        barcode={controller.barcode}
-        duplicateCandidates={controller.duplicateCandidates}
-        exactDuplicate={controller.exactDuplicate}
-        expirationDate={controller.expirationDate}
-        formError={controller.formError}
-        image={controller.image}
-        isInCart={controller.isInCart}
-        name={controller.name}
-        onChangeBarcode={controller.setBarcode}
-        onChangeExpirationDate={controller.setExpirationDate}
-        onChangeIsInCart={controller.setIsInCart}
-        onChangeName={controller.setName}
-        onChangeQuantity={value => controller.setQuantity(String(Math.max(1, value)))}
-        onOpenBarcodeScanner={controller.openBarcodeScanner}
-        onOpenImageSourcePicker={controller.openImageSourcePicker}
-        onSelectDuplicate={candidateId => controller.router.replace(`/items/${candidateId}`)}
-        parsedQuantity={controller.parsedQuantity}
-        selectedPantry={controller.selectedPantry}
-      />
-    </KeyboardAvoidingView>
+      <KeyboardAvoidingView style={styles.screen}>
+        <ItemFormBody
+          barcode={controller.barcode}
+          duplicateCandidates={controller.duplicateCandidates}
+          exactDuplicate={controller.exactDuplicate}
+          expirationDate={controller.expirationDate}
+          formError={controller.formError}
+          image={controller.image}
+          isInCart={controller.isInCart}
+          name={controller.name}
+          onChangeBarcode={controller.setBarcode}
+          onChangeExpirationDate={controller.setExpirationDate}
+          onChangeIsInCart={controller.setIsInCart}
+          onChangeName={controller.setName}
+          onChangeQuantity={value => controller.setQuantity(String(Math.max(1, value)))}
+          onOpenBarcodeScanner={controller.openBarcodeScanner}
+          onOpenImageSourcePicker={controller.openImageSourcePicker}
+          onSelectDuplicate={candidateId => controller.router.replace(`/items/${candidateId}`)}
+          parsedQuantity={controller.parsedQuantity}
+          selectedPantry={controller.selectedPantry}
+        />
+      </KeyboardAvoidingView>
+    </>
   );
 }
 

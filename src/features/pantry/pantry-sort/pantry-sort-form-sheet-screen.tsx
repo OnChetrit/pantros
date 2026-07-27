@@ -7,8 +7,19 @@ import { StyleSheet, View } from 'react-native';
 import { useAppTheme } from '@/lib/theme';
 
 import { SORT_OPTIONS, parsePantrySortOption } from './pantry-sort-options';
+import { PantrySortFormSheetScreen as AndroidPantrySortFormSheetScreen } from './pantry-sort-form-sheet-screen.android';
 
-export function PantrySortFormSheetScreen({basePath}: {basePath: '/cart' | '/pantry'}) {
+type PantrySortFormSheetScreenProps = {basePath: '/cart' | '/pantry'};
+
+export function PantrySortFormSheetScreen(props: PantrySortFormSheetScreenProps) {
+  if (process.env.EXPO_OS !== 'ios') {
+    return <AndroidPantrySortFormSheetScreen {...props} />;
+  }
+
+  return <IosPantrySortFormSheetScreen {...props} />;
+}
+
+function IosPantrySortFormSheetScreen({basePath}: PantrySortFormSheetScreenProps) {
   const {colors, isDark} = useAppTheme();
   const router = useRouter();
   const {sort} = useLocalSearchParams<{sort?: string | string[]}>();
