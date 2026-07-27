@@ -3,6 +3,7 @@ import { EmptyNotice } from '@/components/ui/primitives';
 import { matchPantryItems } from '@/lib/pantry-insights';
 import { useAppTheme } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
+import { useWorkspaceState } from '@/state/workspace-state';
 import { ListItem } from '@expo/ui';
 import { Host, HStack, List, Section, Spacer, Text } from '@expo/ui/swift-ui';
 import { font, foregroundStyle, listStyle, scrollContentBackground } from '@expo/ui/swift-ui/modifiers';
@@ -26,6 +27,7 @@ export default function SearchScreen() {
     selectedPantryId,
   } = useAppContext();
   const {colors, isDark} = useAppTheme();
+  const {profile} = useWorkspaceState();
   const router = useRouter();
   const searchBarRef = useRef<SearchBarCommands | null>(null);
   const {entry, q} = useLocalSearchParams<{entry?: string | string[]; q?: string | string[]}>();
@@ -207,7 +209,26 @@ export default function SearchScreen() {
       />
       <Stack.Toolbar placement="right">
         <Stack.Toolbar.Button icon="barcode.viewfinder" onPress={handleScanBarcode} />
-        <Stack.Toolbar.Button icon="person.crop.circle" onPress={() => router.push('/account/menu')} />
+        {profile?.avatarUrl ? (
+          <Stack.Toolbar.View>
+            <ReactNative.View style={styles.accountToolbarView}>
+              <ReactNative.Pressable
+                accessibilityLabel="Open account settings"
+                accessibilityRole="button"
+                onPress={() => router.push('/account/menu')}
+                style={styles.accountToolbarButton}
+              >
+                <ReactNative.Image source={{uri: profile.avatarUrl}} style={styles.accountAvatar} />
+              </ReactNative.Pressable>
+            </ReactNative.View>
+          </Stack.Toolbar.View>
+        ) : (
+          <Stack.Toolbar.Button
+            accessibilityLabel="Open account settings"
+            icon="person.crop.circle"
+            onPress={() => router.push('/account/menu')}
+          />
+        )}
       </Stack.Toolbar>
       {visibleItems.length === 0 && !shouldShowCreateItem ? (
         <ReactNative.View style={[styles.emptyStateScreen, {backgroundColor: colors.card}]}>
@@ -268,6 +289,21 @@ export default function SearchScreen() {
 const styles = ReactNative.StyleSheet.create({
   host: {
     flex: 1,
+  },
+  accountToolbarView: {
+    width: 34,
+    height: 34,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  accountToolbarButton: {
+    width: 34,
+    height: 34,
+  },
+  accountAvatar: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
   },
   emptyScreen: {
     flex: 1,

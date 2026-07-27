@@ -4,11 +4,12 @@ import { useTabBarVisibility } from '@/features/navigation/tab-bar-visibility-co
 import { parsePantrySortOption, SORT_OPTIONS } from '@/features/pantry/pantry-sort/pantry-sort-options';
 import { useAppTheme } from '@/lib/theme';
 import { PartialItemActionError, useAppContext } from '@/state/app-context';
+import { useWorkspaceState } from '@/state/workspace-state';
 import { Host, List, Section } from '@expo/ui/swift-ui';
 import { environment, listStyle, scrollContentBackground, tint } from '@expo/ui/swift-ui/modifiers';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Alert, Image, LayoutAnimation, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, LayoutAnimation, Pressable, StyleSheet, Text, View } from 'react-native';
 
 const pantryEmptyIllustration = require('../../../../../assets/images/pantry-empty-state-transparent.png');
 
@@ -16,6 +17,7 @@ export default function PantryScreen() {
   const {deleteItem, deleteItems, moveItemToCart, moveItemsToCart, pantryCarts, pantryItems, selectedPantry} =
     useAppContext();
   const {colors, isDark} = useAppTheme();
+  const {profile} = useWorkspaceState();
   const {setTabBarHidden} = useTabBarVisibility();
   const router = useRouter();
   const {sort} = useLocalSearchParams<{sort?: string | string[]}>();
@@ -242,11 +244,27 @@ export default function PantryScreen() {
         >
           Select
         </Stack.Toolbar.Button>
-        <Stack.Toolbar.Button
-          icon="person.crop.circle"
-          onPress={() => router.push('/account/menu')}
-          hidden={selectionModeActive}
-        />
+        {profile?.avatarUrl ? (
+          <Stack.Toolbar.View hidden={selectionModeActive}>
+            <View style={styles.accountToolbarView}>
+              <Pressable
+                accessibilityLabel="Open account settings"
+                accessibilityRole="button"
+                onPress={() => router.push('/account/menu')}
+                style={styles.accountToolbarButton}
+              >
+                <Image source={{uri: profile.avatarUrl}} style={styles.accountAvatar} />
+              </Pressable>
+            </View>
+          </Stack.Toolbar.View>
+        ) : (
+          <Stack.Toolbar.Button
+            accessibilityLabel="Open account settings"
+            icon="person.crop.circle"
+            onPress={() => router.push('/account/menu')}
+            hidden={selectionModeActive}
+          />
+        )}
       </Stack.Toolbar>
       {selectionModeActive ? (
         <Stack.Toolbar placement="bottom">
@@ -359,6 +377,21 @@ export default function PantryScreen() {
 const styles = StyleSheet.create({
   host: {
     flex: 1,
+  },
+  accountToolbarView: {
+    width: 34,
+    height: 34,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  accountToolbarButton: {
+    width: 34,
+    height: 34,
+  },
+  accountAvatar: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
   },
   emptyScreen: {
     flex: 1,
