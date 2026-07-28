@@ -2,6 +2,7 @@ import { PantryItemNativeListRow } from '@/components/pantry/pantry-item-row/pan
 import { EmptyNotice } from '@/components/ui/primitives';
 import { matchPantryItems } from '@/lib/pantry-insights';
 import { useAppTheme } from '@/lib/theme';
+import { useAddItemDestination } from '@/state/add-item-destination-state';
 import { useAppContext } from '@/state/app-context';
 import { useWorkspaceState } from '@/state/workspace-state';
 import { ListItem } from '@expo/ui';
@@ -28,6 +29,7 @@ export default function SearchScreen() {
   } = useAppContext();
   const {colors, isDark} = useAppTheme();
   const {profile} = useWorkspaceState();
+  const {destination} = useAddItemDestination();
   const router = useRouter();
   const searchBarRef = useRef<SearchBarCommands | null>(null);
   const {entry, q} = useLocalSearchParams<{entry?: string | string[]; q?: string | string[]}>();
@@ -82,8 +84,34 @@ export default function SearchScreen() {
     const submittedResults = matchPantryItems(pantryItems, submittedQuery);
 
     if (submittedResults.exactMatch) {
-      const firstExistingItem = submittedResults.visibleResults[0] ?? submittedResults.exactMatch;
-      router.push(`/items/${firstExistingItem.id}`);
+      const existingItem = submittedResults.exactMatch;
+
+      if (existingItem.isInCart) {
+        ReactNative.Alert.alert('Already in Cart', `${existingItem.name} is already waiting in your cart.`);
+        return;
+      }
+
+      if (!primaryCart) {
+        ReactNative.Alert.alert('No cart available', 'Create a cart before sending items to purchase.');
+        return;
+      }
+
+      try {
+        animateListLayout();
+        await moveItemToCart(existingItem.id, primaryCart.id);
+        searchBarRef.current?.setText('');
+        router.setParams({q: undefined, entry: undefined, nonce: undefined});
+      } catch (error) {
+        ReactNative.Alert.alert(
+          'Unable to add item',
+          error instanceof Error ? error.message : 'Try again in a moment.'
+        );
+      }
+      return;
+    }
+
+    if (destination === 'cart' && !primaryCart) {
+      ReactNative.Alert.alert('No cart available', 'Create a cart before adding new items to the cart.');
       return;
     }
 
@@ -94,8 +122,8 @@ export default function SearchScreen() {
         barcode: null,
         image: null,
         expirationDate: null,
-        isInCart: false,
-        cartId: null,
+        isInCart: destination === 'cart',
+        cartId: destination === 'cart' ? primaryCart?.id ?? null : null,
         quantity: 1,
       });
       searchBarRef.current?.setText('');

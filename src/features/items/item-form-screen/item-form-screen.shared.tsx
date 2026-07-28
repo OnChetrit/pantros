@@ -3,8 +3,9 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { Alert, Keyboard } from 'react-native';
 
-import type { PantryItem, PantryItemInput } from '@/domain/models';
+import type { AddItemDestination, PantryItem, PantryItemInput } from '@/domain/models';
 import { matchPantryItems } from '@/lib/pantry-insights';
+import { useAddItemDestination } from '@/state/add-item-destination-state';
 import { useItemState } from '@/state/item-state';
 import { consumePendingScannedBarcode } from '@/state/barcode-scan-state';
 import { useWorkspaceState } from '@/state/workspace-state';
@@ -22,7 +23,8 @@ export { ItemFormSaveButton } from '../item-form-save-button/item-form-save-butt
 
 export function useItemFormController({initialBarcode, item, initialName}: ItemFormScreenProps) {
   const router = useRouter();
-  const {addItem, itemBusy, updateItem} = useItemState();
+  const {addItem, itemBusy, moveItemToCart, updateItem} = useItemState();
+  const {destination, setDestination} = useAddItemDestination();
   const {pantryCarts, pantryItems, selectedPantry, selectedPantryId} = useWorkspaceState();
 
   const primaryCartId = pantryCarts.find(cart => cart.isPrimary)?.id ?? pantryCarts[0]?.id ?? null;
@@ -32,7 +34,11 @@ export function useItemFormController({initialBarcode, item, initialName}: ItemF
   const [barcode, setBarcode] = useState(item?.barcode ?? initialBarcode ?? '');
   const [image, setImage] = useState(item?.image ?? '');
   const [expirationDate, setExpirationDate] = useState(item?.expirationDate ?? '');
-  const [isInCart, setIsInCart] = useState(item?.isInCart ?? false);
+  const [formDestinationOverride, setFormDestinationOverride] = useState<AddItemDestination | null>(
+    item ? (item.isInCart ? 'cart' : 'pantry') : null
+  );
+  const formDestination = formDestinationOverride ?? destination;
+  const isInCart = formDestination === 'cart';
   const [formError, setFormError] = useState<string | null>(null);
 
   const title = item ? 'Edit Item' : 'Add Item';
@@ -102,7 +108,13 @@ export function useItemFormController({initialBarcode, item, initialName}: ItemF
     hasChanges &&
     name.trim().length > 0 &&
     isValidIsoDate(expirationDate) &&
-    (!isInCart || Boolean(parsedQuantity));
+    (!isInCart || (Boolean(parsedQuantity) && Boolean(primaryCartId)));
+
+  const handleDestinationChange = (nextIsInCart: boolean) => {
+    const nextDestination = nextIsInCart ? 'cart' : 'pantry';
+    setFormDestinationOverride(nextDestination);
+    setDestination(nextDestination);
+  };
 
   const handlePickAsset = async (source: 'camera' | 'library') => {
     const permission =
@@ -185,11 +197,30 @@ export function useItemFormController({initialBarcode, item, initialName}: ItemF
     }
 
     if (!canSave || (isInCart && !parsedQuantity)) {
-      setFormError('Use a name, an optional expiration date, and a positive quantity for cart items.');
+      setFormError(
+        isInCart && !primaryCartId
+          ? 'Create a cart before saving this item to the cart.'
+          : 'Use a name, an optional expiration date, and a positive quantity for cart items.'
+      );
       return;
     }
 
     if (exactDuplicate) {
+      if (isInCart && !exactDuplicate.isInCart) {
+        if (!primaryCartId) {
+          setFormError('Create a cart before saving this item to the cart.');
+          return;
+        }
+
+        try {
+          await moveItemToCart(exactDuplicate.id, primaryCartId);
+          router.back();
+        } catch (error) {
+          setFormError(error instanceof Error ? error.message : 'Unable to move the existing item to the cart.');
+        }
+        return;
+      }
+
       router.replace(`/items/${exactDuplicate.id}`);
       return;
     }
@@ -233,7 +264,7 @@ export function useItemFormController({initialBarcode, item, initialName}: ItemF
     setBarcode,
     setExpirationDate,
     setImage,
-    setIsInCart,
+    setIsInCart: handleDestinationChange,
     setName,
     setQuantity,
     title,

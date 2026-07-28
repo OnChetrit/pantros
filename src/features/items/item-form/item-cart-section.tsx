@@ -1,7 +1,9 @@
-import { Host, Row, Spacer, Switch } from '@expo/ui';
+import { Host, Row, Spacer } from '@expo/ui';
 import { StyleSheet, View } from 'react-native';
 
+import type { AddItemDestination } from '@/domain/models';
 import { NumberWheelInput } from '@/components/ui/primitives';
+import { AddItemDestinationPicker } from '@/features/items/add-item-destination-picker/add-item-destination-picker';
 import { useThemedStyles } from '@/lib/theme';
 
 import { ItemFormFieldLabel } from './item-form-field-label';
@@ -23,9 +25,12 @@ export function ItemCartSection({isInCart, quantity, onToggle, onChangeQuantity}
       <View style={styles.fieldGroup}>
         <Host style={styles.fieldHeader}>
           <Row alignment="center">
-            <ItemFormFieldLabel>Add To Cart</ItemFormFieldLabel>
+            <ItemFormFieldLabel>Save New Item To</ItemFormFieldLabel>
             <Spacer flexible />
-            <Switch value={isInCart} onValueChange={onToggle} />
+            <AddItemDestinationPicker
+              value={isInCart ? 'cart' : 'pantry'}
+              onChange={(destination: AddItemDestination) => onToggle(destination === 'cart')}
+            />
           </Row>
         </Host>
       </View>

@@ -2,6 +2,7 @@ import { NativeTabs } from 'expo-router/unstable-native-tabs';
 import { StyleSheet, View } from 'react-native';
 
 import { appColors } from '@/components/ui/primitives';
+import { AddItemDestinationAccessory } from '@/features/items/add-item-destination-accessory/add-item-destination-accessory';
 import { TabBarVisibilityProvider, useTabBarVisibility } from '@/features/navigation/tab-bar-visibility-context/tab-bar-visibility-context';
 import { useAppTheme } from '@/lib/theme';
 
@@ -43,6 +44,9 @@ function TabsLayoutNavigator() {
           },
         }}
       >
+        <NativeTabs.BottomAccessory>
+          <AddItemDestinationAccessory />
+        </NativeTabs.BottomAccessory>
         <NativeTabs.Trigger name="pantry">
           <NativeTabs.Trigger.Icon sf="house.fill" md="home" />
           <NativeTabs.Trigger.Label>Pantry</NativeTabs.Trigger.Label>

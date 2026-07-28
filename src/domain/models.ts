@@ -1,5 +1,7 @@
 export type PantryRole = 'owner' | 'admin' | 'member';
 
+export type AddItemDestination = 'pantry' | 'cart';
+
 export type ReminderSettings = {
   expirationRemindersEnabled: boolean;
   reminderTime: string;
