@@ -13,6 +13,7 @@
     "run:android": "expo run:android",
     "run:ios": "expo run:ios",
     "eas:build:ios": "bunx eas-cli build --platform ios --profile production",
+    "eas:deploy:testflight": "bunx eas-cli build --platform ios --profile production --submit",
     "eas:build:android": "bunx eas-cli build --platform android --profile production",
     "eas:build:preview:ios": "bunx eas-cli build --platform ios --profile preview",
     "eas:build:preview:android": "bunx eas-cli build --platform android --profile preview",
