@@ -5,16 +5,14 @@ import { StyleSheet, Text, View } from 'react-native';
 import { AddItemDestinationPicker } from '@/features/items/add-item-destination-picker/add-item-destination-picker';
 import { useAppTheme } from '@/lib/theme';
 import { useAddItemDestination } from '@/state/add-item-destination-state';
-import { useWorkspaceState } from '@/state/workspace-state';
 
 export function AddItemDestinationAccessory() {
   const placement = NativeTabs.BottomAccessory.usePlacement();
   const pathname = usePathname();
   const {colors} = useAppTheme();
   const {destination, ready, setDestination} = useAddItemDestination();
-  const {selectedPantry} = useWorkspaceState();
 
-  if (pathname.includes('/cart') || !selectedPantry) {
+  if (!pathname.includes('/search')) {
     return null;
   }
 
@@ -24,12 +22,8 @@ export function AddItemDestinationAccessory() {
 
   return (
     <View style={[styles.container, {backgroundColor: colors.card, borderColor: colors.border}]}>
-      <Text style={[styles.label, {color: colors.muted}]}>New items</Text>
-      <AddItemDestinationPicker
-        value={destination}
-        disabled={!ready}
-        onChange={setDestination}
-      />
+      <Text style={[styles.label, {color: colors.muted}]}>Add New items to</Text>
+      <AddItemDestinationPicker value={destination} disabled={!ready} onChange={setDestination} />
     </View>
   );
 }

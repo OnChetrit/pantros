@@ -16,6 +16,7 @@ export type PantryItemRowProps = {
   leftActionLabel?: string;
   onLeftAction?: () => void;
   onDelete: () => void;
+  isNewItem?: boolean;
   isSelectionMode?: boolean;
   isSelected?: boolean;
   onToggleSelection?: () => void;
@@ -29,6 +30,7 @@ type PantryItemRowContentProps = {
   onPress: () => void;
   onLongPress?: (event: GestureResponderEvent) => void;
   nativeListItem?: boolean;
+  isNewItem?: boolean;
   isSelectionMode?: boolean;
   isSelected?: boolean;
 };
@@ -44,6 +46,7 @@ export function PantryItemRowContent({
   onPress,
   onLongPress,
   nativeListItem = false,
+  isNewItem = false,
   isSelectionMode = false,
   isSelected = false,
 }: PantryItemRowContentProps) {
@@ -58,6 +61,7 @@ export function PantryItemRowContent({
       style={[
         styles.row,
         nativeListItem ? styles.rowNativeList : null,
+        isNewItem ? styles.rowNew : null,
         isSelected ? styles.rowSelected : null,
       ]}
     >
@@ -92,6 +96,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   rowNativeList: {},
+  rowNew: {
+    backgroundColor: appColors.listRowEmphasized,
+  },
   rowSelected: {
     backgroundColor: appColors.tintSoft,
   },

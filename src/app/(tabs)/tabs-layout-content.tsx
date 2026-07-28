@@ -3,8 +3,12 @@ import { StyleSheet, View } from 'react-native';
 
 import { appColors } from '@/components/ui/primitives';
 import { AddItemDestinationAccessory } from '@/features/items/add-item-destination-accessory/add-item-destination-accessory';
-import { TabBarVisibilityProvider, useTabBarVisibility } from '@/features/navigation/tab-bar-visibility-context/tab-bar-visibility-context';
+import {
+  TabBarVisibilityProvider,
+  useTabBarVisibility,
+} from '@/features/navigation/tab-bar-visibility-context/tab-bar-visibility-context';
 import { useAppTheme } from '@/lib/theme';
+import { usePathname } from 'expo-router';
 
 const styles = StyleSheet.create({
   root: {
@@ -24,6 +28,7 @@ export function TabsLayoutContent() {
 function TabsLayoutNavigator() {
   const {colors} = useAppTheme();
   const {isTabBarHidden} = useTabBarVisibility();
+  const pathname = usePathname();
 
   return (
     <View style={styles.root}>
@@ -44,9 +49,11 @@ function TabsLayoutNavigator() {
           },
         }}
       >
-        <NativeTabs.BottomAccessory>
-          <AddItemDestinationAccessory />
-        </NativeTabs.BottomAccessory>
+        {pathname.includes('/search') && (
+          <NativeTabs.BottomAccessory>
+            <AddItemDestinationAccessory />
+          </NativeTabs.BottomAccessory>
+        )}
         <NativeTabs.Trigger name="pantry">
           <NativeTabs.Trigger.Icon sf="house.fill" md="home" />
           <NativeTabs.Trigger.Label>Pantry</NativeTabs.Trigger.Label>

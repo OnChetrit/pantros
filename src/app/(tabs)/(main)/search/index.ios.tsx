@@ -1,13 +1,13 @@
 import { PantryItemNativeListRow } from '@/components/pantry/pantry-item-row/pantry-item-row';
 import { EmptyNotice } from '@/components/ui/primitives';
+import { createSearchSuggestionItem } from '@/features/search/search-item';
 import { matchPantryItems } from '@/lib/pantry-insights';
 import { useAppTheme } from '@/lib/theme';
 import { useAddItemDestination } from '@/state/add-item-destination-state';
 import { useAppContext } from '@/state/app-context';
 import { useWorkspaceState } from '@/state/workspace-state';
-import { ListItem } from '@expo/ui';
-import { Host, HStack, List, Section, Spacer, Text } from '@expo/ui/swift-ui';
-import { font, foregroundStyle, listStyle, scrollContentBackground } from '@expo/ui/swift-ui/modifiers';
+import { Host, List, Section } from '@expo/ui/swift-ui';
+import { listStyle, scrollContentBackground } from '@expo/ui/swift-ui/modifiers';
 import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import * as ReactNative from 'react-native';
@@ -203,6 +203,8 @@ export default function SearchScreen() {
     );
   }
 
+  const newItem = shouldShowCreateItem ? createSearchSuggestionItem(selectedPantry.id, trimmedQuery) : null;
+
   return (
     <>
       <Stack.Screen
@@ -279,17 +281,16 @@ export default function SearchScreen() {
           <List modifiers={[listStyle('grouped'), scrollContentBackground('visible')]}>
             <Section title={trimmedQuery ? 'Search Results' : 'All Items'}>
               {shouldShowCreateItem ? (
-                <ListItem onPress={handleCreateItem}>
-                  <HStack spacing={4}>
-                    <Text modifiers={[font({weight: 'semibold', size: 17}), foregroundStyle(colors.text)]}>
-                      {trimmedQuery}
-                    </Text>
-                    <Spacer />
-                    <Text modifiers={[font({size: 13}), foregroundStyle(colors.muted)]}>
-                      Create a new item with this name
-                    </Text>
-                  </HStack>
-                </ListItem>
+                <PantryItemNativeListRow
+                  key={newItem?.id}
+                  item={newItem!}
+                  isNewItem
+                  displayMode="pantry"
+                  isLast={visibleItems.length === 0}
+                  onPress={handleCreateItem}
+                  onEdit={handleCreateItem}
+                  onDelete={handleCreateItem}
+                />
               ) : null}
               {visibleItems.map((item, index) => (
                 <PantryItemNativeListRow

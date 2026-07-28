@@ -5,6 +5,7 @@ import {
   font,
   foregroundStyle,
   frame,
+  listRowBackground,
   onTapGesture,
   shapes,
   tag,
@@ -32,6 +33,7 @@ export function PantryItemSwipeRow({
   leftActionLabel,
   onLeftAction,
   onDelete,
+  isNewItem = false,
   isSelectionMode = false,
   isSelected = false,
   onToggleSelection,
@@ -69,7 +71,10 @@ export function PantryItemSwipeRow({
       modifiers={
         isSelectionMode && nativeListItem && !onToggleSelection
           ? [contentShape(shapes.rectangle())]
-          : [contentShape(shapes.rectangle()), onTapGesture(isSelectionMode ? (onToggleSelection ?? onPress) : onPress)]
+          : [
+              ...(isNewItem ? [listRowBackground(colors.grabber)] : []),
+              onTapGesture(isSelectionMode ? (onToggleSelection ?? onPress) : onPress),
+            ]
       }
     >
       <Text
@@ -156,6 +161,10 @@ export function PantryItemSwipeRow({
       </ContextMenu.Items>
     </ContextMenu>
   );
+
+  if (isNewItem) {
+    return rowContent;
+  }
 
   return (
     <SwipeActions modifiers={nativeListItem && !isCart ? [tag(item.id)] : undefined}>

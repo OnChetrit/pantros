@@ -15,6 +15,7 @@ export function PantryItemRow({
   leftActionLabel,
   onLeftAction,
   onDelete,
+  isNewItem = false,
   isSelectionMode = false,
   isSelected = false,
   onToggleSelection,
@@ -68,7 +69,8 @@ export function PantryItemRow({
       displayMode={displayMode}
       isLast={isLast}
       onPress={isSelectionMode ? (onToggleSelection ?? onPress) : onPress}
-      onLongPress={onStartSelection ? () => onStartSelection() : showActions}
+      onLongPress={isNewItem ? undefined : onStartSelection ? () => onStartSelection() : showActions}
+      isNewItem={isNewItem}
       isSelectionMode={isSelectionMode}
       isSelected={isSelected}
     />
