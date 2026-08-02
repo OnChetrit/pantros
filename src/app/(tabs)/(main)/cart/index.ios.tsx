@@ -28,6 +28,7 @@ export default function CartScreen() {
     clearSelection,
     dismissCompletionMessage,
     enterSelectionMode,
+    exitSelectionMode,
     isSelectionMode,
     selectAll,
     selectedItemIds,
@@ -85,26 +86,32 @@ export default function CartScreen() {
         }}
       />
       <Stack.Toolbar placement="left">
-        <Stack.Toolbar.Menu icon="arrow.up.arrow.down" title="Sort" hidden={isSelectionMode}>
-          {SORT_OPTIONS.map(option => (
-            <Stack.Toolbar.MenuAction
-              key={option.key}
-              isOn={option.key === sortOption}
-              onPress={() =>
-                router.replace({
-                  pathname: '/cart',
-                  params: {sort: option.key},
-                })
-              }
-            >
-              {option.label}
-            </Stack.Toolbar.MenuAction>
-          ))}
-        </Stack.Toolbar.Menu>
+        <Stack.Toolbar.Button onPress={exitSelectionMode} hidden={!isSelectionMode}>
+          Cancel
+        </Stack.Toolbar.Button>
+        {isSelectionMode ? null : (
+          <Stack.Toolbar.Menu icon="arrow.up.arrow.down" title="Sort">
+            {SORT_OPTIONS.map(option => (
+              <Stack.Toolbar.MenuAction
+                key={option.key}
+                isOn={option.key === sortOption}
+                onPress={() =>
+                  router.replace({
+                    pathname: '/cart',
+                    params: {sort: option.key},
+                  })
+                }
+              >
+                {option.label}
+              </Stack.Toolbar.MenuAction>
+            ))}
+          </Stack.Toolbar.Menu>
+        )}
       </Stack.Toolbar>
       <Stack.Toolbar placement="right">
         <Stack.Toolbar.Button
           hidden={!isSelectionMode}
+          variant="prominent"
           onPress={() => {
             animateListLayout();
             if (allSelected) {
@@ -198,7 +205,7 @@ export default function CartScreen() {
                 </View>
               </ListItem>
             ) : null}
-            {/* {checkoutProgress.completionMessage ? (
+            {checkoutProgress.completionMessage ? (
               <ListItem key="checkout-success">
                 <View style={styles.noticeRow}>
                   <CartCheckoutNotice
@@ -208,7 +215,7 @@ export default function CartScreen() {
                   />
                 </View>
               </ListItem>
-            ) : null} */}
+            ) : null}
             <Section title="">
               {itemsInCart.length > 0
                 ? unselectedItems.map((item, index) => (
