@@ -1,4 +1,4 @@
-import { Host, Picker } from '@expo/ui';
+import { SegmentedControl } from '@expo/ui/community/segmented-control';
 
 type ExpirationMode = 'manual' | 'relative';
 
@@ -9,15 +9,11 @@ type ItemExpirationModePickerProps = {
 
 export function ItemExpirationModePicker({mode, onChange}: ItemExpirationModePickerProps) {
   return (
-    <Host matchContents>
-      <Picker
-        selectedValue={mode}
-        onValueChange={selection => onChange(selection as ExpirationMode)}
-        appearance="menu"
-      >
-        <Picker.Item label="Manual" value="manual" />
-        <Picker.Item label="Relative" value="relative" />
-      </Picker>
-    </Host>
+    <SegmentedControl
+      style={{width: '100%'}}
+      values={['Manual', 'Relative']}
+      selectedIndex={mode === 'manual' ? 0 : 1}
+      onChange={({nativeEvent}) => onChange(nativeEvent.selectedSegmentIndex === 0 ? 'manual' : 'relative')}
+    />
   );
 }

@@ -1,5 +1,16 @@
-import { Button, ContextMenu, HStack, Spacer, SwipeActions, Text, VStack } from '@expo/ui/swift-ui';
-import { background, font, foregroundStyle, frame, onTapGesture, shapes, tint } from '@expo/ui/swift-ui/modifiers';
+import { Button, ContextMenu, Divider, HStack, Spacer, SwipeActions, Text, VStack } from '@expo/ui/swift-ui';
+import {
+  background,
+  contentShape,
+  font,
+  foregroundStyle,
+  frame,
+  listRowBackground,
+  onTapGesture,
+  shapes,
+  tag,
+  tint,
+} from '@expo/ui/swift-ui/modifiers';
 import { Alert } from 'react-native';
 
 import { triggerMediumImpact } from '@/lib/haptics';
@@ -22,10 +33,12 @@ export function PantryItemSwipeRow({
   leftActionLabel,
   onLeftAction,
   onDelete,
+  isNewItem = false,
   isSelectionMode = false,
   isSelected = false,
   onToggleSelection,
   onStartSelection,
+  nativeListItem = false,
 }: PantryItemSwipeRowProps) {
   const hasLeftAction = Boolean(onLeftAction && leftActionLabel);
   const isCart = displayMode === 'cart';
@@ -49,17 +62,30 @@ export function PantryItemSwipeRow({
     ]);
   };
 
+  const contextMenuItemModifiers = [foregroundStyle(colors.text), tint(colors.text)];
+
   const rowContent = (
     <HStack
       alignment="center"
       spacing={12}
-      modifiers={[onTapGesture(isSelectionMode ? (onToggleSelection ?? onPress) : onPress)]}
+      modifiers={
+        [
+          ...(isNewItem ? [listRowBackground(colors.grabber)] : []),
+          // SwiftUI only hit-tests visible subviews by default, so taps in the
+          // spacing/trailing area would miss the row. Make the whole row shape
+          // interactive while retaining native list selection handling.
+          contentShape(shapes.rectangle()),
+          ...(isSelectionMode && nativeListItem && !onToggleSelection
+            ? []
+            : [onTapGesture(isSelectionMode ? (onToggleSelection ?? onPress) : onPress)]),
+        ]
+      }
     >
       <Text
         modifiers={[
           font({weight: 'bold', size: 15}),
           frame({width: 48, height: 48}),
-          background(isSelected && isSelectionMode ? '#D9DCE1' : '#EAF2FF', shapes.roundedRectangle({cornerRadius: 8})),
+          background(colors.tintSoft, shapes.roundedRectangle({cornerRadius: 8})),
         ]}
       >
         {item.name.charAt(0).toUpperCase()}
@@ -97,13 +123,19 @@ export function PantryItemSwipeRow({
       <ContextMenu.Trigger>{rowContent}</ContextMenu.Trigger>
 
       <ContextMenu.Items>
-        <Button label="Edit item" systemImage="pencil" onPress={() => handleWithHaptics(onEdit)} />
+        <Button
+          label="Edit item"
+          systemImage="pencil"
+          onPress={() => handleWithHaptics(onEdit)}
+          modifiers={contextMenuItemModifiers}
+        />
 
         {!isSelectionMode && onStartSelection ? (
           <Button
             label="Select"
             systemImage="checkmark.circle"
             onPress={() => handleWithHaptics(onStartSelection)}
+            modifiers={contextMenuItemModifiers}
           />
         ) : null}
 
@@ -111,6 +143,7 @@ export function PantryItemSwipeRow({
           label={isCart ? 'Update quantity' : 'Review expiration'}
           systemImage={isCart ? 'number.circle' : 'clock'}
           onPress={() => handleWithHaptics(isCart ? onReviewQuantity : onReviewExpiration)}
+          modifiers={contextMenuItemModifiers}
         />
 
         {hasLeftAction ? (
@@ -118,16 +151,27 @@ export function PantryItemSwipeRow({
             label={leftActionLabel}
             systemImage={getCartActionSystemImage(item)}
             onPress={() => handleWithHaptics(onLeftAction)}
+            modifiers={contextMenuItemModifiers}
           />
         ) : null}
-
-        <Button label="Delete item" role="destructive" systemImage="trash" onPress={confirmDelete} />
+        <Divider />
+        <Button
+          label="Delete item"
+          role="destructive"
+          systemImage="trash"
+          onPress={confirmDelete}
+          modifiers={[tint(colors.danger)]}
+        />
       </ContextMenu.Items>
     </ContextMenu>
   );
 
+  if (isNewItem) {
+    return rowContent;
+  }
+
   return (
-    <SwipeActions>
+    <SwipeActions modifiers={nativeListItem && !isCart ? [tag(item.id)] : undefined}>
       {contextMenu}
 
       {hasLeftAction ? (

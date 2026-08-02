@@ -1,17 +1,15 @@
 import { Stack } from 'expo-router';
-import { KeyboardAvoidingView, StyleSheet } from 'react-native';
 
-import { useAppTheme, useThemedStyles } from '@/lib/theme';
+import { useAppTheme } from '@/lib/theme';
 
 import { ItemFormBody, type ItemFormScreenProps, useItemFormController } from './item-form-screen.shared';
 
 export function ItemFormScreen(props: ItemFormScreenProps) {
-  const styles = useThemedStyles(createStyles);
   const controller = useItemFormController(props);
   const {colors} = useAppTheme();
 
   return (
-    <KeyboardAvoidingView behavior="padding" style={styles.screen}>
+    <>
       <Stack.Screen
         options={{
           title: controller.title,
@@ -33,7 +31,6 @@ export function ItemFormScreen(props: ItemFormScreenProps) {
           onPress={controller.selectedPantry ? () => void controller.handleSave() : controller.handleMissingPantry}
           disabled={controller.itemBusy || (Boolean(controller.selectedPantry) && !controller.canSave)}
           tintColor={colors.tint}
-          style={{color: colors.textInverse}}
           variant="done"
         >
           {controller.item ? 'Save' : 'Add'}
@@ -59,14 +56,6 @@ export function ItemFormScreen(props: ItemFormScreenProps) {
         parsedQuantity={controller.parsedQuantity}
         selectedPantry={controller.selectedPantry}
       />
-    </KeyboardAvoidingView>
+    </>
   );
 }
-
-const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
-  StyleSheet.create({
-    screen: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
-  });

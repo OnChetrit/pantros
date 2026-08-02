@@ -32,11 +32,21 @@ import { getCartItems } from '@/lib/pantry-insights';
 import { useAppTheme } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
 
+import { CartCheckoutSheet as AndroidCartCheckoutSheet } from './cart-checkout-sheet.android';
+
 const CARD_STAGGER_MS = 32;
 const MAX_CARD_STAGGER_STEPS = 6;
 const CARD_LAYOUT_TRANSITION = LinearTransition.duration(180).easing(Easing.out(Easing.quad));
 
 export function CartCheckoutSheet() {
+  if (ReactNative.Platform.OS !== 'ios') {
+    return <AndroidCartCheckoutSheet />;
+  }
+
+  return <IosCartCheckoutSheet />;
+}
+
+function IosCartCheckoutSheet() {
   const {pantryItems} = useAppContext();
   const {colors} = useAppTheme();
   const {

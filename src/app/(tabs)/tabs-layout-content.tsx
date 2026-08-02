@@ -2,8 +2,13 @@ import { NativeTabs } from 'expo-router/unstable-native-tabs';
 import { StyleSheet, View } from 'react-native';
 
 import { appColors } from '@/components/ui/primitives';
-import { TabBarVisibilityProvider, useTabBarVisibility } from '@/features/navigation/tab-bar-visibility-context/tab-bar-visibility-context';
+import { AddItemDestinationAccessory } from '@/features/items/add-item-destination-accessory/add-item-destination-accessory';
+import {
+  TabBarVisibilityProvider,
+  useTabBarVisibility,
+} from '@/features/navigation/tab-bar-visibility-context/tab-bar-visibility-context';
 import { useAppTheme } from '@/lib/theme';
+import { usePathname } from 'expo-router';
 
 const styles = StyleSheet.create({
   root: {
@@ -23,6 +28,7 @@ export function TabsLayoutContent() {
 function TabsLayoutNavigator() {
   const {colors} = useAppTheme();
   const {isTabBarHidden} = useTabBarVisibility();
+  const pathname = usePathname();
 
   return (
     <View style={styles.root}>
@@ -43,12 +49,17 @@ function TabsLayoutNavigator() {
           },
         }}
       >
+        {pathname.includes('/search') && (
+          <NativeTabs.BottomAccessory>
+            <AddItemDestinationAccessory />
+          </NativeTabs.BottomAccessory>
+        )}
         <NativeTabs.Trigger name="pantry">
-          <NativeTabs.Trigger.Icon sf="house.fill" />
+          <NativeTabs.Trigger.Icon sf="house.fill" md="home" />
           <NativeTabs.Trigger.Label>Pantry</NativeTabs.Trigger.Label>
         </NativeTabs.Trigger>
         <NativeTabs.Trigger name="cart">
-          <NativeTabs.Trigger.Icon sf="cart.fill" />
+          <NativeTabs.Trigger.Icon sf="cart.fill" md="shopping_cart" />
           <NativeTabs.Trigger.Label>Cart</NativeTabs.Trigger.Label>
         </NativeTabs.Trigger>
         <NativeTabs.Trigger name="search" role="search">
@@ -57,6 +68,7 @@ function TabsLayoutNavigator() {
               default: 'plus.magnifyingglass',
               selected: 'plus.magnifyingglass',
             }}
+            md="search"
           />
           <NativeTabs.Trigger.Label>Search</NativeTabs.Trigger.Label>
         </NativeTabs.Trigger>

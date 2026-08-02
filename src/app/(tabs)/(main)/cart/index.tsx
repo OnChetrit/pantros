@@ -1,4 +1,3 @@
-import { Host, RNHostView, Row } from '@expo/ui';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { FlatList, LayoutAnimation, Platform, StyleSheet, UIManager, View } from 'react-native';
@@ -30,7 +29,6 @@ export default function CartScreen() {
     clearSelection,
     dismissCompletionMessage,
     enterSelectionMode,
-    exitSelectionMode,
     isSelectionMode,
     selectAll,
     selectedItemIds,
@@ -75,9 +73,7 @@ export default function CartScreen() {
       <Stack.Screen
         options={{
           headerLeft: () =>
-            isSelectionMode ? (
-              <CartHeaderAction label="Cancel" onPress={exitSelectionMode} />
-            ) : (
+            isSelectionMode ? null : (
               <PantryFilterMenu sortOption={sortOption} sheetHref="/cart/sort" />
             ),
           title: isSelectionMode ? `${selectedCount} selected` : 'Cart',
@@ -85,25 +81,18 @@ export default function CartScreen() {
             isSelectionMode ? (
               <CartHeaderAction
                 label={allSelected ? 'Clear' : 'Select All'}
-                emphasized
                 onPress={() => (allSelected ? clearSelection() : selectAll(itemsInCart.map((item) => item.id)))}
               />
             ) : (
-              <Host style={styles.headerActions} matchContents>
-                <Row alignment="center" spacing={8}>
-                  <RNHostView matchContents>
-                    <CartHeaderAction
-                      label="Select"
-                      emphasized
-                      disabled={itemsInCart.length === 0}
-                      onPress={() => enterSelectionMode()}
-                    />
-                  </RNHostView>
-                  <RNHostView matchContents>
-                    <AvatarSidebarButton />
-                  </RNHostView>
-                </Row>
-              </Host>
+              <View style={styles.headerActions}>
+                <CartHeaderAction
+                  label="Select"
+                  emphasized
+                  disabled={itemsInCart.length === 0}
+                  onPress={() => enterSelectionMode()}
+                />
+                <AvatarSidebarButton />
+              </View>
             ),
         }}
       />
@@ -200,8 +189,8 @@ export default function CartScreen() {
             />
           )}
         />
+        <CartCheckoutSheet />
       </View>
-      <CartCheckoutSheet />
     </>
   );
 }
@@ -210,6 +199,7 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
   StyleSheet.create({
     screen: {
       flex: 1,
+      position: 'relative',
       backgroundColor: colors.background,
     },
     list: {
@@ -236,7 +226,11 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
       paddingHorizontal: 16,
       paddingTop: 6,
     },
-    headerActions: {},
+    headerActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
     selectedGroup: {
       marginTop: 8,
       paddingTop: 10,

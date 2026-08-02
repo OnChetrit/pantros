@@ -13,6 +13,7 @@
     "run:android": "expo run:android",
     "run:ios": "expo run:ios",
     "eas:build:ios": "bunx eas-cli build --platform ios --profile production",
+    "eas:deploy:testflight": "bunx eas-cli build --platform ios --profile production --submit",
     "eas:build:android": "bunx eas-cli build --platform android --profile production",
     "eas:build:preview:ios": "bunx eas-cli build --platform ios --profile preview",
     "eas:build:preview:android": "bunx eas-cli build --platform android --profile preview",
@@ -22,6 +23,7 @@
   "dependencies": {
     "@expo/ui": "~56.0.20",
     "@expo/vector-icons": "^15.0.2",
+    "@quidone/react-native-wheel-picker": "^1.7.1",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-community/datetimepicker": "9.1.0",
     "@react-native-picker/picker": "2.11.4",

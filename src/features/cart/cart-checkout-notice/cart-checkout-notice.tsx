@@ -1,5 +1,5 @@
 import { Button, Host, RNHostView, Row, Spacer, Text } from '@expo/ui';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Text as ReactNativeText, View } from 'react-native';
 
 import { useAppTheme } from '@/lib/theme';
 
@@ -29,7 +29,7 @@ export function CartCheckoutNotice({
       <Row alignment="center" spacing={12}>
         <RNHostView matchContents>
           <View style={styles.noticeBannerCopy}>
-            <Text style={messageStyle as never}>{message}</Text>
+            <ReactNativeText style={messageStyle as never}>{message}</ReactNativeText>
           </View>
         </RNHostView>
         <Spacer flexible />

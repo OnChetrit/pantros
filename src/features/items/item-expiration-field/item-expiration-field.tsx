@@ -1,11 +1,15 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useEffect, useMemo, useState } from 'react';
-import { Platform, StyleSheet, Switch, Text, View } from 'react-native';
+import { StyleSheet, Switch, Text, View } from 'react-native';
 
 import { useAppTheme, useThemedStyles } from '@/lib/theme';
 
 import { ItemExpirationModePicker } from '../item-expiration-mode-picker/item-expiration-mode-picker';
-import { ItemRelativePicker } from './item-relative-picker';
+import {
+  formatRelativeDuration,
+  relativeDurationInDays,
+  RelativeDatePickerRow,
+} from './item-relative-picker';
 
 type ExpirationMode = 'manual' | 'relative';
 
@@ -104,6 +108,17 @@ export function ItemExpirationField({value, onChange}: {value: string; onChange:
   }, [onChange, resolvedDate]);
 
   const previewLabel = resolvedDate ? formatDisplayDate(resolvedDate) : 'No expiration date';
+  const previewRelativeState =
+    mode === 'relative'
+      ? {days: relativeDays, weeks: relativeWeeks, months: relativeMonths}
+      : initialRelativeState(resolvedDate);
+  const previewRelative = formatRelativeDuration(
+    previewRelativeState.days,
+    previewRelativeState.weeks,
+    previewRelativeState.months,
+  );
+  const isCloseExpiration =
+    relativeDurationInDays(previewRelativeState.days, previewRelativeState.weeks, previewRelativeState.months) < 7;
 
   const enableMode = (nextMode: ExpirationMode) => {
     setIsEnabled(true);
@@ -133,8 +148,16 @@ export function ItemExpirationField({value, onChange}: {value: string; onChange:
       </View>
       {isEnabled ? (
         <View style={styles.previewCard}>
-          <Text style={styles.previewLabel}>Selected date</Text>
-          <Text style={styles.previewValue}>{previewLabel}</Text>
+          <View style={styles.previewRow}>
+            <Text style={[styles.previewValue, {color: isCloseExpiration ? colors.warning : colors.tint}]}>
+              {previewLabel}
+            </Text>
+            <Text
+              style={[styles.previewRelative, {color: isCloseExpiration ? colors.danger : colors.accent}]}
+            >
+              {previewRelative}
+            </Text>
+          </View>
         </View>
       ) : null}
 
@@ -145,7 +168,7 @@ export function ItemExpirationField({value, onChange}: {value: string; onChange:
           <DateTimePicker
             value={manualDate}
             mode="date"
-            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            display="default"
             onValueChange={(_, selectedDate) => {
               if (selectedDate) {
                 setManualDate(selectedDate);
@@ -160,13 +183,17 @@ export function ItemExpirationField({value, onChange}: {value: string; onChange:
       ) : null}
 
       {isEnabled && mode === 'relative' ? (
-        <View style={styles.controlBlock}>
-          <View style={styles.relativeRow}>
-            <ItemRelativePicker label="D" value={relativeDays} options={dayOptions} onChange={setRelativeDays} />
-            <ItemRelativePicker label="W" value={relativeWeeks} options={weekOptions} onChange={setRelativeWeeks} />
-            <ItemRelativePicker label="M" value={relativeMonths} options={monthOptions} onChange={setRelativeMonths} />
-          </View>
-        </View>
+        <RelativeDatePickerRow
+          days={relativeDays}
+          weeks={relativeWeeks}
+          months={relativeMonths}
+          dayOptions={dayOptions}
+          weekOptions={weekOptions}
+          monthOptions={monthOptions}
+          onChangeDays={setRelativeDays}
+          onChangeWeeks={setRelativeWeeks}
+          onChangeMonths={setRelativeMonths}
+        />
       ) : null}
     </View>
   );
@@ -204,16 +231,21 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
       borderColor: colors.border,
       gap: 4,
     },
-    previewLabel: {
-      color: colors.muted,
-      fontSize: 12,
-      textTransform: 'uppercase',
-      letterSpacing: 0.5,
-    },
     previewValue: {
-      color: colors.text,
       fontSize: 16,
       fontWeight: '800',
+      flexShrink: 1,
+    },
+    previewRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: 16,
+    },
+    previewRelative: {
+      fontSize: 16,
+      fontWeight: '800',
+      flexShrink: 0,
     },
     controlBlock: {
       gap: 12,
@@ -234,9 +266,5 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
       alignSelf: 'stretch',
       marginLeft: 0,
       marginRight: 0,
-    },
-    relativeRow: {
-      flexDirection: 'row',
-      gap: 10,
     },
   });

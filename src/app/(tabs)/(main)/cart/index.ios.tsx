@@ -1,9 +1,9 @@
 import { ListItem } from '@expo/ui';
 import { Host, List, Section } from '@expo/ui/swift-ui';
-import { listStyle } from '@expo/ui/swift-ui/modifiers';
+import { listStyle, scrollContentBackground } from '@expo/ui/swift-ui/modifiers';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo } from 'react';
-import { Image, LayoutAnimation, StyleSheet, Text, View } from 'react-native';
+import { Image, LayoutAnimation, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { PantryItemNativeListRow } from '@/components/pantry/pantry-item-row/pantry-item-row';
 import { EmptyNotice } from '@/components/ui/primitives';
@@ -15,6 +15,7 @@ import { parsePantrySortOption, SORT_OPTIONS } from '@/features/pantry/pantry-so
 import { getCartItems } from '@/lib/pantry-insights';
 import { useAppTheme } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
+import { useWorkspaceState } from '@/state/workspace-state';
 
 const fullCartIllustration = require('../../../../../assets/images/cart-full-empty-state-transparent.png');
 const emptyCartIllustration = require('../../../../../assets/images/cart-empty-state-transparent.png');
@@ -34,6 +35,7 @@ export default function CartScreen() {
     toggleItemSelection,
   } = useCartCheckout();
   const {colors, isDark} = useAppTheme();
+  const {profile} = useWorkspaceState();
   const router = useRouter();
   const {sort} = useLocalSearchParams<{sort?: string | string[]}>();
   const sortOption = parsePantrySortOption(sort);
@@ -129,14 +131,30 @@ export default function CartScreen() {
         >
           Select
         </Stack.Toolbar.Button>
-        <Stack.Toolbar.Button
-          icon="person.crop.circle"
-          onPress={() => router.push('/account/menu')}
-          hidden={isSelectionMode}
-        />
+        {profile?.avatarUrl ? (
+          <Stack.Toolbar.View hidden={isSelectionMode}>
+            <View style={styles.accountToolbarView}>
+              <Pressable
+                accessibilityLabel="Open account settings"
+                accessibilityRole="button"
+                onPress={() => router.push('/account/menu')}
+                style={styles.accountToolbarButton}
+              >
+                <Image source={{uri: profile.avatarUrl}} style={styles.accountAvatar} />
+              </Pressable>
+            </View>
+          </Stack.Toolbar.View>
+        ) : (
+          <Stack.Toolbar.Button
+            accessibilityLabel="Open account settings"
+            icon="person.crop.circle"
+            onPress={() => router.push('/account/menu')}
+            hidden={isSelectionMode}
+          />
+        )}
       </Stack.Toolbar>
       {itemsInCart.length === 0 ? (
-        <View style={[styles.emptyStateScreen, {backgroundColor: colors.background}]}>
+        <View style={[styles.emptyStateScreen]}>
           <View style={styles.emptyStateContent}>
             <Image source={emptyCartIllustration} style={styles.illustration} resizeMode="contain" />
             <View style={styles.emptyStateCopy}>
@@ -148,7 +166,7 @@ export default function CartScreen() {
           </View>
         </View>
       ) : itemsInCart.length > 0 && unselectedItems.length === 0 ? (
-        <View style={[styles.allSelectedScreen, {backgroundColor: colors.background}]}>
+        <View style={[styles.allSelectedScreen]}>
           {checkoutProgress.errorMessage ? (
             <View style={styles.noticeRow}>
               <CartCheckoutNotice tone="error" message={checkoutProgress.errorMessage} onDismiss={clearCheckoutError} />
@@ -174,8 +192,8 @@ export default function CartScreen() {
           </View>
         </View>
       ) : (
-        <Host colorScheme={isDark ? 'dark' : 'light'} style={[styles.host, {backgroundColor: colors.background}]}>
-          <List modifiers={[listStyle('insetGrouped')]}>
+        <Host colorScheme={isDark ? 'dark' : 'light'} style={[styles.host]}>
+          <List modifiers={[listStyle('plain'), scrollContentBackground('visible')]}>
             {checkoutProgress.errorMessage ? (
               <ListItem key="checkout-error">
                 <View style={styles.noticeRow}>
@@ -253,6 +271,21 @@ export default function CartScreen() {
 const styles = StyleSheet.create({
   host: {
     flex: 1,
+  },
+  accountToolbarView: {
+    width: 34,
+    height: 34,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  accountToolbarButton: {
+    width: 34,
+    height: 34,
+  },
+  accountAvatar: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
   },
   emptyScreen: {
     flex: 1,

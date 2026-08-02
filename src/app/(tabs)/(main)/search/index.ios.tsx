@@ -1,21 +1,35 @@
 import { PantryItemNativeListRow } from '@/components/pantry/pantry-item-row/pantry-item-row';
 import { EmptyNotice } from '@/components/ui/primitives';
+import { createSearchSuggestionItem } from '@/features/search/search-item';
 import { matchPantryItems } from '@/lib/pantry-insights';
 import { useAppTheme } from '@/lib/theme';
+import { useAddItemDestination } from '@/state/add-item-destination-state';
 import { useAppContext } from '@/state/app-context';
-import { ListItem } from '@expo/ui';
-import { Host, HStack, List, Section, Spacer, Text } from '@expo/ui/swift-ui';
-import { font, foregroundStyle, listStyle } from '@expo/ui/swift-ui/modifiers';
+import { useWorkspaceState } from '@/state/workspace-state';
+import { Host, List, Section } from '@expo/ui/swift-ui';
+import { listStyle, scrollContentBackground } from '@expo/ui/swift-ui/modifiers';
 import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import type { SearchBarCommands } from 'react-native-screens';
 import * as ReactNative from 'react-native';
+import type { SearchBarCommands } from 'react-native-screens';
 
 const searchEmptyIllustration = require('../../../../../assets/images/search-empty-state-transparent.png');
 
 export default function SearchScreen() {
-  const {deleteItem, moveItemToCart, moveItemToPantry, pantryCarts, pantryItems, selectedPantry} = useAppContext();
+  const {
+    addItem,
+    deleteItem,
+    itemBusy,
+    moveItemToCart,
+    moveItemToPantry,
+    pantryCarts,
+    pantryItems,
+    selectedPantry,
+    selectedPantryId,
+  } = useAppContext();
   const {colors, isDark} = useAppTheme();
+  const {profile} = useWorkspaceState();
+  const {destination} = useAddItemDestination();
   const router = useRouter();
   const searchBarRef = useRef<SearchBarCommands | null>(null);
   const {entry, q} = useLocalSearchParams<{entry?: string | string[]; q?: string | string[]}>();
@@ -58,6 +72,69 @@ export default function SearchScreen() {
     }
 
     router.push(`/items/new?name=${encodeURIComponent(trimmedQuery)}`);
+  };
+
+  const handleSearchSubmit = async (submittedQuery: string) => {
+    const submittedTrimmedQuery = submittedQuery.trim();
+
+    if (!submittedTrimmedQuery || !selectedPantryId || itemBusy) {
+      return;
+    }
+
+    const submittedResults = matchPantryItems(pantryItems, submittedQuery);
+
+    if (submittedResults.exactMatch) {
+      const existingItem = submittedResults.exactMatch;
+
+      if (existingItem.isInCart) {
+        ReactNative.Alert.alert('Already in Cart', `${existingItem.name} is already waiting in your cart.`);
+        return;
+      }
+
+      if (!primaryCart) {
+        ReactNative.Alert.alert('No cart available', 'Create a cart before sending items to purchase.');
+        return;
+      }
+
+      try {
+        animateListLayout();
+        await moveItemToCart(existingItem.id, primaryCart.id);
+        searchBarRef.current?.setText('');
+        router.setParams({q: undefined, entry: undefined, nonce: undefined});
+      } catch (error) {
+        ReactNative.Alert.alert(
+          'Unable to add item',
+          error instanceof Error ? error.message : 'Try again in a moment.'
+        );
+      }
+      return;
+    }
+
+    if (destination === 'cart' && !primaryCart) {
+      ReactNative.Alert.alert('No cart available', 'Create a cart before adding new items to the cart.');
+      return;
+    }
+
+    try {
+      await addItem({
+        pantryId: selectedPantryId,
+        name: submittedTrimmedQuery,
+        barcode: null,
+        image: null,
+        expirationDate: null,
+        isInCart: destination === 'cart',
+        cartId: destination === 'cart' ? primaryCart?.id ?? null : null,
+        quantity: 1,
+      });
+      searchBarRef.current?.setText('');
+      router.setParams({
+        q: undefined,
+        entry: undefined,
+        nonce: undefined,
+      });
+    } catch (error) {
+      ReactNative.Alert.alert('Unable to create item', error instanceof Error ? error.message : 'Try again in a moment.');
+    }
   };
 
   const handleScanBarcode = () => {
@@ -110,6 +187,9 @@ export default function SearchScreen() {
                   nonce: undefined,
                 });
               },
+              onSearchButtonPress: event => {
+                void handleSearchSubmit(event.nativeEvent.text);
+              },
             },
           }}
         />
@@ -122,6 +202,8 @@ export default function SearchScreen() {
       </>
     );
   }
+
+  const newItem = shouldShowCreateItem ? createSearchSuggestionItem(selectedPantry.id, trimmedQuery) : null;
 
   return (
     <>
@@ -149,15 +231,37 @@ export default function SearchScreen() {
                 nonce: undefined,
               });
             },
+            onSearchButtonPress: event => {
+              void handleSearchSubmit(event.nativeEvent.text);
+            },
           },
         }}
       />
       <Stack.Toolbar placement="right">
         <Stack.Toolbar.Button icon="barcode.viewfinder" onPress={handleScanBarcode} />
-        <Stack.Toolbar.Button icon="person.crop.circle" onPress={() => router.push('/account/menu')} />
+        {profile?.avatarUrl ? (
+          <Stack.Toolbar.View>
+            <ReactNative.View style={styles.accountToolbarView}>
+              <ReactNative.Pressable
+                accessibilityLabel="Open account settings"
+                accessibilityRole="button"
+                onPress={() => router.push('/account/menu')}
+                style={styles.accountToolbarButton}
+              >
+                <ReactNative.Image source={{uri: profile.avatarUrl}} style={styles.accountAvatar} />
+              </ReactNative.Pressable>
+            </ReactNative.View>
+          </Stack.Toolbar.View>
+        ) : (
+          <Stack.Toolbar.Button
+            accessibilityLabel="Open account settings"
+            icon="person.crop.circle"
+            onPress={() => router.push('/account/menu')}
+          />
+        )}
       </Stack.Toolbar>
       {visibleItems.length === 0 && !shouldShowCreateItem ? (
-        <ReactNative.View style={[styles.emptyStateScreen, {backgroundColor: colors.background}]}>
+        <ReactNative.View style={[styles.emptyStateScreen, {backgroundColor: colors.card}]}>
           <ReactNative.View style={styles.emptyStateContent}>
             <ReactNative.Image source={searchEmptyIllustration} style={styles.illustration} resizeMode="contain" />
             <ReactNative.View style={styles.emptyStateCopy}>
@@ -173,27 +277,26 @@ export default function SearchScreen() {
           </ReactNative.View>
         </ReactNative.View>
       ) : (
-        <Host colorScheme={isDark ? 'dark' : 'light'} style={[styles.host, {backgroundColor: colors.background}]}>
-          <List modifiers={[listStyle('insetGrouped')]}>
+        <Host colorScheme={isDark ? 'dark' : 'light'} style={[styles.host, {backgroundColor: colors.card}]}>
+          <List modifiers={[listStyle('grouped'), scrollContentBackground('visible')]}>
             <Section title={trimmedQuery ? 'Search Results' : 'All Items'}>
               {shouldShowCreateItem ? (
-                <ListItem onPress={handleCreateItem}>
-                  <HStack spacing={4}>
-                    <Text modifiers={[font({weight: 'semibold', size: 17}), foregroundStyle(colors.text)]}>
-                      {trimmedQuery}
-                    </Text>
-                    <Spacer />
-                    <Text modifiers={[font({size: 13}), foregroundStyle(colors.muted)]}>
-                      Create a new item with this name
-                    </Text>
-                  </HStack>
-                </ListItem>
+                <PantryItemNativeListRow
+                  key={newItem?.id}
+                  item={newItem!}
+                  isNewItem
+                  displayMode="pantry"
+                  isLast={visibleItems.length === 0}
+                  onPress={handleCreateItem}
+                  onEdit={handleCreateItem}
+                  onDelete={handleCreateItem}
+                />
               ) : null}
               {visibleItems.map((item, index) => (
                 <PantryItemNativeListRow
                   key={item.id}
                   item={item}
-                  displayMode="pantry"
+                  displayMode={item.isInCart ? 'cart' : 'pantry'}
                   isLast={index === visibleItems.length - 1}
                   onPress={() => router.push(`/items/${item.id}`)}
                   onEdit={() => router.push(`/items/${item.id}`)}
@@ -215,6 +318,21 @@ export default function SearchScreen() {
 const styles = ReactNative.StyleSheet.create({
   host: {
     flex: 1,
+  },
+  accountToolbarView: {
+    width: 34,
+    height: 34,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  accountToolbarButton: {
+    width: 34,
+    height: 34,
+  },
+  accountAvatar: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
   },
   emptyScreen: {
     flex: 1,

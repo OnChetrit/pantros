@@ -1,40 +1,40 @@
-import { Button, Host, RNHostView } from '@expo/ui';
 import { Ionicons } from '@expo/vector-icons';
-import { StyleSheet } from 'react-native';
+import { Pressable, StyleSheet } from 'react-native';
 
 import { appColors } from '@/components/ui/primitives';
+import type { AuthProviderButtonProps } from './auth-provider-button.types';
 
-export function AuthProviderButton({
-  icon,
-  label,
-  onPress,
-  disabled,
-}: {
-  icon: keyof typeof Ionicons.glyphMap;
-  label: string;
-  onPress: () => void;
-  disabled: boolean;
-}) {
+export function AuthProviderButton({icon, label, onPress, disabled}: AuthProviderButtonProps) {
   return (
-    <Host>
-      <Button disabled={disabled} onPress={onPress} variant="outlined" style={styles.providerIconButton as never}>
-        <RNHostView matchContents>
-          <Ionicons name={icon} size={18} color={appColors.text} />
-        </RNHostView>
-      </Button>
-    </Host>
+    <Pressable
+      accessibilityLabel={label}
+      accessibilityRole="button"
+      disabled={disabled}
+      onPress={onPress}
+      style={({pressed}) => [styles.providerButton, pressed && styles.pressedButton, disabled && styles.disabledButton]}
+    >
+      <Ionicons name={icon} size={20} color={appColors.text} />
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  providerIconButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 16,
+  providerButton: {
+    width: 52,
+    height: 52,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: appColors.background,
+    flexShrink: 0,
+    borderRadius: 16,
+    borderCurve: 'continuous',
     borderWidth: 1,
     borderColor: appColors.border,
+    backgroundColor: appColors.background,
+  },
+  pressedButton: {
+    opacity: 0.6,
+  },
+  disabledButton: {
+    opacity: 0.45,
   },
 });

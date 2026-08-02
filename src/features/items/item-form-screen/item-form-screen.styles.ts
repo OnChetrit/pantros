@@ -9,7 +9,6 @@ export const createStyles = (colors: import('@/lib/theme').AppThemeColors) =>
     content: {
       paddingHorizontal: 16,
       paddingTop: 8,
-      paddingBottom: 48,
       gap: 10,
     },
     heroRow: {

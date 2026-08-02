@@ -1,6 +1,7 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyNotice, NumberWheelInput } from '@/components/ui/primitives';
 import { useAppTheme } from '@/lib/theme';
@@ -43,6 +44,7 @@ function CartQuantityFormSheetContent({
   updateItem: ReturnType<typeof useAppContext>['updateItem'];
 }) {
   const {colors} = useAppTheme();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const [quantity, setQuantity] = useState(item.quantity);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -96,7 +98,10 @@ function CartQuantityFormSheetContent({
           </Stack.Toolbar>
         </>
       ) : null}
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.screen}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={[styles.screen, {paddingBottom: Math.max(insets.bottom, 20)}]}
+      >
         <View style={[styles.wheelCard, {backgroundColor: colors.card, borderColor: colors.border}]}>
           <NumberWheelInput value={quantity} options={quantityOptions} onChange={setQuantity} disabled={itemBusy} />
         </View>
@@ -113,8 +118,7 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 20,
+    paddingTop: 72,
   },
   content: {
     flex: 1,
@@ -124,7 +128,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 24,
     paddingHorizontal: 12,
-    paddingVertical: 18,
+    paddingVertical: 10,
   },
   footer: {
     gap: 12,

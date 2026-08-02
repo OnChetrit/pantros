@@ -8,10 +8,11 @@ type NumberWheelInputProps = {
   options: number[];
   onChange: (value: number) => void;
   suffix?: string;
+  pickerWidth?: number;
   disabled?: boolean;
 };
 
-export function NumberWheelInput({value, options, onChange, suffix, disabled = false}: NumberWheelInputProps) {
+export function NumberWheelInput({value, options, onChange, suffix, pickerWidth = 85, disabled = false}: NumberWheelInputProps) {
   const {colors} = useAppTheme();
 
   return (
@@ -26,7 +27,7 @@ export function NumberWheelInput({value, options, onChange, suffix, disabled = f
             }
           }}
           itemStyle={[styles.pickerItem, {color: disabled ? colors.muted : colors.text}]}
-          style={[styles.picker, {color: disabled ? colors.muted : colors.text, opacity: disabled ? 0.5 : 1}]}
+          style={[styles.picker, {width: pickerWidth, color: disabled ? colors.muted : colors.text, opacity: disabled ? 0.5 : 1}]}
         >
           {options.map(option => (
             <Picker.Item key={option} label={String(option)} value={option} />
@@ -50,14 +51,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   picker: {
-    width: 74,
-    height: 74,
-    marginTop: -6,
-    marginBottom: -6,
+    width: 85,
+    height: 85,
     justifyContent: 'center',
   },
   pickerItem: {
     fontSize: 16,
+    fontWeight: 'bold',
   },
   suffixText: {
     fontSize: 13,

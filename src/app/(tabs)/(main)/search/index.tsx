@@ -3,7 +3,8 @@ import { useMemo } from 'react';
 import { Alert, FlatList, StyleSheet, Text, View } from 'react-native';
 
 import { PantryItemRow } from '@/components/pantry/pantry-item-row/pantry-item-row';
-import { EmptyNotice, ListRow } from '@/components/ui/primitives';
+import { EmptyNotice } from '@/components/ui/primitives';
+import { createSearchSuggestionItem } from '@/features/search/search-item';
 import { matchPantryItems } from '@/lib/pantry-insights';
 import { useThemedStyles } from '@/lib/theme';
 import { useAppContext } from '@/state/app-context';
@@ -56,6 +57,8 @@ export default function SearchScreen() {
     );
   }
 
+  const newItem = shouldShowCreateItem ? createSearchSuggestionItem(selectedPantry.id, trimmedQuery) : null;
+
   return (
     <>
       <Stack.Screen
@@ -84,7 +87,14 @@ export default function SearchScreen() {
                 : `${visibleItems.length} ${visibleItems.length === 1 ? 'item' : 'items'} in ${selectedPantry.name}`}
             </Text>
             {shouldShowCreateItem ? (
-              <ListRow title={trimmedQuery} subtitle="Create a new item with this name" onPress={handleCreateItem} />
+              <PantryItemRow
+                item={newItem!}
+                isNewItem
+                isLast={visibleItems.length === 0}
+                onPress={handleCreateItem}
+                onEdit={handleCreateItem}
+                onDelete={handleCreateItem}
+              />
             ) : null}
           </View>
         }
@@ -104,7 +114,7 @@ export default function SearchScreen() {
           return (
             <PantryItemRow
               item={item}
-              displayMode="pantry"
+              displayMode={item.isInCart ? 'cart' : 'pantry'}
               isLast={index === visibleItems.length - 1}
               onPress={() => router.push(`/items/${item.id}`)}
               onEdit={() => router.push(`/items/${item.id}`)}

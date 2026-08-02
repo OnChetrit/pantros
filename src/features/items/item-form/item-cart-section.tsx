@@ -1,7 +1,9 @@
-import { Host, Row, Spacer, Switch } from '@expo/ui';
+import { Host, Row, Spacer } from '@expo/ui';
 import { StyleSheet, View } from 'react-native';
 
+import type { AddItemDestination } from '@/domain/models';
 import { NumberWheelInput } from '@/components/ui/primitives';
+import { AddItemDestinationPicker } from '@/features/items/add-item-destination-picker/add-item-destination-picker';
 import { useThemedStyles } from '@/lib/theme';
 
 import { ItemFormFieldLabel } from './item-form-field-label';
@@ -22,10 +24,13 @@ export function ItemCartSection({isInCart, quantity, onToggle, onChangeQuantity}
     <>
       <View style={styles.fieldGroup}>
         <Host style={styles.fieldHeader}>
-          <Row alignment="center" spacing={12}>
-            <ItemFormFieldLabel>Add To Cart</ItemFormFieldLabel>
+          <Row alignment="center">
+            <ItemFormFieldLabel>Save New Item To</ItemFormFieldLabel>
             <Spacer flexible />
-            <Switch value={isInCart} onValueChange={onToggle} />
+            <AddItemDestinationPicker
+              value={isInCart ? 'cart' : 'pantry'}
+              onChange={(destination: AddItemDestination) => onToggle(destination === 'cart')}
+            />
           </Row>
         </Host>
       </View>
@@ -44,7 +49,6 @@ export function ItemCartSection({isInCart, quantity, onToggle, onChangeQuantity}
               />
             </View>
           </View>
-          {/* <View style={styles.quantitySide} /> */}
         </View>
       ) : null}
     </>
@@ -54,6 +58,7 @@ export function ItemCartSection({isInCart, quantity, onToggle, onChangeQuantity}
 const createStyles = (colors: import('@/lib/theme').AppThemeColors) => {
   return StyleSheet.create({
     fieldGroup: {
+      marginTop: 8,
       gap: 6,
     },
     fieldHeader: {
@@ -62,17 +67,14 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) => {
     quantityRow: {
       flexDirection: 'row',
       alignItems: 'center',
+      justifyContent: 'space-between',
       gap: 12,
     },
     quantitySide: {
       flex: 1,
-      // alignItems: 'flex-start',
-      // justifyContent: 'center',
     },
     quantityCenter: {
-      flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: 'flex-end',
     },
     wheelCard: {
       width: 76,

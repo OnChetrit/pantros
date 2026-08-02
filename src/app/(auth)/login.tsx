@@ -1,20 +1,15 @@
 import { Redirect } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, KeyboardAvoidingView, LayoutChangeEvent, Platform, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useRef, useState } from 'react';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppButton, AppScreen, EmptyNotice, appColors } from '@/components/ui/primitives';
-import { AuthModeChip } from '@/features/auth/auth-mode-chip/auth-mode-chip';
+import { AuthModePicker } from '@/features/auth/auth-mode-picker/auth-mode-picker';
+import type { AuthMode } from '@/features/auth/auth-mode-picker/auth-mode-picker';
 import { AuthProviderButton } from '@/features/auth/auth-provider-button/auth-provider-button';
 import { useThemedStyles } from '@/lib/theme';
 import { useAuthState } from '@/state/auth-state';
 import { useWorkspaceState } from '@/state/workspace-state';
-
-type AuthMode = 'signin' | 'signup';
-
-function renderAppleButton(disabled: boolean, onPress: () => void) {
-  return <AuthProviderButton icon="logo-apple" label="Continue with Apple" onPress={onPress} disabled={disabled} />;
-}
 
 export default function LoginScreen() {
   const styles = useThemedStyles(createStyles);
@@ -35,21 +30,10 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
-  const [modeSwitchWidth, setModeSwitchWidth] = useState(0);
   const fullNameRef = useRef<TextInput | null>(null);
   const emailRef = useRef<TextInput | null>(null);
   const passwordRef = useRef<TextInput | null>(null);
   const confirmPasswordRef = useRef<TextInput | null>(null);
-  const [modeAnimation] = useState(() => new Animated.Value(0));
-
-  useEffect(() => {
-    Animated.timing(modeAnimation, {
-      toValue: mode === 'signin' ? 0 : 1,
-      duration: 240,
-      easing: Easing.out(Easing.cubic),
-      useNativeDriver: true,
-    }).start();
-  }, [mode, modeAnimation]);
 
   if (isAuthenticated) {
     return <Redirect href="/pantry" />;
@@ -57,11 +41,6 @@ export default function LoginScreen() {
 
   const disabled = authBusy || !isEnvReady;
   const emailButtonLabel = authBusy ? 'Working...' : mode === 'signin' ? 'Sign in with email' : 'Create with email';
-  const modeIndicatorWidth = modeSwitchWidth > 0 ? (modeSwitchWidth - 12 - 8) / 2 : 0;
-  const modeIndicatorTranslateX = modeAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, modeIndicatorWidth + 8],
-  });
 
   const switchMode = (nextMode: AuthMode) => {
     setMode(nextMode);
@@ -91,10 +70,6 @@ export default function LoginScreen() {
     await signUp(email.trim(), password, fullName.trim() || undefined);
   };
 
-  const handleModeSwitchLayout = (event: LayoutChangeEvent) => {
-    setModeSwitchWidth(event.nativeEvent.layout.width);
-  };
-
   return (
     <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex}>
@@ -111,22 +86,7 @@ export default function LoginScreen() {
 
             <View style={styles.authCardWrap}>
               <View style={styles.authCard}>
-                <View style={styles.modeSwitch} onLayout={handleModeSwitchLayout}>
-                  {modeIndicatorWidth > 0 ? (
-                    <Animated.View
-                      pointerEvents="none"
-                      style={[
-                        styles.modeIndicator,
-                        {
-                          width: modeIndicatorWidth,
-                          transform: [{translateX: modeIndicatorTranslateX}],
-                        },
-                      ]}
-                    />
-                  ) : null}
-                  <AuthModeChip label="Sign in" active={mode === 'signin'} onPress={() => switchMode('signin')} />
-                  <AuthModeChip label="Sign up" active={mode === 'signup'} onPress={() => switchMode('signup')} />
-                </View>
+                <AuthModePicker mode={mode} disabled={authBusy} onChange={switchMode} />
 
                 <View style={styles.providers}>
                   <Text style={styles.providersLabel}>Continue with</Text>
@@ -137,7 +97,14 @@ export default function LoginScreen() {
                       onPress={() => void signInWithGoogle()}
                       disabled={disabled}
                     />
-                    {renderAppleButton(disabled, () => void signInWithApple())}
+                    {process.env.EXPO_OS === 'ios' ? (
+                      <AuthProviderButton
+                        icon="logo-apple"
+                        label="Continue with Apple"
+                        onPress={() => void signInWithApple()}
+                        disabled={disabled}
+                      />
+                    ) : null}
                   </View>
                 </View>
 
@@ -309,24 +276,6 @@ const createStyles = (colors: import('@/lib/theme').AppThemeColors) => StyleShee
     borderWidth: 1,
     borderColor: colors.border,
     gap: 14,
-  },
-  modeSwitch: {
-    position: 'relative',
-    flexDirection: 'row',
-    gap: 8,
-    padding: 6,
-    borderRadius: 22,
-    backgroundColor: colors.background,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  modeIndicator: {
-    position: 'absolute',
-    top: 6,
-    left: 6,
-    bottom: 6,
-    borderRadius: 16,
-    backgroundColor: colors.tint,
   },
   providers: {
     alignItems: 'center',

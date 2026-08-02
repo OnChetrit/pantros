@@ -1,14 +1,19 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Stack, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { EmptyNotice } from '@/components/ui/primitives';
 import { useCartCheckout } from '@/features/cart/cart-checkout-context/cart-checkout-context';
+import {
+  formatRelativeDuration,
+  RelativeDatePickerRow,
+  relativeDurationInDays,
+} from '@/features/items/item-expiration-field/item-relative-picker';
 import { ItemExpirationModePicker } from '@/features/items/item-expiration-mode-picker/item-expiration-mode-picker';
 import { useAppTheme } from '@/lib/theme';
 
-import { RelativePicker } from './cart-expiration-review-modal-relative-picker';
+import { Spacer } from '@expo/ui';
 import {
   addRelativeDate,
   dayOptions,
@@ -122,6 +127,12 @@ function CartExpirationReviewContent({
   }, [onChangeDate, resolvedDate, reviewDate]);
 
   const hasChanges = resolvedDate !== initialReviewDate;
+  const previewRelativeState =
+    mode === 'relative'
+      ? {days: relativeDays, weeks: relativeWeeks, months: relativeMonths}
+      : initialRelativeState(resolvedDate);
+  const isCloseExpiration =
+    relativeDurationInDays(previewRelativeState.days, previewRelativeState.weeks, previewRelativeState.months) < 7;
 
   const handleClose = () => {
     if (processing) {
@@ -171,66 +182,100 @@ function CartExpirationReviewContent({
           </Stack.Toolbar>
         </>
       ) : null}
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={styles.content}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={[styles.previewCard, {backgroundColor: colors.card, borderColor: colors.border}]}>
-          <Text selectable style={[sharedStyles.previewLabel, {color: colors.muted}]}>
-            Selected date
-          </Text>
-          <Text selectable style={[sharedStyles.previewValue, {color: colors.text}]}>
-            {formatExpiration(resolvedDate)}
-          </Text>
-        </View>
+      <View style={styles.screen}>
+        <ScrollView
+          style={styles.scroll}
+          contentInsetAdjustmentBehavior="automatic"
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={[styles.previewCard, {backgroundColor: colors.card, borderColor: colors.border}]}>
+            <View style={styles.previewRow}>
+              <Text
+                selectable
+                style={[
+                  sharedStyles.previewValue,
+                  {color: isCloseExpiration ? colors.warning : colors.tint, flexShrink: 1},
+                ]}
+              >
+                {formatExpiration(resolvedDate)}
+              </Text>
+              <Spacer />
+              <Text
+                selectable
+                style={[sharedStyles.previewRelative, {color: isCloseExpiration ? colors.danger : colors.accent}]}
+              >
+                {formatRelativeDuration(
+                  previewRelativeState.days,
+                  previewRelativeState.weeks,
+                  previewRelativeState.months
+                )}
+              </Text>
+            </View>
+          </View>
 
-        <ItemExpirationModePicker mode={mode} onChange={setMode} />
+          <ItemExpirationModePicker mode={mode} onChange={setMode} />
 
-        {mode === 'manual' ? (
-          <View style={[sharedStyles.dateCard, {backgroundColor: colors.card, borderColor: colors.border}]}>
-            <DateTimePicker
-              value={manualDate}
-              mode="date"
-              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-              onValueChange={(_, selectedDate) => {
-                if (selectedDate) {
-                  setManualDate(selectedDate);
-                }
-              }}
-              themeVariant={isDark ? 'dark' : 'light'}
-              accentColor={colors.tint}
-              textColor={colors.text}
-              style={sharedStyles.datePicker}
+          {mode === 'manual' ? (
+            <View style={[sharedStyles.dateCard, {backgroundColor: colors.card, borderColor: colors.border}]}>
+              <DateTimePicker
+                value={manualDate}
+                mode="date"
+                display="default"
+                onValueChange={(_, selectedDate) => {
+                  if (selectedDate) {
+                    setManualDate(selectedDate);
+                  }
+                }}
+                themeVariant={isDark ? 'dark' : 'light'}
+                accentColor={colors.tint}
+                textColor={colors.text}
+                style={sharedStyles.datePicker}
+              />
+            </View>
+          ) : null}
+          {mode === 'relative' ? (
+            <RelativeDatePickerRow
+              days={relativeDays}
+              weeks={relativeWeeks}
+              months={relativeMonths}
+              dayOptions={dayOptions}
+              weekOptions={weekOptions}
+              monthOptions={monthOptions}
+              onChangeDays={setRelativeDays}
+              onChangeWeeks={setRelativeWeeks}
+              onChangeMonths={setRelativeMonths}
             />
-          </View>
-        ) : (
-          <View style={sharedStyles.relativeInlineRow}>
-            <RelativePicker label="Days" value={relativeDays} options={dayOptions} onChange={setRelativeDays} />
-            <RelativePicker label="Weeks" value={relativeWeeks} options={weekOptions} onChange={setRelativeWeeks} />
-            <RelativePicker label="Months" value={relativeMonths} options={monthOptions} onChange={setRelativeMonths} />
-          </View>
-        )}
+          ) : null}
 
-        {errorMessage ? (
-          <Text selectable style={[sharedStyles.error, {color: colors.danger}]}>
-            {errorMessage}
-          </Text>
-        ) : null}
-        {!hasChanges ? (
-          <Text selectable style={[styles.helperText, {color: colors.muted}]}>
-            No changes yet.
-          </Text>
-        ) : null}
-      </ScrollView>
+          {errorMessage ? (
+            <Text selectable style={[sharedStyles.error, {color: colors.danger}]}>
+              {errorMessage}
+            </Text>
+          ) : null}
+          {!hasChanges ? (
+            <Text selectable style={[styles.helperText, {color: colors.muted}]}>
+              No changes yet.
+            </Text>
+          ) : null}
+        </ScrollView>
+      </View>
     </>
   );
 }
 
 const styles = StyleSheet.create({
+  scroll: {
+    flex: 1,
+  },
+  screen: {
+    flex: 1,
+    // paddingHorizontal: 20,
+  },
   content: {
-    padding: 20,
-    gap: 16,
+    paddingTop: 20,
+    paddingBottom: 16,
+    gap: 12,
   },
   previewCard: {
     borderWidth: 1,
@@ -238,6 +283,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 12,
     gap: 4,
+  },
+  previewRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 16,
+  },
+  previewRelative: {
+    fontSize: 17,
+    lineHeight: 22,
+    fontWeight: '700',
+    flexShrink: 0,
   },
   helperText: {
     fontSize: 13,

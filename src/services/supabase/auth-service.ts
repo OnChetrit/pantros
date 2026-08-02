@@ -10,6 +10,8 @@ import { supabase } from './client';
 
 WebBrowser.maybeCompleteAuthSession();
 
+const nativeRedirectUrl = 'pantros://auth/callback';
+
 export async function getStoredSession() {
   const { data, error } = await supabase.auth.getSession();
 
@@ -123,10 +125,25 @@ function getRedirectUrl() {
     return globalThis.location?.origin ?? AuthSession.makeRedirectUri();
   }
 
-  return AuthSession.makeRedirectUri({
-    scheme: 'pantros',
-    path: 'auth/callback',
-  });
+  // Keep the native callback independent from the local web server/Supabase Site URL.
+  return nativeRedirectUrl;
+}
+
+function getOAuthResponse(url: string) {
+  const parsedUrl = new URL(url);
+  const hashParams = new URLSearchParams(parsedUrl.hash.replace(/^#/, ''));
+  const getParam = (name: string) => hashParams.get(name) ?? parsedUrl.searchParams.get(name);
+  const errorDescription = getParam('error_description');
+
+  if (errorDescription) {
+    throw new Error(errorDescription);
+  }
+
+  return {
+    accessToken: getParam('access_token'),
+    refreshToken: getParam('refresh_token'),
+    code: parsedUrl.searchParams.get('code'),
+  };
 }
 
 async function signInWithOAuthProvider(provider: 'google' | 'apple') {
@@ -162,10 +179,17 @@ async function signInWithOAuthProvider(provider: 'google' | 'apple') {
     return;
   }
 
-  const url = new URL(result.url);
-  const hash = new URLSearchParams(url.hash.replace(/^#/, ''));
-  const accessToken = hash.get('access_token');
-  const refreshToken = hash.get('refresh_token');
+  const {accessToken, refreshToken, code} = getOAuthResponse(result.url);
+
+  if (code) {
+    const {error: exchangeError} = await supabase.auth.exchangeCodeForSession(code);
+
+    if (exchangeError) {
+      throw exchangeError;
+    }
+
+    return;
+  }
 
   if (!accessToken || !refreshToken) {
     throw new Error(`${provider} auth did not return an access token and refresh token.`);
