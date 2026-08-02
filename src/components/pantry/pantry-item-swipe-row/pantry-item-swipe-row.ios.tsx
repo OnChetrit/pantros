@@ -69,12 +69,16 @@ export function PantryItemSwipeRow({
       alignment="center"
       spacing={12}
       modifiers={
-        isSelectionMode && nativeListItem && !onToggleSelection
-          ? [contentShape(shapes.rectangle())]
-          : [
-              ...(isNewItem ? [listRowBackground(colors.grabber)] : []),
-              onTapGesture(isSelectionMode ? (onToggleSelection ?? onPress) : onPress),
-            ]
+        [
+          ...(isNewItem ? [listRowBackground(colors.grabber)] : []),
+          // SwiftUI only hit-tests visible subviews by default, so taps in the
+          // spacing/trailing area would miss the row. Make the whole row shape
+          // interactive while retaining native list selection handling.
+          contentShape(shapes.rectangle()),
+          ...(isSelectionMode && nativeListItem && !onToggleSelection
+            ? []
+            : [onTapGesture(isSelectionMode ? (onToggleSelection ?? onPress) : onPress)]),
+        ]
       }
     >
       <Text
