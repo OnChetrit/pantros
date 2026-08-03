@@ -305,7 +305,7 @@ export default function PantryScreen() {
           </View>
         </View>
       ) : (
-        <Host colorScheme={isDark ? 'dark' : 'light'} style={[styles.host, {backgroundColor: colors.card}]}>
+        <Host colorScheme={isDark ? 'dark' : 'light'} style={styles.host}>
           <List
             modifiers={[
               listStyle('plain'),

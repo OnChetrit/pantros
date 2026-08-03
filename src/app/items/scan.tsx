@@ -16,6 +16,10 @@ import { setPendingScannedBarcode } from '@/state/barcode-scan-state';
 import { useWorkspaceState } from '@/state/workspace-state';
 
 const BARCODE_TYPES: BarcodeType[] = ['ean13', 'ean8', 'upc_a', 'upc_e', 'code128', 'code39', 'code93', 'itf14'];
+const scanHeaderOptions = {
+  headerBackVisible: true,
+  headerBackButtonDisplayMode: 'minimal' as const,
+};
 
 function normalizeScannedBarcode(value: string) {
   const trimmed = value.trim();
@@ -195,6 +199,7 @@ export default function ScanItemScreen() {
       <>
         <Stack.Screen
           options={{
+            ...scanHeaderOptions,
             title: 'Scan Barcode',
           }}
         />
@@ -220,6 +225,7 @@ export default function ScanItemScreen() {
       <>
         <Stack.Screen
           options={{
+            ...scanHeaderOptions,
             title: 'Scan Barcode',
           }}
         />
@@ -242,6 +248,7 @@ export default function ScanItemScreen() {
       <>
         <Stack.Screen
           options={{
+            ...scanHeaderOptions,
             title: 'Scan Barcode',
           }}
         />
@@ -266,6 +273,7 @@ export default function ScanItemScreen() {
     <View style={styles.screen}>
       <Stack.Screen
         options={{
+          ...scanHeaderOptions,
           title: 'Scan Barcode',
           headerTransparent: true,
           headerShadowVisible: false,
