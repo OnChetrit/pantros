@@ -1,5 +1,6 @@
 import { PantryItemNativeListRow } from '@/components/pantry/pantry-item-row/pantry-item-row';
 import { EmptyNotice } from '@/components/ui/primitives';
+import { AddItemDestinationToolbar } from '@/features/items/add-item-destination-toolbar/add-item-destination-toolbar';
 import { createSearchSuggestionItem } from '@/features/search/search-item';
 import { matchPantryItems } from '@/lib/pantry-insights';
 import { useAppTheme } from '@/lib/theme';
@@ -123,7 +124,7 @@ export default function SearchScreen() {
         image: null,
         expirationDate: null,
         isInCart: destination === 'cart',
-        cartId: destination === 'cart' ? primaryCart?.id ?? null : null,
+        cartId: destination === 'cart' ? (primaryCart?.id ?? null) : null,
         quantity: 1,
       });
       searchBarRef.current?.setText('');
@@ -133,7 +134,10 @@ export default function SearchScreen() {
         nonce: undefined,
       });
     } catch (error) {
-      ReactNative.Alert.alert('Unable to create item', error instanceof Error ? error.message : 'Try again in a moment.');
+      ReactNative.Alert.alert(
+        'Unable to create item',
+        error instanceof Error ? error.message : 'Try again in a moment.'
+      );
     }
   };
 
@@ -193,6 +197,7 @@ export default function SearchScreen() {
             },
           }}
         />
+        <AddItemDestinationToolbar />
         <ReactNative.View style={styles.emptyScreen}>
           <EmptyNotice
             title="No pantry workspace yet"
@@ -216,6 +221,7 @@ export default function SearchScreen() {
             autoCapitalize: 'none',
             hideWhenScrolling: false,
             placement: 'automatic',
+            hideNavigationBar: false,
             onChangeText: event => {
               const text = event.nativeEvent.text;
               router.setParams({
@@ -237,6 +243,7 @@ export default function SearchScreen() {
           },
         }}
       />
+      <AddItemDestinationToolbar />
       <Stack.Toolbar placement="right">
         <Stack.Toolbar.Button icon="barcode.viewfinder" onPress={handleScanBarcode} />
         {profile?.avatarUrl ? (
