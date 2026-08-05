@@ -5,6 +5,7 @@ import { AddItemDestinationProvider } from './add-item-destination-state';
 import { AuthStateProvider } from './auth-state';
 import { ItemStateProvider } from './item-state';
 import { NotificationStateProvider } from './notification-state';
+import { ShoppingCartStateProvider } from './shopping-cart-state';
 import { WorkspaceStateProvider } from './workspace-state';
 
 export function AppStateProvider({children}: PropsWithChildren) {
@@ -13,9 +14,11 @@ export function AppStateProvider({children}: PropsWithChildren) {
       <WorkspaceStateProvider>
         <AddItemDestinationProvider>
           <NotificationStateProvider>
-            <ItemStateProvider>
-              <AccountStateProvider>{children}</AccountStateProvider>
-            </ItemStateProvider>
+            <ShoppingCartStateProvider>
+              <ItemStateProvider>
+                <AccountStateProvider>{children}</AccountStateProvider>
+              </ItemStateProvider>
+            </ShoppingCartStateProvider>
           </NotificationStateProvider>
         </AddItemDestinationProvider>
       </WorkspaceStateProvider>
