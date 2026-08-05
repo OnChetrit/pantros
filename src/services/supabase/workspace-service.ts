@@ -1,5 +1,5 @@
 import type { User } from '@supabase/supabase-js';
-import type { Cart, Pantry, PantryMember, ReminderSettings, WorkspaceBundle } from '@/domain/models';
+import type { Cart, Pantry, PantryMember, ReminderSettings, ShoppingCartItem, WorkspaceBundle } from '@/domain/models';
 
 import { ensureUserProfile } from './auth-service';
 import { supabase } from './client';
@@ -26,6 +26,17 @@ function mapCart(row: Record<string, any>): Cart {
   };
 }
 
+function mapShoppingCartItem(row: Record<string, any>): ShoppingCartItem {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    pantryId: row.pantry_id,
+    itemId: row.item_id,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
 export async function fetchWorkspaceBundle(user: User): Promise<WorkspaceBundle> {
   const profile = await ensureUserProfile(user);
   const userId = user.id;
@@ -47,6 +58,7 @@ export async function fetchWorkspaceBundle(user: User): Promise<WorkspaceBundle>
       pantries: [],
       items: [],
       carts: [],
+      shoppingCartItems: [],
     };
   }
 
@@ -140,9 +152,10 @@ export async function fetchWorkspaceBundle(user: User): Promise<WorkspaceBundle>
     };
   });
 
-  const [{ data: itemRows, error: itemError }, { data: cartRows, error: cartError }] = await Promise.all([
+  const [{ data: itemRows, error: itemError }, { data: cartRows, error: cartError }, { data: shoppingRows, error: shoppingError }] = await Promise.all([
     supabase.from('items').select('*').in('pantry_id', pantryIds).order('created_at', { ascending: false }),
     supabase.from('carts').select('*').in('pantry_id', pantryIds).order('created_at', { ascending: true }),
+    supabase.from('shopping_cart_items').select('*').eq('user_id', userId).in('pantry_id', pantryIds).order('created_at', { ascending: true }),
   ]);
 
   if (itemError) {
@@ -153,10 +166,15 @@ export async function fetchWorkspaceBundle(user: User): Promise<WorkspaceBundle>
     throw cartError;
   }
 
+  if (shoppingError) {
+    throw shoppingError;
+  }
+
   return {
     profile,
     pantries,
     items: (itemRows ?? []).map((row) => mapItem(row)),
     carts: (cartRows ?? []).map((row) => mapCart(row)),
+    shoppingCartItems: (shoppingRows ?? []).map((row) => mapShoppingCartItem(row)),
   };
 }

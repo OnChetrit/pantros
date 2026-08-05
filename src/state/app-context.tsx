@@ -8,6 +8,8 @@ import { useAccountState } from './account-state';
 import { useAuthState } from './auth-state';
 import { PartialItemActionError, useItemState } from './item-state';
 import { useNotificationState } from './notification-state';
+import { useShoppingCartState } from './shopping-cart-state';
+import { useWatchConnectivitySync } from './watch-connectivity-state';
 import { useWorkspaceState } from './workspace-state';
 
 type AppContextValue = {
@@ -23,6 +25,8 @@ type AppContextValue = {
   carts: ReturnType<typeof useWorkspaceState>['carts'];
   pantryItems: ReturnType<typeof useWorkspaceState>['pantryItems'];
   pantryCarts: ReturnType<typeof useWorkspaceState>['pantryCarts'];
+  shoppingCartItems: ReturnType<typeof useWorkspaceState>['shoppingCartItems'];
+  activeShoppingCartItems: ReturnType<typeof useWorkspaceState>['activeShoppingCartItems'];
   isAuthenticated: ReturnType<typeof useAuthState>['isAuthenticated'];
   errorMessage: string | null;
   authBusy: ReturnType<typeof useAuthState>['authBusy'];
@@ -40,6 +44,10 @@ type AppContextValue = {
   completeCartItemWithExpiration: ReturnType<typeof useItemState>['completeCartItemWithExpiration'];
   deleteItem: ReturnType<typeof useItemState>['deleteItem'];
   deleteItems: ReturnType<typeof useItemState>['deleteItems'];
+  shoppingCartBusy: ReturnType<typeof useShoppingCartState>['shoppingCartBusy'];
+  addShoppingCartItem: ReturnType<typeof useShoppingCartState>['addShoppingCartItem'];
+  removeShoppingCartItem: ReturnType<typeof useShoppingCartState>['removeShoppingCartItem'];
+  completeShoppingCartItems: ReturnType<typeof useShoppingCartState>['completeShoppingCartItems'];
   saveNotificationPreferences: (preferences: NotificationPreferences) => Promise<NotificationPreferences>;
   signIn: ReturnType<typeof useAuthState>['signIn'];
   signUp: ReturnType<typeof useAuthState>['signUp'];
@@ -57,6 +65,8 @@ function AppContextBridge({children}: PropsWithChildren) {
   const notifications = useNotificationState();
   const items = useItemState();
   const account = useAccountState();
+  const shoppingCart = useShoppingCartState();
+  useWatchConnectivitySync();
 
   const value = useMemo<AppContextValue>(
     () => ({
@@ -72,12 +82,15 @@ function AppContextBridge({children}: PropsWithChildren) {
       carts: workspace.carts,
       pantryItems: workspace.pantryItems,
       pantryCarts: workspace.pantryCarts,
+      shoppingCartItems: workspace.shoppingCartItems,
+      activeShoppingCartItems: workspace.activeShoppingCartItems,
       isAuthenticated: auth.isAuthenticated,
       errorMessage:
         auth.errorMessage ??
         workspace.errorMessage ??
         notifications.errorMessage ??
         items.errorMessage ??
+        shoppingCart.shoppingCartError ??
         account.errorMessage,
       authBusy: auth.authBusy,
       itemBusy: items.itemBusy,
@@ -99,6 +112,10 @@ function AppContextBridge({children}: PropsWithChildren) {
       completeCartItemWithExpiration: items.completeCartItemWithExpiration,
       deleteItem: items.deleteItem,
       deleteItems: items.deleteItems,
+      shoppingCartBusy: shoppingCart.shoppingCartBusy,
+      addShoppingCartItem: shoppingCart.addShoppingCartItem,
+      removeShoppingCartItem: shoppingCart.removeShoppingCartItem,
+      completeShoppingCartItems: shoppingCart.completeShoppingCartItems,
       saveNotificationPreferences: notifications.saveNotificationPreferences,
       signIn: auth.signIn,
       signUp: auth.signUp,
@@ -107,7 +124,7 @@ function AppContextBridge({children}: PropsWithChildren) {
       signOut: auth.signOut,
       deleteAccount: account.deleteAccount,
     }),
-    [account, auth, items, notifications, workspace]
+    [account, auth, items, notifications, shoppingCart, workspace]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -68,6 +68,32 @@ export type Cart = {
   createdAt: string;
 };
 
+export type ShoppingCartItem = {
+  id: string;
+  userId: string;
+  pantryId: string;
+  itemId: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type WatchSnapshotItem = {
+  id: string;
+  name: string;
+  quantity: number;
+  cartId: string | null;
+  isSelected: boolean;
+};
+
+export type WatchSnapshot = {
+  version: 1;
+  pantryId: string;
+  pantryName: string;
+  revision: string;
+  items: WatchSnapshotItem[];
+  selectedItemIds: string[];
+};
+
 export type UserProfile = {
   id: string;
   email: string;
@@ -113,6 +139,7 @@ export type WorkspaceBundle = {
   pantries: Pantry[];
   items: PantryItem[];
   carts: Cart[];
+  shoppingCartItems: ShoppingCartItem[];
 };
 
 export type BootstrapStatus = 'idle' | 'loading' | 'ready' | 'error';

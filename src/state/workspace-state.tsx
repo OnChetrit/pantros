@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { PropsWithChildren } from 'react';
 
-import type { BootstrapStatus, Cart, Pantry, PantryItem, UserProfile } from '@/domain/models';
+import type { BootstrapStatus, Cart, Pantry, PantryItem, ShoppingCartItem, UserProfile } from '@/domain/models';
 import { fetchWorkspaceBundle } from '@/services/supabase/workspace-service';
 
 import { useAuthState } from './auth-state';
@@ -17,8 +17,11 @@ type WorkspaceStateContextValue = {
   selectedPantry: Pantry | null;
   pantryItems: PantryItem[];
   pantryCarts: Cart[];
+  shoppingCartItems: ShoppingCartItem[];
+  activeShoppingCartItems: ShoppingCartItem[];
   selectPantry: (pantryId: string) => void;
   setItems: React.Dispatch<React.SetStateAction<PantryItem[]>>;
+  setShoppingCartItems: React.Dispatch<React.SetStateAction<ShoppingCartItem[]>>;
   refreshWorkspace: () => Promise<void>;
 };
 
@@ -32,6 +35,7 @@ export function WorkspaceStateProvider({children}: PropsWithChildren) {
   const [pantries, setPantries] = useState<Pantry[]>([]);
   const [items, setItems] = useState<PantryItem[]>([]);
   const [carts, setCarts] = useState<Cart[]>([]);
+  const [shoppingCartItems, setShoppingCartItems] = useState<ShoppingCartItem[]>([]);
   const [selectedPantryId, setSelectedPantryId] = useState<string | null>(null);
 
   const resetWorkspace = useCallback(() => {
@@ -39,6 +43,7 @@ export function WorkspaceStateProvider({children}: PropsWithChildren) {
     setPantries([]);
     setItems([]);
     setCarts([]);
+    setShoppingCartItems([]);
     setSelectedPantryId(null);
   }, []);
 
@@ -67,6 +72,7 @@ export function WorkspaceStateProvider({children}: PropsWithChildren) {
       setPantries(bundle.pantries);
       setItems(bundle.items);
       setCarts(bundle.carts);
+      setShoppingCartItems(bundle.shoppingCartItems);
       setSelectedPantryId((current) => {
         if (current && bundle.pantries.some((pantry) => pantry.id === current)) {
           return current;
@@ -108,6 +114,11 @@ export function WorkspaceStateProvider({children}: PropsWithChildren) {
     [carts, selectedPantryId]
   );
 
+  const activeShoppingCartItems = useMemo(
+    () => shoppingCartItems.filter((item) => item.pantryId === selectedPantryId),
+    [selectedPantryId, shoppingCartItems]
+  );
+
   const value = useMemo<WorkspaceStateContextValue>(
     () => ({
       status,
@@ -116,6 +127,9 @@ export function WorkspaceStateProvider({children}: PropsWithChildren) {
       pantries,
       items,
       carts,
+      shoppingCartItems,
+      activeShoppingCartItems,
+      setShoppingCartItems,
       selectedPantryId,
       selectedPantry,
       pantryItems,
@@ -126,6 +140,8 @@ export function WorkspaceStateProvider({children}: PropsWithChildren) {
     }),
     [
       carts,
+      shoppingCartItems,
+      activeShoppingCartItems,
       errorMessage,
       hydrateWorkspace,
       items,
